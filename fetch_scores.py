@@ -183,20 +183,30 @@ html = f"""<!DOCTYPE html>
             --star-light: #fffbf0;
             --night-light: #f8f3ff;
             --ocean-light: #f0f7ff;
+            
+            /* 组颜色 */
+            --star-primary: #fbbf24;
+            --night-primary: #a78bfa;
+            --ocean-primary: #60a5fa;
         }}
         
         body.night-mode {{
-            --bg-body: #1a1e24;
-            --bg-card: #2a2f38;
-            --bg-input: #2a2f38;
+            --bg-body: #0f1319;
+            --bg-card: #1e242b;
+            --bg-input: #1e242b;
             --text-primary: #e5e7eb;
             --text-secondary: #9ca3af;
-            --border-color: #3f4551;
-            --border-input: #3f4551;
-            --shadow: 0 4px 12px rgba(0,0,0,0.2);
-            --star-light: #3f3a2e;
-            --night-light: #332e3f;
-            --ocean-light: #2e3642;
+            --border-color: #2d343e;
+            --border-input: #2d343e;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --star-light: #332e1f;
+            --night-light: #241f33;
+            --ocean-light: #1a2533;
+            
+            /* 夜间模式组颜色 - 加强漫透感 */
+            --star-primary: #fbbf24;
+            --night-primary: #c4b5fd;
+            --ocean-primary: #7ab2ff;
         }}
         
         body {{
@@ -246,6 +256,7 @@ html = f"""<!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s;
         }}
         
         .theme-toggle:hover {{
@@ -268,6 +279,7 @@ html = f"""<!DOCTYPE html>
             font-size: 1rem;
             background: var(--bg-input);
             color: var(--text-primary);
+            transition: all 0.2s;
         }}
         
         #search:focus {{
@@ -276,7 +288,7 @@ html = f"""<!DOCTYPE html>
             background: var(--bg-card);
         }}
         
-        /* 组排名卡片 */
+        /* 组排名卡片 - 加强漫透效果 */
         .rank-grid {{
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -295,33 +307,72 @@ html = f"""<!DOCTYPE html>
             align-items: center;
             gap: 12px;
             border-left: 4px solid;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }}
+        
+        /* 漫透光效果 */
+        .rank-card::after {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }}
+        
+        .rank-card:hover::after {{
+            opacity: 0.6;
+        }}
+        
+        .rank-card[data-group="星穹组"]::after {{
+            background: radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.2), transparent 70%);
+        }}
+        
+        .rank-card[data-group="夜曜组"]::after {{
+            background: radial-gradient(circle at 30% 30%, rgba(167, 139, 250, 0.2), transparent 70%);
+        }}
+        
+        .rank-card[data-group="沧澜组"]::after {{
+            background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.25), transparent 70%);
+        }}
+        
+        body.night-mode .rank-card[data-group="沧澜组"]::after {{
+            background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.35), transparent 75%);
+        }}
+        
+        .rank-card[data-group="星穹组"] {{
+            border-left-color: var(--star-primary);
+            background: linear-gradient(to right, var(--star-light), var(--bg-card));
+        }}
+        .rank-card[data-group="夜曜组"] {{
+            border-left-color: var(--night-primary);
+            background: linear-gradient(to right, var(--night-light), var(--bg-card));
+        }}
+        .rank-card[data-group="沧澜组"] {{
+            border-left-color: var(--ocean-primary);
+            background: linear-gradient(to right, var(--ocean-light), var(--bg-card));
         }}
         
         .rank-card:hover {{
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-        }}
-        
-        .rank-card[data-group="星穹组"] {{
-            border-left-color: #fbbf24;
-            background: linear-gradient(to right, var(--star-light), var(--bg-card));
-        }}
-        .rank-card[data-group="夜曜组"] {{
-            border-left-color: #a78bfa;
-            background: linear-gradient(to right, var(--night-light), var(--bg-card));
-        }}
-        .rank-card[data-group="沧澜组"] {{
-            border-left-color: #60a5fa;
-            background: linear-gradient(to right, var(--ocean-light), var(--bg-card));
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }}
         
         .rank-icon {{
             font-size: 2.2rem;
+            position: relative;
+            z-index: 1;
         }}
         
         .rank-info {{
             flex: 1;
+            position: relative;
+            z-index: 1;
         }}
         
         .rank-name {{
@@ -342,7 +393,7 @@ html = f"""<!DOCTYPE html>
             margin-left: 4px;
         }}
         
-        /* 组卡片 */
+        /* 组卡片 - 加强漫透效果 */
         .groups {{
             display: flex;
             flex-direction: column;
@@ -357,11 +408,45 @@ html = f"""<!DOCTYPE html>
             border: 1px solid var(--border-color);
             scroll-margin-top: 20px;
             border-top: 4px solid;
+            position: relative;
+            overflow: hidden;
         }}
         
-        .group-card[data-group="星穹组"] {{ border-top-color: #fbbf24; }}
-        .group-card[data-group="夜曜组"] {{ border-top-color: #a78bfa; }}
-        .group-card[data-group="沧澜组"] {{ border-top-color: #60a5fa; }}
+        .group-card::after {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }}
+        
+        .group-card:hover::after {{
+            opacity: 0.5;
+        }}
+        
+        .group-card[data-group="星穹组"]::after {{
+            background: radial-gradient(circle at 20% 20%, rgba(251, 191, 36, 0.15), transparent 70%);
+        }}
+        
+        .group-card[data-group="夜曜组"]::after {{
+            background: radial-gradient(circle at 20% 20%, rgba(167, 139, 250, 0.15), transparent 70%);
+        }}
+        
+        .group-card[data-group="沧澜组"]::after {{
+            background: radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.2), transparent 70%);
+        }}
+        
+        body.night-mode .group-card[data-group="沧澜组"]::after {{
+            background: radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.3), transparent 75%);
+        }}
+        
+        .group-card[data-group="星穹组"] {{ border-top-color: var(--star-primary); }}
+        .group-card[data-group="夜曜组"] {{ border-top-color: var(--night-primary); }}
+        .group-card[data-group="沧澜组"] {{ border-top-color: var(--ocean-primary); }}
         
         .group-header {{
             display: flex;
@@ -370,6 +455,8 @@ html = f"""<!DOCTYPE html>
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 2px solid var(--border-color);
+            position: relative;
+            z-index: 1;
         }}
         
         .group-title {{
@@ -383,16 +470,20 @@ html = f"""<!DOCTYPE html>
             font-size: 0.9rem;
             font-weight: 500;
             color: white;
+            position: relative;
+            z-index: 1;
         }}
         
-        .group-card[data-group="星穹组"] .group-badge {{ background: #fbbf24; color: #1e293b; }}
-        .group-card[data-group="夜曜组"] .group-badge {{ background: #a78bfa; }}
-        .group-card[data-group="沧澜组"] .group-badge {{ background: #60a5fa; }}
+        .group-card[data-group="星穹组"] .group-badge {{ background: var(--star-primary); color: #1e293b; }}
+        .group-card[data-group="夜曜组"] .group-badge {{ background: var(--night-primary); }}
+        .group-card[data-group="沧澜组"] .group-badge {{ background: var(--ocean-primary); }}
         
         /* 表格 */
         .member-table {{
             width: 100%;
             border-collapse: collapse;
+            position: relative;
+            z-index: 1;
         }}
         
         .member-table th {{
@@ -467,6 +558,12 @@ html = f"""<!DOCTYPE html>
             background: var(--bg-body);
             color: var(--text-secondary);
             border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }}
+        
+        .score-item:hover {{
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }}
         
         .score-item.has-score {{
@@ -476,9 +573,9 @@ html = f"""<!DOCTYPE html>
         }}
         
         body.night-mode .score-item.has-score {{
-            background: #1e3a5f;
+            background: #1a2a45;
             color: #93c5fd;
-            border: 1px solid #2563eb;
+            border: 1px solid #3b5b9b;
         }}
         
         .score-date {{
