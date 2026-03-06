@@ -155,12 +155,12 @@ group_rank = {}
 for i, (g, _) in enumerate(sorted_groups, 1):
     group_rank[g] = i
 
-# 生成HTML
+# 生成HTML - 手机优化版
 html = f"""<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 · 学长团分数板</title>
     <style>
         * {{
@@ -179,7 +179,7 @@ html = f"""<!DOCTYPE html>
             --text-secondary: #64748b;
             --border-color: #edf2f7;
             --border-input: #e2e8f0;
-            --shadow: 0 4px 12px rgba(0,0,0,0.03);
+            --shadow: 0 2px 8px rgba(0,0,0,0.03);
             --star-light: #fffbf0;
             --night-light: #f8f3ff;
             --ocean-light: #f0f7ff;
@@ -188,22 +188,25 @@ html = f"""<!DOCTYPE html>
             --star-primary: #fbbf24;
             --night-primary: #a78bfa;
             --ocean-primary: #60a5fa;
+            
+            /* 手机端专用变量 */
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }}
         
         body.night-mode {{
             --bg-body: #0f1319;
-            --bg-card: #1e242b;
-            --bg-input: #1e242b;
+            --bg-card: #1a1f26;
+            --bg-input: #1a1f26;
             --text-primary: #e5e7eb;
             --text-secondary: #9ca3af;
-            --border-color: #2d343e;
-            --border-input: #2d343e;
-            --shadow: 0 4px 12px rgba(0,0,0,0.3);
-            --star-light: #332e1f;
-            --night-light: #241f33;
-            --ocean-light: #1a2533;
+            --border-color: #2a3038;
+            --border-input: #2a3038;
+            --shadow: 0 2px 8px rgba(0,0,0,0.3);
+            --star-light: #2a251a;
+            --night-light: #1e1a2a;
+            --ocean-light: #1a202a;
             
-            /* 夜间模式组颜色 - 加强漫透感 */
             --star-primary: #fbbf24;
             --night-primary: #c4b5fd;
             --ocean-primary: #7ab2ff;
@@ -212,9 +215,13 @@ html = f"""<!DOCTYPE html>
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
             background: var(--bg-body);
-            padding: 20px;
+            padding: 12px;
+            padding-top: max(12px, var(--safe-top));
+            padding-bottom: max(12px, var(--safe-bottom));
             color: var(--text-primary);
             transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
         }}
         
         .container {{
@@ -222,64 +229,73 @@ html = f"""<!DOCTYPE html>
             margin: 0 auto;
         }}
         
-        /* 头部 */
+        /* 头部 - 手机优化 */
         .header {{
             background: var(--bg-card);
             border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }}
         
         .header-top {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
         }}
         
         h1 {{
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 600;
             color: var(--text-primary);
+            letter-spacing: -0.3px;
         }}
         
         .theme-toggle {{
             background: var(--bg-body);
             border: 1px solid var(--border-color);
             border-radius: 30px;
-            padding: 8px 16px;
+            padding: 6px 12px;
             cursor: pointer;
             color: var(--text-primary);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
             transition: all 0.2s;
+            -webkit-touch-callout: none;
         }}
         
-        .theme-toggle:hover {{
+        .theme-toggle:active {{
             background: var(--border-color);
+            transform: scale(0.96);
         }}
         
         .subtitle {{
             display: flex;
             justify-content: space-between;
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 16px;
+            font-size: 0.8rem;
+            margin-bottom: 12px;
         }}
         
         #search {{
             width: 100%;
-            padding: 14px 20px;
+            padding: 12px 16px;
             border: 1px solid var(--border-input);
-            border-radius: 40px;
-            font-size: 1rem;
+            border-radius: 30px;
+            font-size: 0.95rem;
             background: var(--bg-input);
             color: var(--text-primary);
             transition: all 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
         }}
         
         #search:focus {{
@@ -288,31 +304,37 @@ html = f"""<!DOCTYPE html>
             background: var(--bg-card);
         }}
         
-        /* 组排名卡片 - 加强漫透效果 */
+        /* 组排名卡片 - 手机网格优化 */
         .rank-grid {{
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 8px;
+            margin-bottom: 16px;
         }}
         
         .rank-card {{
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 16px;
+            border-radius: 14px;
+            padding: 12px 8px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 6px;
             border-left: 4px solid;
-            transition: all 0.3s;
+            transition: all 0.2s;
             position: relative;
             overflow: hidden;
+            -webkit-touch-callout: none;
         }}
         
-        /* 漫透光效果 */
+        .rank-card:active {{
+            transform: scale(0.97);
+            background: var(--border-color);
+        }}
+        
+        /* 漫透光效果 - 手机优化 */
         .rank-card::after {{
             content: '';
             position: absolute;
@@ -322,27 +344,23 @@ html = f"""<!DOCTYPE html>
             bottom: 0;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.2s;
         }}
         
-        .rank-card:hover::after {{
-            opacity: 0.6;
+        .rank-card:active::after {{
+            opacity: 0.4;
         }}
         
         .rank-card[data-group="星穹组"]::after {{
-            background: radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.2), transparent 70%);
+            background: radial-gradient(circle at 30% 30%, rgba(251, 191, 36, 0.25), transparent 80%);
         }}
         
         .rank-card[data-group="夜曜组"]::after {{
-            background: radial-gradient(circle at 30% 30%, rgba(167, 139, 250, 0.2), transparent 70%);
+            background: radial-gradient(circle at 30% 30%, rgba(167, 139, 250, 0.25), transparent 80%);
         }}
         
         .rank-card[data-group="沧澜组"]::after {{
-            background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.25), transparent 70%);
-        }}
-        
-        body.night-mode .rank-card[data-group="沧澜组"]::after {{
-            background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.35), transparent 75%);
+            background: radial-gradient(circle at 30% 30%, rgba(96, 165, 250, 0.3), transparent 80%);
         }}
         
         .rank-card[data-group="星穹组"] {{
@@ -358,55 +376,48 @@ html = f"""<!DOCTYPE html>
             background: linear-gradient(to right, var(--ocean-light), var(--bg-card));
         }}
         
-        .rank-card:hover {{
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        }}
-        
         .rank-icon {{
-            font-size: 2.2rem;
-            position: relative;
-            z-index: 1;
+            font-size: 1.6rem;
+            line-height: 1;
         }}
         
         .rank-info {{
             flex: 1;
-            position: relative;
-            z-index: 1;
         }}
         
         .rank-name {{
             font-weight: 600;
-            font-size: 1.1rem;
-            margin-bottom: 4px;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
         }}
         
         .rank-score {{
             font-weight: 700;
-            font-size: 1.4rem;
+            font-size: 1.1rem;
+            line-height: 1.2;
         }}
         
         .rank-score small {{
-            font-size: 0.8rem;
+            font-size: 0.65rem;
             font-weight: 400;
             color: var(--text-secondary);
-            margin-left: 4px;
+            margin-left: 2px;
         }}
         
-        /* 组卡片 - 加强漫透效果 */
+        /* 组卡片 - 手机优化 */
         .groups {{
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 12px;
         }}
         
         .group-card {{
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 24px;
+            border-radius: 18px;
+            padding: 16px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
-            scroll-margin-top: 20px;
+            scroll-margin-top: 12px;
             border-top: 4px solid;
             position: relative;
             overflow: hidden;
@@ -418,30 +429,22 @@ html = f"""<!DOCTYPE html>
             top: 0;
             left: 0;
             right: 0;
-            height: 100px;
+            height: 80px;
             pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }}
-        
-        .group-card:hover::after {{
-            opacity: 0.5;
+            opacity: 0.3;
+            transition: opacity 0.2s;
         }}
         
         .group-card[data-group="星穹组"]::after {{
-            background: radial-gradient(circle at 20% 20%, rgba(251, 191, 36, 0.15), transparent 70%);
+            background: radial-gradient(circle at 20% 20%, rgba(251, 191, 36, 0.15), transparent 80%);
         }}
         
         .group-card[data-group="夜曜组"]::after {{
-            background: radial-gradient(circle at 20% 20%, rgba(167, 139, 250, 0.15), transparent 70%);
+            background: radial-gradient(circle at 20% 20%, rgba(167, 139, 250, 0.15), transparent 80%);
         }}
         
         .group-card[data-group="沧澜组"]::after {{
-            background: radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.2), transparent 70%);
-        }}
-        
-        body.night-mode .group-card[data-group="沧澜组"]::after {{
-            background: radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.3), transparent 75%);
+            background: radial-gradient(circle at 20% 20%, rgba(96, 165, 250, 0.2), transparent 80%);
         }}
         
         .group-card[data-group="星穹组"] {{ border-top-color: var(--star-primary); }}
@@ -452,118 +455,135 @@ html = f"""<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
             border-bottom: 2px solid var(--border-color);
             position: relative;
             z-index: 1;
+            flex-wrap: wrap;
+            gap: 8px;
         }}
         
         .group-title {{
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
         }}
         
         .group-badge {{
-            padding: 6px 16px;
+            padding: 4px 12px;
             border-radius: 30px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: white;
-            position: relative;
-            z-index: 1;
+            white-space: nowrap;
         }}
         
         .group-card[data-group="星穹组"] .group-badge {{ background: var(--star-primary); color: #1e293b; }}
         .group-card[data-group="夜曜组"] .group-badge {{ background: var(--night-primary); }}
         .group-card[data-group="沧澜组"] .group-badge {{ background: var(--ocean-primary); }}
         
-        /* 表格 */
-        .member-table {{
-            width: 100%;
-            border-collapse: collapse;
+        /* 表格 - 手机横滑优化 */
+        .table-container {{
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -16px;
+            padding: 0 16px;
+            scrollbar-width: thin;
             position: relative;
             z-index: 1;
         }}
         
+        .member-table {{
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+            font-size: 0.9rem;
+        }}
+        
         .member-table th {{
             text-align: left;
-            padding: 12px 8px;
-            font-size: 0.8rem;
+            padding: 10px 6px;
+            font-size: 0.7rem;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
+            letter-spacing: 0.3px;
             border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
         }}
         
         .member-table td {{
-            padding: 14px 8px;
+            padding: 10px 6px;
             border-bottom: 1px solid var(--border-color);
+            white-space: nowrap;
         }}
         
-        .member-table tr:hover {{
-            background: var(--bg-body);
+        .member-table tr:active {{
+            background: var(--border-color);
         }}
         
         .rank-number {{
             font-weight: 500;
             color: var(--text-secondary);
-            width: 45px;
+            width: 40px;
+            font-size: 0.85rem;
         }}
         
         .name-cell {{
-            min-width: 130px;
+            min-width: 120px;
         }}
         
         .name-cn {{
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             margin-bottom: 2px;
         }}
         
         .name-en {{
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 130px;
+            max-width: 110px;
         }}
         
         .info-cell {{
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             font-weight: 500;
         }}
         
-        /* 分数标签 */
+        /* 分数标签 - 手机优化 */
         .scores-cell {{
-            max-width: 220px;
+            max-width: 200px;
         }}
         
         .score-tags {{
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+            gap: 4px;
+            flex-wrap: nowrap;
         }}
         
         .score-item {{
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
             font-weight: 500;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 3px;
             background: var(--bg-body);
             color: var(--text-secondary);
             border: 1px solid var(--border-color);
-            transition: all 0.2s;
+            white-space: nowrap;
+            -webkit-touch-callout: none;
         }}
         
-        .score-item:hover {{
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        .score-item:active {{
+            transform: scale(0.95);
+            background: var(--border-color);
         }}
         
         .score-item.has-score {{
@@ -580,17 +600,19 @@ html = f"""<!DOCTYPE html>
         
         .score-date {{
             opacity: 0.7;
+            font-size: 0.65rem;
         }}
         
         .score-value {{
             font-weight: 700;
+            font-size: 0.7rem;
         }}
         
         .total-cell {{
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-align: right;
-            width: 60px;
+            width: 50px;
         }}
         
         /* 搜索高亮 */
@@ -598,24 +620,131 @@ html = f"""<!DOCTYPE html>
         .group-card[data-group="夜曜组"] tr.search-match {{ background: var(--night-light) !important; }}
         .group-card[data-group="沧澜组"] tr.search-match {{ background: var(--ocean-light) !important; }}
         
-        .footer {{
-            margin-top: 40px;
-            text-align: center;
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-            padding: 20px;
+        /* 底部导航 - 手机优化 */
+        .bottom-nav {{
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-top: 1px solid var(--border-color);
+            padding: 8px 16px;
+            padding-bottom: max(8px, var(--safe-bottom));
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }}
         
-        @media (max-width: 640px) {{
-            body {{ padding: 16px; }}
-            .rank-grid {{ gap: 12px; }}
-            .rank-card {{ padding: 14px 10px; }}
-            .rank-icon {{ font-size: 1.8rem; }}
-            .member-table th {{ font-size: 0.7rem; padding: 8px 4px; }}
-            .member-table td {{ padding: 10px 4px; font-size: 0.85rem; }}
-            .scores-cell {{ max-width: 140px; }}
-            .header-top {{ flex-direction: column; gap: 12px; align-items: flex-start; }}
+        .nav-item {{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            padding: 6px 12px;
+            border-radius: 30px;
+            transition: all 0.2s;
+            -webkit-touch-callout: none;
+        }}
+        
+        .nav-item:active {{
+            background: var(--border-color);
+            transform: scale(0.95);
+        }}
+        
+        .nav-item.active {{
+            color: var(--star-primary);
+        }}
+        
+        .nav-item span {{
+            font-size: 1.2rem;
+        }}
+        
+        .footer {{
+            margin-top: 70px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            padding: 16px;
+            padding-bottom: max(70px, var(--safe-bottom));
+        }}
+        
+        /* 回到顶部按钮 - 手机优化 */
+        .back-to-top {{
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            width: 44px;
+            height: 44px;
+            border-radius: 30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }}
+        
+        .back-to-top.visible {{
+            opacity: 1;
+            pointer-events: auto;
+        }}
+        
+        .back-to-top:active {{
+            transform: scale(0.9);
+            background: var(--border-color);
+        }}
+        
+        /* 加载动画 */
+        @keyframes pulse {{
+            0% {{ opacity: 1; }}
+            50% {{ opacity: 0.7; }}
+            100% {{ opacity: 1; }}
+        }}
+        
+        .loading {{
+            animation: pulse 1.5s infinite;
+        }}
+        
+        /* 横屏优化 */
+        @media (orientation: landscape) {{
+            .rank-grid {{
+                grid-template-columns: repeat(3, 1fr);
+            }}
+            .group-card {{
+                padding: 14px;
+            }}
+        }}
+        
+        /* 小屏手机优化 */
+        @media (max-width: 360px) {{
+            .rank-name {{
+                font-size: 0.8rem;
+            }}
+            .rank-score {{
+                font-size: 1rem;
+            }}
+            .group-title {{
+                font-size: 1.1rem;
+            }}
+            .group-badge {{
+                font-size: 0.7rem;
+                padding: 3px 8px;
+            }}
         }}
     </style>
 </head>
@@ -623,17 +752,17 @@ html = f"""<!DOCTYPE html>
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <h1>🏫 学长团分数板</h1>
+                <h1>🏫 学长团</h1>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                     <span>🌓</span>
-                    <span>切换模式</span>
+                    <span>夜间</span>
                 </div>
             </div>
             <div class="subtitle">
                 <span>Prefects' Scoreboard</span>
-                <span>{datetime.now().strftime('%Y.%m.%d')}</span>
+                <span>{datetime.now().strftime('%m/%d')}</span>
             </div>
-            <input type="text" id="search" placeholder="搜索姓名、英文名、班级或学号...">
+            <input type="text" id="search" placeholder="🔍 搜姓名/班级/学号">
         </div>
 
         <!-- 组排名卡片 -->
@@ -642,12 +771,13 @@ html = f"""<!DOCTYPE html>
 
 for i, (g, total) in enumerate(sorted_groups, 1):
     icons = {1: "🥇", 2: "🥈", 3: "🥉"}
+    short_names = {"星穹组": "星穹", "夜曜组": "夜曜", "沧澜组": "沧澜"}
     html += f"""
-            <div class="rank-card" data-group="{g}" onclick="document.getElementById('group-{g}').scrollIntoView({{behavior: 'smooth'}})">
+            <div class="rank-card" data-group="{g}" onclick="document.getElementById('group-{g}').scrollIntoView({{behavior: 'smooth', block: 'start'}})">
                 <span class="rank-icon">{icons[i]}</span>
                 <div class="rank-info">
-                    <div class="rank-name">{g}</div>
-                    <div class="rank-score">{int(total)} <small>分</small></div>
+                    <div class="rank-name">{short_names[g]}</div>
+                    <div class="rank-score">{int(total)}<small>分</small></div>
                 </div>
             </div>
 """
@@ -668,20 +798,21 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
             <div class="group-card" data-group="{group_name}" id="group-{group_name}">
                 <div class="group-header">
                     <span class="group-title">{group_emojis[group_name]} {group_name}</span>
-                    <span class="group-badge">第{rank}名 · {int(group_totals[group_name])}分</span>
+                    <span class="group-badge">#{rank} {int(group_totals[group_name])}分</span>
                 </div>
-                <table class="member-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>姓名</th>
-                            <th>班级</th>
-                            <th>学号</th>
-                            <th>每日得分</th>
-                            <th>总分</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="table-container">
+                    <table class="member-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>姓名</th>
+                                <th>班级</th>
+                                <th>学号</th>
+                                <th>得分</th>
+                                <th>总分</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 """
 
     for member in members:
@@ -690,13 +821,15 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         sorted_dates = sorted(member["score_dict"].keys())
         for date in sorted_dates[-5:]:
             score = member["score_dict"][date]
-            score_tags += f'<span class="score-item has-score"><span class="score-date">{date}</span><span class="score-value">{int(score)}</span></span>'
+            # 只显示月和日
+            short_date = date[-5:] if len(date) > 5 else date
+            score_tags += f'<span class="score-item has-score"><span class="score-date">{short_date}</span><span class="score-value">{int(score)}</span></span>'
         
         if not score_tags:
             score_tags = '<span class="score-item">-</span>'
         
         # 截断英文名
-        name_en_short = member['name_en'][:20] + "..." if len(member['name_en']) > 20 else member['name_en']
+        name_en_short = member['name_en'][:15] + "…" if len(member['name_en']) > 15 else member['name_en']
         
         html += f"""
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
@@ -713,60 +846,45 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 """
 
     html += """
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 """
 
 html += """
         </div>
         
+        <!-- 底部快速导航 -->
+        <div class="bottom-nav">
+            <div class="nav-item" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <span>🏠</span>
+                <span>顶部</span>
+            </div>
+            <div class="nav-item" onclick="document.getElementById('group-星穹组').scrollIntoView({behavior: 'smooth'})">
+                <span>✨</span>
+                <span>星穹</span>
+            </div>
+            <div class="nav-item" onclick="document.getElementById('group-夜曜组').scrollIntoView({behavior: 'smooth'})">
+                <span>🌙</span>
+                <span>夜曜</span>
+            </div>
+            <div class="nav-item" onclick="document.getElementById('group-沧澜组').scrollIntoView({behavior: 'smooth'})">
+                <span>🌊</span>
+                <span>沧澜</span>
+            </div>
+        </div>
+        
+        <!-- 回到顶部按钮 -->
+        <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            ↑
+        </div>
+        
         <div class="footer">
-            ｜ 训育处 ｜ 数据每日更新 ｜ 点击组排名跳转 ｜ 点击🌓切换夜间模式 ｜
+            ｜ 训育处 ｜ 数据每日更新 ｜ 点击🌓切换夜间 ｜
         </div>
     </div>
 
     <script>
         // 检查系统主题偏好
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('night-mode');
-        }
-        
-        // 搜索功能
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                allRows.forEach(row => {
-                    row.style.display = '';
-                    row.classList.remove('search-match');
-                });
-                return;
-            }
-            
-            allRows.forEach(row => {
-                const searchText = row.getAttribute('data-search').toLowerCase();
-                if (searchText.includes(searchTerm)) {
-                    row.style.display = '';
-                    row.classList.add('search-match');
-                } else {
-                    row.style.display = 'none';
-                    row.classList.remove('search-match');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
-"""
-
-# 保存HTML文件
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html)
-
-print(f"\n✅ 生成成功！共 {len(people)} 人")
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名")
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
