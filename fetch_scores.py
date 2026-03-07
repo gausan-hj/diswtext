@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
+import base64
 
 # ===== 你要修改的地方 =====
 SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
@@ -88,6 +89,7 @@ members_list = [
 people = []
 yesterday_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 today_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+previous_rank = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}  # 模拟上次排名
 
 print("\n开始匹配成员...")
 
@@ -184,11 +186,16 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
 for g in group_data:
     group_data[g].sort(key=lambda x: x["order"])
 
-# 计算组排名
+# 计算当前排名
 sorted_groups = sorted(group_totals.items(), key=lambda x: x[1], reverse=True)
 group_rank = {}
 for i, (g, _) in enumerate(sorted_groups, 1):
     group_rank[g] = i
+
+# 模拟上次排名（稍微打乱一点，为了展示动画效果）
+previous_rank["星穹组"] = max(1, group_rank["星穹组"] - 1) if group_rank["星穹组"] > 1 else 2
+previous_rank["夜曜组"] = max(1, group_rank["夜曜组"] - 1) if group_rank["夜曜组"] > 1 else 2
+previous_rank["沧澜组"] = max(1, group_rank["沧澜组"] - 1) if group_rank["沧澜组"] > 1 else 2
 
 # 组别颜色配置
 group_colors = {
@@ -197,13 +204,15 @@ group_colors = {
     "沧澜组": {"primary": "#60a5fa", "light": "#dbeafe", "border": "#3b82f6"}
 }
 
-# 生成HTML - 加入夜间模式和变化显示
+# 生成HTML - 加入动画和导出功能
 html = f"""<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>训育处 - 学长团分数板</title>
+    <!-- html2canvas 用于导出图片 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {{
             -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -284,6 +293,8 @@ html = f"""<!DOCTYPE html>
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 10px;
         }}
         
         h1 {{
@@ -302,7 +313,13 @@ html = f"""<!DOCTYPE html>
             -webkit-text-fill-color: transparent;
         }}
         
-        .theme-toggle {{
+        .header-actions {{
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }}
+        
+        .theme-toggle, .export-btn {{
             background: var(--bg-body);
             border: 1px solid var(--border-color);
             border-radius: 30px;
@@ -316,8 +333,12 @@ html = f"""<!DOCTYPE html>
             transition: all 0.2s;
         }}
         
-        .theme-toggle:hover {{
+        .theme-toggle:hover, .export-btn:hover {{
             background: var(--border-color);
+        }}
+        
+        .export-btn:active {{
+            transform: scale(0.95);
         }}
         
         .subtitle {{
@@ -347,7 +368,7 @@ html = f"""<!DOCTYPE html>
             box-shadow: 0 0 0 3px rgba(148,163,184,0.1);
         }}
         
-        /* 组排名卡片 - 增加变化显示 */
+        /* 组排名卡片 - 动画效果 */
         .rank-grid {{
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -361,15 +382,77 @@ html = f"""<!DOCTYPE html>
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             align-items: center;
             gap: 10px;
             border-left: 4px solid;
+            animation: cardAppear 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
         }}
-        .rank-card:active {{
-            transform: scale(0.98);
+        
+        .rank-card::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
         }}
+        
+        .rank-card:hover::before {{
+            transform: translateX(100%);
+        }}
+        
+        @keyframes cardAppear {{
+            0% {{
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }}
+            100% {{
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }}
+        }}
+        
+        .rank-card.rank-up {{
+            animation: rankUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }}
+        
+        .rank-card.rank-down {{
+            animation: rankDown 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }}
+        
+        @keyframes rankUp {{
+            0%, 100% {{
+                transform: translateY(0);
+            }}
+            30% {{
+                transform: translateY(-8px) scale(1.02);
+                box-shadow: 0 12px 24px -8px var(--change-up);
+            }}
+            60% {{
+                transform: translateY(2px);
+            }}
+        }}
+        
+        @keyframes rankDown {{
+            0%, 100% {{
+                transform: translateY(0);
+            }}
+            30% {{
+                transform: translateY(8px) scale(0.98);
+                box-shadow: 0 12px 24px -8px var(--change-down);
+            }}
+            60% {{
+                transform: translateY(-2px);
+            }}
+        }}
+        
         .rank-card[data-group="星穹组"] {{
             border-left-color: #fbbf24;
             background: linear-gradient(135deg, var(--star-light), var(--bg-card));
@@ -385,6 +468,10 @@ html = f"""<!DOCTYPE html>
         .rank-icon {{
             font-size: 2rem;
             line-height: 1;
+            transition: transform 0.3s;
+        }}
+        .rank-card:hover .rank-icon {{
+            transform: scale(1.1) rotate(5deg);
         }}
         .rank-info {{
             flex: 1;
@@ -580,6 +667,30 @@ html = f"""<!DOCTYPE html>
             border-top: 1px solid var(--border-light);
         }}
         
+        /* 导出提示 */
+        .export-toast {{
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 40px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: transform 0.3s;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }}
+        
+        .export-toast.show {{
+            transform: translateX(-50%) translateY(0);
+        }}
+        
         /* 移动端优化 */
         @media (max-width: 640px) {{
             body {{ padding: 12px; }}
@@ -598,19 +709,28 @@ html = f"""<!DOCTYPE html>
             .header-top {{
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+            }}
+            .header-actions {{
+                width: 100%;
+                justify-content: space-between;
             }}
         }}
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="capture-area">
         <div class="header">
             <div class="header-top">
                 <h1>🏫 学长团分数板</h1>
-                <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
-                    <span>🌓</span>
-                    <span>夜间模式</span>
+                <div class="header-actions">
+                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                        <span>🌓</span>
+                        <span>夜间模式</span>
+                    </div>
+                    <div class="export-btn" onclick="exportAsImage()">
+                        <span>📸</span>
+                        <span>导出图片</span>
+                    </div>
                 </div>
             </div>
             <div class="subtitle">
@@ -622,7 +742,7 @@ html = f"""<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 - 显示变化 -->
+        <!-- 组排名卡片 - 显示变化和动画 -->
         <div class="rank-grid">
 """
 
@@ -632,6 +752,16 @@ group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜
 for i, (g, total) in enumerate(sorted_groups, 1):
     group_id = group_ids[g]
     change = group_changes[g]
+    prev_rank = previous_rank[g]
+    current_rank = group_rank[g]
+    
+    # 判断排名变化动画
+    rank_animation = ""
+    if current_rank < prev_rank:
+        rank_animation = 'rank-up'
+    elif current_rank > prev_rank:
+        rank_animation = 'rank-down'
+    
     if change > 0:
         change_text = f'<span class="change-up">▲ +{int(change)}</span>'
     elif change < 0:
@@ -640,7 +770,7 @@ for i, (g, total) in enumerate(sorted_groups, 1):
         change_text = '<span class="change-steady">◆ 0</span>'
     
     html += f"""
-            <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
+            <div class="rank-card {rank_animation}" data-group="{g}" data-rank="{current_rank}" data-prev-rank="{prev_rank}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
                 <span class="rank-icon">{rank_icons[i]}</span>
                 <div class="rank-info">
                     <div class="rank-name">{g}</div>
@@ -723,8 +853,14 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += """
         </div>
         <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间模式 · 显示较昨日变化 · 最近5次得分
+            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间模式 · 点击📸导出图片 · 显示较昨日变化 · 最近5次得分
         </div>
+    </div>
+
+    <!-- 导出提示 -->
+    <div class="export-toast" id="exportToast">
+        <span>✅</span>
+        <span>图片已保存</span>
     </div>
 
     <script>
@@ -733,33 +869,4 @@ html += """
             document.body.classList.add('night-mode');
         }
         
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                allRows.forEach(row => row.style.display = '');
-                return;
-            }
-            
-            allRows.forEach(row => {
-                const searchText = row.getAttribute('data-search').toLowerCase();
-                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    </script>
-</body>
-</html>
-"""
-
-# 保存HTML文件
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html)
-
-print(f"\n✅ 生成成功！共 {len(people)} 人")
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    change = group_changes[g]
-    change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
-    print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
+        const searchIn
