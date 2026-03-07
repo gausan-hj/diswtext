@@ -218,7 +218,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 使用普通三重引号，不使用f-string
+# 生成HTML
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -764,6 +764,7 @@ html = '''<!DOCTYPE html>
             </div>
         </div>
 
+        <!-- 组排名卡片 - 带变化显示 -->
         <div class="rank-grid">
 '''
 
@@ -803,6 +804,7 @@ for i, (g, total) in enumerate(sorted_groups, 1):
 html += '''
         </div>
 
+        <!-- 三组 -->
         <div class="groups">
 '''
 
@@ -877,5 +879,4 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += '''
         </div>
 
-        <div class="reward-card">
-            <di
+        <!-- 奖励规则卡片 -
