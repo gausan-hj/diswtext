@@ -21,34 +21,20 @@ except:
 
 print(f"读取到 {len(df)} 行数据")
 
-# 获取日期（第一行）- 修复版本
+# 获取日期（第一行）
 dates = []
 date_objects = []
 if len(df) > 0:
     first_row = df.iloc[0].tolist()
-    print("第一行日期数据:", first_row[7:15])  # 调试用
-    
     for j in range(7, len(first_row)):
         if pd.notna(first_row[j]):
             date_str = str(first_row[j])
             try:
-                # 处理 "2026-03-02 00:00:00" 格式
                 if "00:00" in date_str:
-                    # 提取 03-02
                     date_str = date_str[5:10]
-                    dates.append(date_str)
-                    try:
-                        date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
-                    except:
-                        date_objects.append(None)
-                    print(f"成功解析日期: {date_str}")  # 调试用
-                else:
-                    # 其他格式，直接使用
-                    dates.append(date_str)
-                    date_objects.append(None)
-                    print(f"使用原日期: {date_str}")  # 调试用
-            except Exception as e:
-                print(f"日期解析失败: {date_str}, 错误: {e}")
+                dates.append(date_str)
+                date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
+            except:
                 dates.append(f"D{j-6}")
                 date_objects.append(None)
         else:
@@ -56,11 +42,9 @@ if len(df) > 0:
             date_objects.append(None)
 
 print(f"找到 {len(dates)} 个日期")
-print("前5个日期:", dates[:5])
 
 # ===== 成员名单 =====
 members_list = [
-    # 星穹组 (10人)
     {"group": "星穹组", "name_cn": "陈展艺", "name_en": "IVAN TAN ZHAN YI", "class": "S2FA", "student_id": "22038", "order": 1},
     {"group": "星穹组", "name_cn": "侯展扬", "name_en": "HOW ZHAN YANG", "class": "S2Y", "student_id": "22100", "order": 2},
     {"group": "星穹组", "name_cn": "邱嘉瑞", "name_en": "KATHERINE KHOO JAI RUI", "class": "J3T", "student_id": "24076", "order": 3},
@@ -71,8 +55,6 @@ members_list = [
     {"group": "星穹组", "name_cn": "尤嘉乐", "name_en": "JUSTIN YEW JIA LE", "class": "J2Y", "student_id": "25046", "order": 8},
     {"group": "星穹组", "name_cn": "许艳棋", "name_en": "KHOR YAN QI", "class": "J1Y", "student_id": "26018", "order": 9},
     {"group": "星穹组", "name_cn": "林隽毓", "name_en": "LIM JOON YI", "class": "J1Y", "student_id": "26032", "order": 10},
-    
-    # 夜曜组 (11人)
     {"group": "夜曜组", "name_cn": "李竑证", "name_en": "LEE HOONG ZHENG", "class": "S2FA", "student_id": "22040", "order": 1},
     {"group": "夜曜组", "name_cn": "廖若含", "name_en": "LIEW XIN YU", "class": "S2Y", "student_id": "22029", "order": 2},
     {"group": "夜曜组", "name_cn": "林芷嫣", "name_en": "LIM ZHI YAN", "class": "S2Y", "student_id": "22083", "order": 3},
@@ -84,8 +66,6 @@ members_list = [
     {"group": "夜曜组", "name_cn": "陈欣怡", "name_en": "CINDY TAN XIN YI", "class": "J2F", "student_id": "25058", "order": 9},
     {"group": "夜曜组", "name_cn": "丽亚", "name_en": "DHIYA ZULAIKHA DARWISYAH BINTI YUSNIZAN", "class": "J2F", "student_id": "25059", "order": 10},
     {"group": "夜曜组", "name_cn": "郑宜桐", "name_en": "TEH YEE THONG", "class": "J1Y", "student_id": "26024", "order": 11},
-    
-    # 沧澜组 (10人)
     {"group": "沧澜组", "name_cn": "浦源政", "name_en": "POH YUAN ZHENG", "class": "S2Y", "student_id": "22044", "order": 1},
     {"group": "沧澜组", "name_cn": "吴贝优", "name_en": "GOH BEI YO", "class": "S2Y", "student_id": "22021", "order": 2},
     {"group": "沧澜组", "name_cn": "林沛筠", "name_en": "LIM PEI JUN", "class": "S2Y", "student_id": "22030", "order": 3},
@@ -181,6 +161,41 @@ group_rank = {}
 for i, (g, _) in enumerate(sorted_groups, 1):
     group_rank[g] = i
 
+# 计算每组平均分
+group_averages = {}
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if group_data[g]:
+        group_averages[g] = group_totals[g] / len(group_data[g])
+    else:
+        group_averages[g] = 0
+
+# 计算每个人的达标状态
+for g in group_data:
+    for p in group_data[g]:
+        rank = group_rank[g]
+        avg = group_averages[g]
+        
+        if rank == 1:  # 第一名组别
+            p["reward"] = "✅ 达标" if p["total"] >= avg / 2 else "❌ 未达标"
+            p["reward_status"] = "达标" if p["total"] >= avg / 2 else "未达标"
+            p["reward_class"] = "reward-pass" if p["total"] >= avg / 2 else "reward-fail"
+        elif rank == 2:  # 第二名组别
+            p["reward"] = "✅ 达标" if p["total"] >= avg else "❌ 未达标"
+            p["reward_status"] = "达标" if p["total"] >= avg else "未达标"
+            p["reward_class"] = "reward-pass" if p["total"] >= avg else "reward-fail"
+        else:  # 第三名组别
+            # 找出组内前三名
+            top3 = sorted(group_data[g], key=lambda x: x["total"], reverse=True)[:3]
+            top3_names = [t["name_cn"] for t in top3]
+            if p["name_cn"] in top3_names:
+                p["reward"] = "✅ 达标 (前三名)"
+                p["reward_status"] = "达标"
+                p["reward_class"] = "reward-pass"
+            else:
+                p["reward"] = "❌ 未达标"
+                p["reward_status"] = "未达标"
+                p["reward_class"] = "reward-fail"
+
 # 模拟上次排名
 previous_rank = {}
 previous_rank["星穹组"] = max(1, group_rank["星穹组"] - 1) if group_rank["星穹组"] > 1 else 2
@@ -200,7 +215,7 @@ html = '''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>训育处 - 学长团分数板</title>
+    <title>训育处 - 学长团分数板 · 奖励机制</title>
     <style>
         * {
             -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -230,6 +245,10 @@ html = '''<!DOCTYPE html>
             --change-up: #10b981;
             --change-down: #ef4444;
             --change-steady: #f59e0b;
+            --reward-pass: #dcfce7;
+            --reward-pass-text: #166534;
+            --reward-fail: #fee2e2;
+            --reward-fail-text: #991b1b;
         }
         
         /* 夜间模式变量 */
@@ -251,6 +270,10 @@ html = '''<!DOCTYPE html>
             --change-up: #34d399;
             --change-down: #f87171;
             --change-steady: #fbbf24;
+            --reward-pass: #14532d;
+            --reward-pass-text: #bbf7d0;
+            --reward-fail: #7f1d1d;
+            --reward-fail-text: #fecaca;
         }
         
         body {
@@ -336,6 +359,62 @@ html = '''<!DOCTYPE html>
             outline: none;
             border-color: var(--text-secondary);
             box-shadow: 0 0 0 3px rgba(148,163,184,0.1);
+        }
+        
+        /* 奖励规则卡片 */
+        .reward-rule-card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid #fbbf24;
+        }
+        
+        .reward-rule-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .reward-rule-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        .reward-rule-item {
+            padding: 12px;
+            border-radius: 16px;
+            background: var(--bg-body);
+        }
+        
+        .reward-rule-rank {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid;
+        }
+        
+        .reward-rule-rank[data-rank="1"] { border-bottom-color: #fbbf24; }
+        .reward-rule-rank[data-rank="2"] { border-bottom-color: #a78bfa; }
+        .reward-rule-rank[data-rank="3"] { border-bottom-color: #60a5fa; }
+        
+        .reward-rule-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .reward-rule-highlight {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-primary);
         }
         
         /* 组排名卡片 */
@@ -581,6 +660,28 @@ html = '''<!DOCTYPE html>
             width: 50px;
         }
         
+        /* 奖励状态 */
+        .reward-cell {
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-align: center;
+            min-width: 70px;
+        }
+        .reward-pass {
+            background: var(--reward-pass);
+            color: var(--reward-pass-text);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .reward-fail {
+            background: var(--reward-fail);
+            color: var(--reward-fail-text);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
         .footer {
             margin-top: 32px;
             text-align: center;
@@ -605,6 +706,14 @@ html = '''<!DOCTYPE html>
                 padding: 8px 2px;
                 font-size: 0.85rem;
             }
+            .reward-rule-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .reward-cell {
+                min-width: 60px;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -612,18 +721,46 @@ html = '''<!DOCTYPE html>
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <h1>🏫 学长团分数板</h1>
+                <h1>🏫 学长团分数板 · 奖励机制</h1>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                     <span>🌓</span>
                     <span>夜间</span>
                 </div>
             </div>
             <div class="subtitle">
-                <span>Prefects' Scoreboard</span>
+                <span>Prefects' Scoreboard · Reward System</span>
                 <span>''' + datetime.now().strftime('%Y.%m.%d %H:%M') + '''</span>
             </div>
             <div class="search-box">
                 <input type="text" id="search" placeholder="🔍 搜索姓名、英文名、班级或学号...">
+            </div>
+        </div>
+
+        <!-- 奖励规则说明 -->
+        <div class="reward-rule-card">
+            <div class="reward-rule-title">
+                <span>🎁</span>
+                <span>本周奖励机制</span>
+            </div>
+            <div class="reward-rule-grid">
+                <div class="reward-rule-item">
+                    <div class="reward-rule-rank" data-rank="1">🥇 第一名组别</div>
+                    <div class="reward-rule-desc">个人分数 ≥ 组平均分一半</div>
+                    <div class="reward-rule-highlight">✅ 免搬椅子 + 减免操步</div>
+                </div>
+                <div class="reward-rule-item">
+                    <div class="reward-rule-rank" data-rank="2">🥈 第二名组别</div>
+                    <div class="reward-rule-desc">个人分数 ≥ 组平均分</div>
+                    <div class="reward-rule-highlight">✅ 免搬椅子 + 减免操步</div>
+                </div>
+                <div class="reward-rule-item">
+                    <div class="reward-rule-rank" data-rank="3">🥉 第三名组别</div>
+                    <div class="reward-rule-desc">个人分数 组内前三名</div>
+                    <div class="reward-rule-highlight">✅ 免搬椅子 + 减免操步</div>
+                </div>
+            </div>
+            <div style="margin-top: 12px; font-size: 0.85rem; color: var(--text-secondary); text-align: center;">
+                ⚡ 第一名组别达标者额外获得一份奖励 · 公平原则，不负每一位付出的学长
             </div>
         </div>
 
@@ -675,11 +812,15 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     members = group_data[group_name]
     rank = group_rank[group_name]
     group_id = group_ids[group_name]
+    avg_score = group_averages[group_name]
     
     html += f'''
             <div class="group-card" data-group="{group_name}" id="{group_id}">
                 <div class="group-header">
-                    <span class="group-title">{group_name}</span>
+                    <div>
+                        <span class="group-title">{group_name}</span>
+                        <span style="font-size:0.8rem; color:var(--text-secondary); margin-left:8px;">平均分 {int(avg_score)}</span>
+                    </div>
                     <span class="group-badge">第{rank}名 · {int(group_totals[group_name])}分</span>
                 </div>
                 <table class="member-table">
@@ -691,6 +832,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                             <th>学号</th>
                             <th>每日得分</th>
                             <th>总分</th>
+                            <th>奖励</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -699,7 +841,6 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     for member in members:
         # 生成每日得分标签
         score_tags = ""
-        # 显示最近5个有分数的日期
         sorted_dates = sorted(member["score_dict"].keys())
         for date in sorted_dates[-5:]:
             score = member["score_dict"][date]
@@ -709,80 +850,4 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
             score_tags = '<span class="score-item">-</span>'
         
         # 截断英文名
-        name_en_short = member['name_en'][:20] + "..." if len(member['name_en']) > 20 else member['name_en']
-        
-        html += f'''
-                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
-                            <td class="rank-number">{member['order']}</td>
-                            <td class="name-cell">
-                                <div class="name-cn">{member['name_cn']}</div>
-                                <div class="name-en">{name_en_short}</div>
-                            </td>
-                            <td class="info-cell">{member['class']}</td>
-                            <td class="info-cell">{member['student_id']}</td>
-                            <td class="scores-cell"><div class="score-tags">{score_tags}</div></td>
-                            <td class="total-cell">{int(member['total'])}</td>
-                        </tr>'''
-
-    html += '''
-                    </tbody>
-                </table>
-            </div>'''
-
-html += '''
-        </div>
-        <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 显示较昨日变化 · 最近5次得分
-        </div>
-    </div>
-
-    <script>
-        // 检查系统主题偏好
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('night-mode');
-        }
-        
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                allRows.forEach(row => row.style.display = '');
-                return;
-            }
-            
-            allRows.forEach(row => {
-                const searchText = row.getAttribute('data-search').toLowerCase();
-                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-            });
-        });
-        
-        // 排名动画
-        document.querySelectorAll('.rank-card').forEach(card => {
-            const currentRank = parseInt(card.dataset.rank);
-            const prevRank = parseInt(card.dataset.prevRank);
-            if (currentRank && prevRank) {
-                if (currentRank < prevRank) {
-                    card.classList.add('rank-up');
-                } else if (currentRank > prevRank) {
-                    card.classList.add('rank-down');
-                }
-            }
-        });
-    </script>
-</body>
-</html>'''
-
-# 保存HTML文件
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html)
-
-print(f"\n✅ 生成成功！共 {len(people)} 人")
-print("日期示例:", dates[:5])
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    change = group_changes[g]
-    change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
-    print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 功能：排名动画 + 夜间模式 + 较昨日变化 + 修复日期显示")
+        name_en_short = member['name_en'][:20] + "..." if l
