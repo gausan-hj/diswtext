@@ -218,7 +218,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML
+# 生成HTML - 修复总分对齐
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -552,11 +552,12 @@ html = '''<!DOCTYPE html>
         .rank-number {
             font-weight: 500;
             color: var(--text-secondary);
-            width: 40px;
+            width: 45px;
+            text-align: center;
         }
         
         .name-cell {
-            min-width: 120px;
+            min-width: 130px;
         }
         
         .name-cn {
@@ -571,16 +572,17 @@ html = '''<!DOCTYPE html>
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 110px;
+            max-width: 120px;
         }
         
         .info-cell {
             font-size: 0.85rem;
             color: var(--text-secondary);
+            width: 80px;
         }
         
         .scores-cell {
-            max-width: 180px;
+            max-width: 200px;
         }
         
         .score-tags {
@@ -616,12 +618,13 @@ html = '''<!DOCTYPE html>
             font-size: 1rem;
             color: var(--text-primary);
             text-align: right;
-            width: 60px;
+            width: 70px;
+            padding-right: 12px;
         }
         
         .reward-cell {
             text-align: center;
-            width: 50px;
+            width: 60px;
         }
         
         .reward-pass {
@@ -632,7 +635,7 @@ html = '''<!DOCTYPE html>
             font-size: 0.7rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 40px;
+            min-width: 45px;
         }
         
         .reward-fail {
@@ -643,7 +646,7 @@ html = '''<!DOCTYPE html>
             font-size: 0.7rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 40px;
+            min-width: 45px;
         }
         
         .reward-card {
@@ -742,6 +745,8 @@ html = '''<!DOCTYPE html>
             .member-table td { padding: 10px 4px; font-size: 0.8rem; }
             .reward-item { padding: 12px; }
             .reward-rank-icon { font-size: 1.5rem; min-width: 35px; }
+            .total-cell { width: 60px; padding-right: 8px; }
+            .info-cell { width: 70px; }
         }
     </style>
 </head>
@@ -974,4 +979,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 功能：夜间模式 + 较昨日变化 + 奖励卡片")
+print("✨ 功能：夜间模式 + 较昨日变化 + 奖励卡片 + 总分对齐")
