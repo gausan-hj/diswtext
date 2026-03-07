@@ -204,7 +204,7 @@ group_colors = {
     "沧澜组": {"primary": "#60a5fa", "light": "#dbeafe", "border": "#3b82f6"}
 }
 
-# 生成HTML
+# 生成HTML - 修复语法错误
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -778,8 +778,7 @@ html = '''<!DOCTYPE html>
                 <div class="chart-wrapper">
                     <canvas id="groupChart"></canvas>
                 </div>
-                <div class="stats-grid">
-'''
+                <div class="stats-grid">'''
 
 # 添加统计数据
 for g, total in sorted_groups:
@@ -796,16 +795,14 @@ for g, total in sorted_groups:
                         <div class="stat-label">{g}</div>
                         <div class="stat-value">{int(total)}</div>
                         <div class="stat-change">{change_html}</div>
-                    </div>
-'''
+                    </div>'''
 
 html += '''
                 </div>
             </div>
         </div>
 
-        <div class="rank-grid">
-'''
+        <div class="rank-grid">'''
 
 # 添加组排名卡片
 rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
@@ -837,14 +834,12 @@ for i, (g, total) in enumerate(sorted_groups, 1):
                     <div class="rank-score">{int(total)}<small>分</small></div>
                     <div class="rank-change">较昨日 {change_text}</div>
                 </div>
-            </div>
-'''
+            </div>'''
 
 html += '''
         </div>
 
-        <div class="groups">
-'''
+        <div class="groups">'''
 
 # 添加三个组
 for group_name in ["星穹组", "夜曜组", "沧澜组"]:
@@ -869,8 +864,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                             <th>总分</th>
                         </tr>
                     </thead>
-                    <tbody>
-'''
+                    <tbody>'''
 
     for member in members:
         score_tags = ""
@@ -891,4 +885,4 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                                 <div class="name-cn">{member['name_cn']}</div>
                                 <div class="name-en">{name_en_short}</div>
                             </td>
-                            <td class="info-cel
+                            <td class="info-
