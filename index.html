@@ -331,11 +331,12 @@
         .rank-number {
             font-weight: 500;
             color: var(--text-secondary);
-            width: 40px;
+            width: 45px;
+            text-align: center;
         }
         
         .name-cell {
-            min-width: 120px;
+            min-width: 130px;
         }
         
         .name-cn {
@@ -350,16 +351,17 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 110px;
+            max-width: 120px;
         }
         
         .info-cell {
             font-size: 0.85rem;
             color: var(--text-secondary);
+            width: 80px;
         }
         
         .scores-cell {
-            max-width: 180px;
+            max-width: 200px;
         }
         
         .score-tags {
@@ -395,12 +397,13 @@
             font-size: 1rem;
             color: var(--text-primary);
             text-align: right;
-            width: 60px;
+            width: 70px;
+            padding-right: 12px;
         }
         
         .reward-cell {
             text-align: center;
-            width: 50px;
+            width: 60px;
         }
         
         .reward-pass {
@@ -411,7 +414,7 @@
             font-size: 0.7rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 40px;
+            min-width: 45px;
         }
         
         .reward-fail {
@@ -422,7 +425,7 @@
             font-size: 0.7rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 40px;
+            min-width: 45px;
         }
         
         .reward-card {
@@ -521,6 +524,8 @@
             .member-table td { padding: 10px 4px; font-size: 0.8rem; }
             .reward-item { padding: 12px; }
             .reward-rank-icon { font-size: 1.5rem; min-width: 35px; }
+            .total-cell { width: 60px; padding-right: 8px; }
+            .info-cell { width: 70px; }
         }
     </style>
 </head>
@@ -536,7 +541,7 @@
             </div>
             <div class="subtitle">
                 <span>Prefects' Scoreboard</span>
-                <span>2026.03.07 13:32</span>
+                <span>2026.03.07 13:54</span>
             </div>
             <div class="search-box">
                 <input type="text" id="search" placeholder="🔍 搜索姓名、英文名、班级或学号...">
