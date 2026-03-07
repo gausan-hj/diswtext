@@ -223,7 +223,6 @@ html = f"""<!DOCTYPE html>
             padding: 0;
         }}
         
-        /* 日间模式变量 */
         :root {{
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
@@ -244,7 +243,6 @@ html = f"""<!DOCTYPE html>
             --change-steady: #f59e0b;
         }}
         
-        /* 夜间模式变量 */
         body.night-mode {{
             --bg-body: #0f172a;
             --bg-card: #1e293b;
@@ -277,7 +275,6 @@ html = f"""<!DOCTYPE html>
             margin: 0 auto;
         }}
         
-        /* 头部 */
         .header {{
             background: var(--bg-card);
             border-radius: 24px;
@@ -368,7 +365,6 @@ html = f"""<!DOCTYPE html>
             box-shadow: 0 0 0 3px rgba(148,163,184,0.1);
         }}
         
-        /* 组排名卡片 - 动画效果 */
         .rank-grid {{
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -508,7 +504,6 @@ html = f"""<!DOCTYPE html>
             color: var(--change-steady);
         }}
         
-        /* 三组布局 */
         .groups {{
             display: flex;
             flex-direction: column;
@@ -564,7 +559,6 @@ html = f"""<!DOCTYPE html>
             background: #60a5fa;
         }}
         
-        /* 表格样式 */
         .member-table {{
             width: 100%;
             border-collapse: collapse;
@@ -586,14 +580,12 @@ html = f"""<!DOCTYPE html>
             border-bottom: none;
         }}
         
-        /* 序号 */
         .rank-number {{
             font-weight: 500;
             color: var(--text-secondary);
             width: 35px;
         }}
         
-        /* 姓名信息 */
         .name-cell {{
             min-width: 110px;
         }}
@@ -610,14 +602,12 @@ html = f"""<!DOCTYPE html>
             max-width: 120px;
         }}
         
-        /* 班级学号 */
         .info-cell {{
             font-size: 0.85rem;
             color: var(--text-secondary);
             white-space: nowrap;
         }}
         
-        /* 分数标签 */
         .scores-cell {{
             max-width: 200px;
         }}
@@ -649,7 +639,6 @@ html = f"""<!DOCTYPE html>
             font-weight: 700;
         }}
         
-        /* 总分 */
         .total-cell {{
             font-weight: 700;
             font-size: 1rem;
@@ -667,7 +656,6 @@ html = f"""<!DOCTYPE html>
             border-top: 1px solid var(--border-light);
         }}
         
-        /* 导出提示 */
         .export-toast {{
             position: fixed;
             bottom: 20px;
@@ -691,7 +679,6 @@ html = f"""<!DOCTYPE html>
             transform: translateX(-50%) translateY(0);
         }}
         
-        /* 移动端优化 */
         @media (max-width: 640px) {{
             body {{ padding: 12px; }}
             .rank-grid {{ gap: 8px; }}
@@ -742,7 +729,6 @@ html = f"""<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 - 显示变化和动画 -->
         <div class="rank-grid">
 """
 
@@ -783,7 +769,6 @@ for i, (g, total) in enumerate(sorted_groups, 1):
 html += """
         </div>
 
-        <!-- 三组 -->
         <div class="groups">
 """
 
@@ -857,16 +842,21 @@ html += """
         </div>
     </div>
 
-    <!-- 导出提示 -->
     <div class="export-toast" id="exportToast">
         <span>✅</span>
         <span>图片已保存</span>
     </div>
 
     <script>
-        // 检查系统主题偏好
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
         
-        const searchIn
+        const searchInput = document.getElementById('search');
+        const allRows = document.querySelectorAll('tbody tr');
+        
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                allRows.forEach(row => row.style.display = 
