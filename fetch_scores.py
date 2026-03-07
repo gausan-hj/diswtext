@@ -879,4 +879,99 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += '''
         </div>
 
-        <!-- 奖励规则卡片 -
+        <!-- 奖励规则卡片 - 移到最下方 -->
+        <div class="reward-card">
+            <div class="reward-title">
+                <span>🎁</span>
+                <span>本轮奖励机制</span>
+            </div>
+            <div class="reward-grid">
+                <div class="reward-item">
+                    <div class="reward-rank-icon">🥇</div>
+                    <div class="reward-content">
+                        <div class="reward-rank-text">第一名组别</div>
+                        <div class="reward-desc">个人分数 ≥ 组平均分一半</div>
+                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                    </div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-rank-icon">🥈</div>
+                    <div class="reward-content">
+                        <div class="reward-rank-text">第二名组别</div>
+                        <div class="reward-desc">个人分数 ≥ 组平均分</div>
+                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                    </div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-rank-icon">🥉</div>
+                    <div class="reward-content">
+                        <div class="reward-rank-text">第三名组别</div>
+                        <div class="reward-desc">个人分数 组内前三名</div>
+                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                    </div>
+                </div>
+            </div>
+            <div class="reward-note">
+                ⚡ 第一名组别达标者额外获得一份奖励 · 公平原则，不负每一位付出的学长
+            </div>
+        </div>
+
+        <div class="footer">
+            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 显示较昨日变化 · 最近5次得分
+        </div>
+    </div>
+
+    <script>
+        // 检查系统主题偏好
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('night-mode');
+        }
+        
+        const searchInput = document.getElementById('search');
+        const allRows = document.querySelectorAll('tbody tr');
+        
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                allRows.forEach(row => row.style.display = '');
+                return;
+            }
+            
+            allRows.forEach(row => {
+                const searchText = row.getAttribute('data-search').toLowerCase();
+                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+            });
+        });
+        
+        // 排名动画
+        document.querySelectorAll('.rank-card').forEach(card => {
+            const currentRank = parseInt(card.dataset.rank);
+            const prevRank = parseInt(card.dataset.prevRank);
+            if (currentRank && prevRank) {
+                if (currentRank < prevRank) {
+                    card.classList.add('rank-up');
+                } else if (currentRank > prevRank) {
+                    card.classList.add('rank-down');
+                }
+            }
+        });
+    </script>
+</body>
+</html>'''
+
+# 保存HTML文件
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html)
+
+print(f"\n✅ 生成成功！共 {len(people)} 人")
+print("\n📊 奖励统计:")
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        members = group_data[g]
+        pass_count = sum(1 for m in members if m["reward_status"] == "✅")
+        print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
+    change = group_changes[g]
+    change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
+    print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
+print("✨ 功能：夜间模式 + 较昨日变化 + 奖励卡片")
