@@ -1,320 +1,977 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-    <title>学长团分数板</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>训育处 - 学长团分数板 · 奖励机制</title>
     <style>
-        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
-        h1 { color: #333; }
-        .group { background: white; border-radius: 10px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .group h2 { margin-top: 0; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; background: #eee; padding: 8px; }
-        td { padding: 8px; border-bottom: 1px solid #ddd; }
-        .reward-pass { background: #d4edda; color: #155724; padding: 3px 8px; border-radius: 20px; }
-        .reward-fail { background: #f8d7da; color: #721c24; padding: 3px 8px; border-radius: 20px; }
-        .footer { text-align: center; color: #777; margin-top: 20px; }
+
+        * {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-focus-ring-color: rgba(0,0,0,0);
+  outline: none !important;
+}
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+            background: #f8fafc;
+            padding: 16px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 头部 */
+        .header {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #eef2f6;
+        }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        .search-box {
+            margin-top: 16px;
+        }
+        #search {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 40px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.2s;
+        }
+        #search:focus {
+            outline: none;
+            border-color: #94a3b8;
+            box-shadow: 0 0 0 3px rgba(148,163,184,0.1);
+        }
+        
+        /* 奖励规则卡片 */
+        .reward-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid #eef2f6;
+            border-left: 4px solid #fbbf24;
+        }
+        .reward-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #1e293b;
+        }
+        .reward-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .reward-item {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 12px;
+        }
+        .reward-rank {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid;
+        }
+        .reward-rank[data-rank="1"] { border-bottom-color: #fbbf24; }
+        .reward-rank[data-rank="2"] { border-bottom-color: #a78bfa; }
+        .reward-rank[data-rank="3"] { border-bottom-color: #60a5fa; }
+        .reward-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .reward-highlight {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        .reward-note {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-align: center;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #e2e8f0;
+        }
+        
+        /* 组排名卡片 */
+        .rank-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .rank-card {
+            background: white;
+            border-radius: 20px;
+            padding: 16px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid #eef2f6;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rank-card:active {
+            transform: scale(0.98);
+        }
+        .rank-card[data-group="星穹组"] {
+            background: linear-gradient(135deg, #fef3c7, white);
+            border-left: 4px solid #fbbf24;
+        }
+        .rank-card[data-group="夜曜组"] {
+            background: linear-gradient(135deg, #ede9fe, white);
+            border-left: 4px solid #a78bfa;
+        }
+        .rank-card[data-group="沧澜组"] {
+            background: linear-gradient(135deg, #dbeafe, white);
+            border-left: 4px solid #60a5fa;
+        }
+        .rank-icon {
+            font-size: 2rem;
+            line-height: 1;
+        }
+        .rank-info {
+            flex: 1;
+        }
+        .rank-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }
+        .rank-score {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #0f172a;
+        }
+        .rank-score small {
+            font-size: 0.7rem;
+            font-weight: 400;
+            color: #64748b;
+            margin-left: 2px;
+        }
+        
+        /* 三组布局 */
+        .groups {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .group-card {
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            border: 1px solid #eef2f6;
+            scroll-margin-top: 10px;
+            border-top: 4px solid;
+        }
+        .group-card[data-group="星穹组"] {
+            border-top-color: #fbbf24;
+        }
+        .group-card[data-group="夜曜组"] {
+            border-top-color: #a78bfa;
+        }
+        .group-card[data-group="沧澜组"] {
+            border-top-color: #60a5fa;
+        }
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .group-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        .group-badge {
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+        }
+        .group-card[data-group="星穹组"] .group-badge {
+            background: #fbbf24;
+            color: #1e293b;
+        }
+        .group-card[data-group="夜曜组"] .group-badge {
+            background: #a78bfa;
+        }
+        .group-card[data-group="沧澜组"] .group-badge {
+            background: #60a5fa;
+        }
+        
+        /* 表格样式 */
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .member-table th {
+            text-align: left;
+            padding: 8px 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .member-table td {
+            padding: 10px 4px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .member-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* 序号 */
+        .rank-number {
+            font-weight: 500;
+            color: #94a3b8;
+            width: 35px;
+        }
+        
+        /* 姓名信息 */
+        .name-cell {
+            min-width: 110px;
+        }
+        .name-cn {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .name-en {
+            font-size: 0.7rem;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+        
+        /* 班级学号 */
+        .info-cell {
+            font-size: 0.85rem;
+            color: #475569;
+            white-space: nowrap;
+        }
+        
+        /* 分数标签 */
+        .scores-cell {
+            max-width: 200px;
+        }
+        .score-tags {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .score-item {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            background: #f1f5f9;
+            color: #334155;
+        }
+        .score-item.has-score {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+        .score-date {
+            opacity: 0.7;
+        }
+        .score-value {
+            font-weight: 700;
+        }
+        
+        /* 总分 */
+        .total-cell {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0f172a;
+            text-align: right;
+            width: 50px;
+        }
+        
+        /* 奖励状态 */
+        .reward-cell {
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-align: center;
+            min-width: 70px;
+        }
+        .reward-pass {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .reward-fail {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            padding: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .rank-grid { gap: 8px; }
+            .rank-card { padding: 12px 8px; }
+            .rank-icon { font-size: 1.6rem; }
+            .score-tags { gap: 2px; }
+            .score-item { padding: 2px 6px; font-size: 0.65rem; }
+            .member-table th {
+                font-size: 0.7rem;
+            }
+            .member-table td {
+                padding: 8px 2px;
+                font-size: 0.85rem;
+            }
+            .reward-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .reward-cell {
+                min-width: 60px;
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>🏫 学长团分数板</h1>
-    <p>更新时间：2026-03-07 12:53:05</p>
+    <div class="container">
+        <div class="header">
+            <h1>🏫 学长团分数板 · 奖励机制</h1>
+            <div class="subtitle">
+                <span>Prefects' Scoreboard · Reward System</span>
+                <span>2026.03.07 12:59</span>
+            </div>
+            <div class="search-box">
+                <input type="text" id="search" placeholder="🔍 搜索姓名、英文名、班级或学号...">
+            </div>
+        </div>
 
-    <div class="group">
-        <h2>星穹组 (第2名 · 总分:21)</h2>
-        <table>
-            <tr>
-                <th>#</th>
-                <th>姓名</th>
-                <th>班级</th>
-                <th>学号</th>
-                <th>总分</th>
-                <th>奖励</th>
-            </tr>
+        <!-- 奖励规则卡片 -->
+        <div class="reward-card">
+            <div class="reward-title">
+                <span>🎁</span>
+                <span>本轮奖励机制</span>
+            </div>
+            <div class="reward-grid">
+                <div class="reward-item">
+                    <div class="reward-rank" data-rank="1">🥇 第一名组别</div>
+                    <div class="reward-desc">个人分数 ≥ 组平均分一半</div>
+                    <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-rank" data-rank="2">🥈 第二名组别</div>
+                    <div class="reward-desc">个人分数 ≥ 组平均分</div>
+                    <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-rank" data-rank="3">🥉 第三名组别</div>
+                    <div class="reward-desc">个人分数 组内前三名</div>
+                    <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                </div>
+            </div>
+            <div class="reward-note">
+                ⚡ 第一名组别达标者额外获得一份奖励 · 公平原则，不负每一位付出的学长
+            </div>
+        </div>
 
-            <tr>
-                <td>1</td>
-                <td>陈展艺</td>
-                <td>S2FA</td>
-                <td>22038</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>侯展扬</td>
-                <td>S2Y</td>
-                <td>22100</td>
-                <td>1</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>邱嘉瑞</td>
-                <td>J3T</td>
-                <td>24076</td>
-                <td>3</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>莎哈娜</td>
-                <td>J3T</td>
-                <td>24078</td>
-                <td>4</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>李韡翰</td>
-                <td>J3K</td>
-                <td>24068</td>
-                <td>2</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>彭绍洋</td>
-                <td>J3T</td>
-                <td>24088</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>梁纹璇</td>
-                <td>J2Y</td>
-                <td>25035</td>
-                <td>3</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td>尤嘉乐</td>
-                <td>J2Y</td>
-                <td>25046</td>
-                <td>8</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>9</td>
-                <td>许艳棋</td>
-                <td>J1Y</td>
-                <td>26018</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td>林隽毓</td>
-                <td>J1Y</td>
-                <td>26032</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-        </table>
+        <!-- 组排名卡片 -->
+        <div class="rank-grid">
+
+            <div class="rank-card" data-group="夜曜组" onclick="document.getElementById('group-yeyao').scrollIntoView({behavior: 'smooth'})">
+                <span class="rank-icon">🥇</span>
+                <div class="rank-info">
+                    <div class="rank-name">夜曜组</div>
+                    <div class="rank-score">46<small>分</small></div>
+                </div>
+            </div>
+
+            <div class="rank-card" data-group="星穹组" onclick="document.getElementById('group-xingqiong').scrollIntoView({behavior: 'smooth'})">
+                <span class="rank-icon">🥈</span>
+                <div class="rank-info">
+                    <div class="rank-name">星穹组</div>
+                    <div class="rank-score">21<small>分</small></div>
+                </div>
+            </div>
+
+            <div class="rank-card" data-group="沧澜组" onclick="document.getElementById('group-canglan').scrollIntoView({behavior: 'smooth'})">
+                <span class="rank-icon">🥉</span>
+                <div class="rank-info">
+                    <div class="rank-name">沧澜组</div>
+                    <div class="rank-score">20<small>分</small></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 三组 -->
+        <div class="groups">
+
+            <div class="group-card" data-group="星穹组" id="group-xingqiong">
+                <div class="group-header">
+                    <div>
+                        <span class="group-title">星穹组</span>
+                        <span style="font-size:0.8rem; color:#64748b; margin-left:8px;">平均分 2</span>
+                    </div>
+                    <span class="group-badge">第2名 · 21分</span>
+                </div>
+                <table class="member-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>姓名</th>
+                            <th>班级</th>
+                            <th>学号</th>
+                            <th>每日得分</th>
+                            <th>总分</th>
+                            <th>奖励</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    
+                        <tr data-search="陈展艺 IVAN TAN ZHAN YI S2FA 22038">
+                            <td class="rank-number">1</td>
+                            <td class="name-cell">
+                                <div class="name-cn">陈展艺</div>
+                                <div class="name-en">IVAN TAN ZHAN YI</div>
+                            </td>
+                            <td class="info-cell">S2FA</td>
+                            <td class="info-cell">22038</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="侯展扬 HOW ZHAN YANG S2Y 22100">
+                            <td class="rank-number">2</td>
+                            <td class="name-cell">
+                                <div class="name-cn">侯展扬</div>
+                                <div class="name-en">HOW ZHAN YANG</div>
+                            </td>
+                            <td class="info-cell">S2Y</td>
+                            <td class="info-cell">22100</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span></div></td>
+                            <td class="total-cell">1</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="邱嘉瑞 KATHERINE KHOO JAI RUI J3T 24076">
+                            <td class="rank-number">3</td>
+                            <td class="name-cell">
+                                <div class="name-cn">邱嘉瑞</div>
+                                <div class="name-en">KATHERINE KHOO JAI R...</div>
+                            </td>
+                            <td class="info-cell">J3T</td>
+                            <td class="info-cell">24076</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">3</span></span></div></td>
+                            <td class="total-cell">3</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="莎哈娜 SADHANA A/P SASU BAKIAN J3T 24078">
+                            <td class="rank-number">4</td>
+                            <td class="name-cell">
+                                <div class="name-cn">莎哈娜</div>
+                                <div class="name-en">SADHANA A/P SASU BAK...</div>
+                            </td>
+                            <td class="info-cell">J3T</td>
+                            <td class="info-cell">24078</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">4</span></span></div></td>
+                            <td class="total-cell">4</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="李韡翰 LEE WEI HANN J3K 24068">
+                            <td class="rank-number">5</td>
+                            <td class="name-cell">
+                                <div class="name-cn">李韡翰</div>
+                                <div class="name-en">LEE WEI HANN</div>
+                            </td>
+                            <td class="info-cell">J3K</td>
+                            <td class="info-cell">24068</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">2</span></span></div></td>
+                            <td class="total-cell">2</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="彭绍洋 PEH SHAO YANG J3T 24088">
+                            <td class="rank-number">6</td>
+                            <td class="name-cell">
+                                <div class="name-cn">彭绍洋</div>
+                                <div class="name-en">PEH SHAO YANG</div>
+                            </td>
+                            <td class="info-cell">J3T</td>
+                            <td class="info-cell">24088</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="梁纹璇 LEONG WEN XUAN J2Y 25035">
+                            <td class="rank-number">7</td>
+                            <td class="name-cell">
+                                <div class="name-cn">梁纹璇</div>
+                                <div class="name-en">LEONG WEN XUAN</div>
+                            </td>
+                            <td class="info-cell">J2Y</td>
+                            <td class="info-cell">25035</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">3</span></span></div></td>
+                            <td class="total-cell">3</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="尤嘉乐 JUSTIN YEW JIA LE J2Y 25046">
+                            <td class="rank-number">8</td>
+                            <td class="name-cell">
+                                <div class="name-cn">尤嘉乐</div>
+                                <div class="name-en">JUSTIN YEW JIA LE</div>
+                            </td>
+                            <td class="info-cell">J2Y</td>
+                            <td class="info-cell">25046</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span></div></td>
+                            <td class="total-cell">8</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="许艳棋 KHOR YAN QI J1Y 26018">
+                            <td class="rank-number">9</td>
+                            <td class="name-cell">
+                                <div class="name-cn">许艳棋</div>
+                                <div class="name-en">KHOR YAN QI</div>
+                            </td>
+                            <td class="info-cell">J1Y</td>
+                            <td class="info-cell">26018</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="林隽毓 LIM JOON YI J1Y 26032">
+                            <td class="rank-number">10</td>
+                            <td class="name-cell">
+                                <div class="name-cn">林隽毓</div>
+                                <div class="name-en">LIM JOON YI</div>
+                            </td>
+                            <td class="info-cell">J1Y</td>
+                            <td class="info-cell">26032</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+    
+            <div class="group-card" data-group="夜曜组" id="group-yeyao">
+                <div class="group-header">
+                    <div>
+                        <span class="group-title">夜曜组</span>
+                        <span style="font-size:0.8rem; color:#64748b; margin-left:8px;">平均分 4</span>
+                    </div>
+                    <span class="group-badge">第1名 · 46分</span>
+                </div>
+                <table class="member-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>姓名</th>
+                            <th>班级</th>
+                            <th>学号</th>
+                            <th>每日得分</th>
+                            <th>总分</th>
+                            <th>奖励</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    
+                        <tr data-search="李竑证 LEE HOONG ZHENG S2FA 22040">
+                            <td class="rank-number">1</td>
+                            <td class="name-cell">
+                                <div class="name-cn">李竑证</div>
+                                <div class="name-en">LEE HOONG ZHENG</div>
+                            </td>
+                            <td class="info-cell">S2FA</td>
+                            <td class="info-cell">22040</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="廖若含 LIEW XIN YU S2Y 22029">
+                            <td class="rank-number">2</td>
+                            <td class="name-cell">
+                                <div class="name-cn">廖若含</div>
+                                <div class="name-en">LIEW XIN YU</div>
+                            </td>
+                            <td class="info-cell">S2Y</td>
+                            <td class="info-cell">22029</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="林芷嫣 LIM ZHI YAN S2Y 22083">
+                            <td class="rank-number">3</td>
+                            <td class="name-cell">
+                                <div class="name-cn">林芷嫣</div>
+                                <div class="name-en">LIM ZHI YAN</div>
+                            </td>
+                            <td class="info-cell">S2Y</td>
+                            <td class="info-cell">22083</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="周柔慈 CHEO ROU ZHI S2K 22051">
+                            <td class="rank-number">4</td>
+                            <td class="name-cell">
+                                <div class="name-cn">周柔慈</div>
+                                <div class="name-en">CHEO ROU ZHI</div>
+                            </td>
+                            <td class="info-cell">S2K</td>
+                            <td class="info-cell">22051</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
+                            <td class="total-cell">1</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="林骏喨 LIM TEIK LIANG J3T 24083">
+                            <td class="rank-number">5</td>
+                            <td class="name-cell">
+                                <div class="name-cn">林骏喨</div>
+                                <div class="name-en">LIM TEIK LIANG</div>
+                            </td>
+                            <td class="info-cell">J3T</td>
+                            <td class="info-cell">24083</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
+                            <td class="total-cell">3</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="林宜彤 LIM YEE TONG J2Y 25036">
+                            <td class="rank-number">6</td>
+                            <td class="name-cell">
+                                <div class="name-cn">林宜彤</div>
+                                <div class="name-en">LIM YEE TONG</div>
+                            </td>
+                            <td class="info-cell">J2Y</td>
+                            <td class="info-cell">25036</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
+                            <td class="total-cell">5</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="潘宛瑜 TRACY PHUAH WANYU J2Y 25071">
+                            <td class="rank-number">7</td>
+                            <td class="name-cell">
+                                <div class="name-cn">潘宛瑜</div>
+                                <div class="name-en">TRACY PHUAH WANYU</div>
+                            </td>
+                            <td class="info-cell">J2Y</td>
+                            <td class="info-cell">25071</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">3</span></span></div></td>
+                            <td class="total-cell">3</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="符传吉 FOO CHUAN JI J2Y 25044">
+                            <td class="rank-number">8</td>
+                            <td class="name-cell">
+                                <div class="name-cn">符传吉</div>
+                                <div class="name-en">FOO CHUAN JI</div>
+                            </td>
+                            <td class="info-cell">J2Y</td>
+                            <td class="info-cell">25044</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
+                            <td class="total-cell">5</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="陈欣怡 CINDY TAN XIN YI J2F 25058">
+                            <td class="rank-number">9</td>
+                            <td class="name-cell">
+                                <div class="name-cn">陈欣怡</div>
+                                <div class="name-en">CINDY TAN XIN YI</div>
+                            </td>
+                            <td class="info-cell">J2F</td>
+                            <td class="info-cell">25058</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
+                            <td class="total-cell">8</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="丽亚 DHIYA ZULAIKHA DARWISYAH BINTI YUSNIZAN J2F 25059">
+                            <td class="rank-number">10</td>
+                            <td class="name-cell">
+                                <div class="name-cn">丽亚</div>
+                                <div class="name-en">DHIYA ZULAIKHA DARWI...</div>
+                            </td>
+                            <td class="info-cell">J2F</td>
+                            <td class="info-cell">25059</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">6</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">7</span></span></div></td>
+                            <td class="total-cell">20</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="郑宜桐 TEH YEE THONG J1Y 26024">
+                            <td class="rank-number">11</td>
+                            <td class="name-cell">
+                                <div class="name-cn">郑宜桐</div>
+                                <div class="name-en">TEH YEE THONG</div>
+                            </td>
+                            <td class="info-cell">J1Y</td>
+                            <td class="info-cell">26024</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span></div></td>
+                            <td class="total-cell">1</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+    
+            <div class="group-card" data-group="沧澜组" id="group-canglan">
+                <div class="group-header">
+                    <div>
+                        <span class="group-title">沧澜组</span>
+                        <span style="font-size:0.8rem; color:#64748b; margin-left:8px;">平均分 2</span>
+                    </div>
+                    <span class="group-badge">第3名 · 20分</span>
+                </div>
+                <table class="member-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>姓名</th>
+                            <th>班级</th>
+                            <th>学号</th>
+                            <th>每日得分</th>
+                            <th>总分</th>
+                            <th>奖励</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    
+                        <tr data-search="浦源政 POH YUAN ZHENG S2Y 22044">
+                            <td class="rank-number">1</td>
+                            <td class="name-cell">
+                                <div class="name-cn">浦源政</div>
+                                <div class="name-en">POH YUAN ZHENG</div>
+                            </td>
+                            <td class="info-cell">S2Y</td>
+                            <td class="info-cell">22044</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="吴贝优 GOH BEI YO S2Y 22021">
+                            <td class="rank-number">2</td>
+                            <td class="name-cell">
+                                <div class="name-cn">吴贝优</div>
+                                <div class="name-en">GOH BEI YO</div>
+                            </td>
+                            <td class="info-cell">S2Y</td>
+                            <td class="info-cell">22021</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="林沛筠 LIM PEI JUN S2Y 22030">
+                            <td class="rank-number">3</td>
+                            <td class="name-cell">
+                                <div class="name-cn">林沛筠</div>
+                                <div class="name-en">LIM PEI JUN</div>
+                            </td>
+                            <td class="info-cell">S2Y</td>
+                            <td class="info-cell">22030</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
+                            <td class="total-cell">0</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="陈诗惠 CHAN SHI HUI S2FA 22017">
+                            <td class="rank-number">4</td>
+                            <td class="name-cell">
+                                <div class="name-cn">陈诗惠</div>
+                                <div class="name-en">CHAN SHI HUI</div>
+                            </td>
+                            <td class="info-cell">S2FA</td>
+                            <td class="info-cell">22017</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">3</span></span></div></td>
+                            <td class="total-cell">3</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="郑憶欣 TEE YEE XIN S1Y 23065">
+                            <td class="rank-number">5</td>
+                            <td class="name-cell">
+                                <div class="name-cn">郑憶欣</div>
+                                <div class="name-en">TEE YEE XIN</div>
+                            </td>
+                            <td class="info-cell">S1Y</td>
+                            <td class="info-cell">23065</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
+                            <td class="total-cell">1</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="谢楷棋 CHEAH KHAI QI S1T 23013">
+                            <td class="rank-number">6</td>
+                            <td class="name-cell">
+                                <div class="name-cn">谢楷棋</div>
+                                <div class="name-en">CHEAH KHAI QI</div>
+                            </td>
+                            <td class="info-cell">S1T</td>
+                            <td class="info-cell">23013</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span></div></td>
+                            <td class="total-cell">1</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="蔡善恩 CHUAH SHAN EN J3F 24039">
+                            <td class="rank-number">7</td>
+                            <td class="name-cell">
+                                <div class="name-cn">蔡善恩</div>
+                                <div class="name-en">CHUAH SHAN EN</div>
+                            </td>
+                            <td class="info-cell">J3F</td>
+                            <td class="info-cell">24039</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
+                            <td class="total-cell">2</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="许家绮 KOO JIA QI J2Y 25031">
+                            <td class="rank-number">8</td>
+                            <td class="name-cell">
+                                <div class="name-cn">许家绮</div>
+                                <div class="name-en">KOO JIA QI</div>
+                            </td>
+                            <td class="info-cell">J2Y</td>
+                            <td class="info-cell">25031</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">3</span></span></div></td>
+                            <td class="total-cell">9</td>
+                            <td class="reward-cell"><span class="reward-pass">✅ 达标</span></td>
+                        </tr>
+        
+                        <tr data-search="张子欣 TEON ZI XIN J2F 25070">
+                            <td class="rank-number">9</td>
+                            <td class="name-cell">
+                                <div class="name-cn">张子欣</div>
+                                <div class="name-en">TEON ZI XIN</div>
+                            </td>
+                            <td class="info-cell">J2F</td>
+                            <td class="info-cell">25070</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span></div></td>
+                            <td class="total-cell">2</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                        <tr data-search="施锦轩 SEE JIN XUAN J1T 26092">
+                            <td class="rank-number">10</td>
+                            <td class="name-cell">
+                                <div class="name-cn">施锦轩</div>
+                                <div class="name-en">SEE JIN XUAN</div>
+                            </td>
+                            <td class="info-cell">J1T</td>
+                            <td class="info-cell">26092</td>
+                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">2</span></span></div></td>
+                            <td class="total-cell">2</td>
+                            <td class="reward-cell"><span class="reward-fail">❌ 未达标</span></td>
+                        </tr>
+        
+                    </tbody>
+                </table>
+            </div>
+    
+        </div>
+        <div class="footer">
+            👆 点击组排名卡片快速跳转 · 显示最近5次得分 · ✅达标可免搬椅子+减免操步
+        </div>
     </div>
 
-    <div class="group">
-        <h2>夜曜组 (第1名 · 总分:46)</h2>
-        <table>
-            <tr>
-                <th>#</th>
-                <th>姓名</th>
-                <th>班级</th>
-                <th>学号</th>
-                <th>总分</th>
-                <th>奖励</th>
-            </tr>
-
-            <tr>
-                <td>1</td>
-                <td>李竑证</td>
-                <td>S2FA</td>
-                <td>22040</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>廖若含</td>
-                <td>S2Y</td>
-                <td>22029</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>林芷嫣</td>
-                <td>S2Y</td>
-                <td>22083</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>周柔慈</td>
-                <td>S2K</td>
-                <td>22051</td>
-                <td>1</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>林骏喨</td>
-                <td>J3T</td>
-                <td>24083</td>
-                <td>3</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>林宜彤</td>
-                <td>J2Y</td>
-                <td>25036</td>
-                <td>5</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>潘宛瑜</td>
-                <td>J2Y</td>
-                <td>25071</td>
-                <td>3</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td>符传吉</td>
-                <td>J2Y</td>
-                <td>25044</td>
-                <td>5</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>9</td>
-                <td>陈欣怡</td>
-                <td>J2F</td>
-                <td>25058</td>
-                <td>8</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td>丽亚</td>
-                <td>J2F</td>
-                <td>25059</td>
-                <td>20</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>11</td>
-                <td>郑宜桐</td>
-                <td>J1Y</td>
-                <td>26024</td>
-                <td>1</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="group">
-        <h2>沧澜组 (第3名 · 总分:20)</h2>
-        <table>
-            <tr>
-                <th>#</th>
-                <th>姓名</th>
-                <th>班级</th>
-                <th>学号</th>
-                <th>总分</th>
-                <th>奖励</th>
-            </tr>
-
-            <tr>
-                <td>1</td>
-                <td>浦源政</td>
-                <td>S2Y</td>
-                <td>22044</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>吴贝优</td>
-                <td>S2Y</td>
-                <td>22021</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>林沛筠</td>
-                <td>S2Y</td>
-                <td>22030</td>
-                <td>0</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td>陈诗惠</td>
-                <td>S2FA</td>
-                <td>22017</td>
-                <td>3</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td>郑憶欣</td>
-                <td>S1Y</td>
-                <td>23065</td>
-                <td>1</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td>谢楷棋</td>
-                <td>S1T</td>
-                <td>23013</td>
-                <td>1</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td>蔡善恩</td>
-                <td>J3F</td>
-                <td>24039</td>
-                <td>2</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td>许家绮</td>
-                <td>J2Y</td>
-                <td>25031</td>
-                <td>9</td>
-                <td><span class="reward-pass">达标</span></td>
-            </tr>
-            <tr>
-                <td>9</td>
-                <td>张子欣</td>
-                <td>J2F</td>
-                <td>25070</td>
-                <td>2</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td>施锦轩</td>
-                <td>J1T</td>
-                <td>26092</td>
-                <td>2</td>
-                <td><span class="reward-fail">未达标</span></td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="footer">
-        👆 点击组排名卡片快速跳转 · 显示较昨日变化 · 最近5次得分 · ✅达标可免搬椅子+减免操步
-    </div>
+    <script>
+        const searchInput = document.getElementById('search');
+        const allRows = document.querySelectorAll('tbody tr');
+        
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm === '') {
+                allRows.forEach(row => row.style.display = '');
+                return;
+            }
+            
+            allRows.forEach(row => {
+                const searchText = row.getAttribute('data-search').toLowerCase();
+                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    </script>
 </body>
 </html>
