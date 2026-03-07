@@ -1,10 +1,218 @@
-<!DOCTYPE html>
+import pandas as pd
+from datetime import datetime, timedelta
+import base64
+
+# ===== 你要修改的地方 =====
+SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
+SHEET_NAME = "Sheet3"
+# ========================
+
+# 生成Google Sheets的CSV导出链接
+url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
+
+# 读取数据
+print("正在从 Google Sheets 读取数据...")
+try:
+    df = pd.read_csv(url, header=None, encoding='utf-8-sig')
+except:
+    try:
+        df = pd.read_csv(url, header=None, encoding='latin1')
+    except:
+        df = pd.read_csv(url, header=None, encoding='cp1252')
+
+print(f"读取到 {len(df)} 行数据")
+
+# 获取日期（第一行）
+dates = []
+date_objects = []
+if len(df) > 0:
+    first_row = df.iloc[0].tolist()
+    for j in range(7, len(first_row)):
+        if pd.notna(first_row[j]):
+            date_str = str(first_row[j])
+            try:
+                if "00:00" in date_str:
+                    date_str = date_str[5:10]
+                dates.append(date_str)
+                # 存储完整日期对象用于计算
+                date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
+            except:
+                dates.append(f"D{j-6}")
+                date_objects.append(None)
+        else:
+            dates.append(f"D{j-6}")
+            date_objects.append(None)
+
+print(f"找到 {len(dates)} 个日期")
+
+# ===== 成员名单 =====
+members_list = [
+    # 星穹组 (10人)
+    {"group": "星穹组", "name_cn": "陈展艺", "name_en": "IVAN TAN ZHAN YI", "class": "S2FA", "student_id": "22038", "order": 1},
+    {"group": "星穹组", "name_cn": "侯展扬", "name_en": "HOW ZHAN YANG", "class": "S2Y", "student_id": "22100", "order": 2},
+    {"group": "星穹组", "name_cn": "邱嘉瑞", "name_en": "KATHERINE KHOO JAI RUI", "class": "J3T", "student_id": "24076", "order": 3},
+    {"group": "星穹组", "name_cn": "莎哈娜", "name_en": "SADHANA A/P SASU BAKIAN", "class": "J3T", "student_id": "24078", "order": 4},
+    {"group": "星穹组", "name_cn": "李韡翰", "name_en": "LEE WEI HANN", "class": "J3K", "student_id": "24068", "order": 5},
+    {"group": "星穹组", "name_cn": "彭绍洋", "name_en": "PEH SHAO YANG", "class": "J3T", "student_id": "24088", "order": 6},
+    {"group": "星穹组", "name_cn": "梁纹璇", "name_en": "LEONG WEN XUAN", "class": "J2Y", "student_id": "25035", "order": 7},
+    {"group": "星穹组", "name_cn": "尤嘉乐", "name_en": "JUSTIN YEW JIA LE", "class": "J2Y", "student_id": "25046", "order": 8},
+    {"group": "星穹组", "name_cn": "许艳棋", "name_en": "KHOR YAN QI", "class": "J1Y", "student_id": "26018", "order": 9},
+    {"group": "星穹组", "name_cn": "林隽毓", "name_en": "LIM JOON YI", "class": "J1Y", "student_id": "26032", "order": 10},
+    
+    # 夜曜组 (11人)
+    {"group": "夜曜组", "name_cn": "李竑证", "name_en": "LEE HOONG ZHENG", "class": "S2FA", "student_id": "22040", "order": 1},
+    {"group": "夜曜组", "name_cn": "廖若含", "name_en": "LIEW XIN YU", "class": "S2Y", "student_id": "22029", "order": 2},
+    {"group": "夜曜组", "name_cn": "林芷嫣", "name_en": "LIM ZHI YAN", "class": "S2Y", "student_id": "22083", "order": 3},
+    {"group": "夜曜组", "name_cn": "周柔慈", "name_en": "CHEO ROU ZHI", "class": "S2K", "student_id": "22051", "order": 4},
+    {"group": "夜曜组", "name_cn": "林骏喨", "name_en": "LIM TEIK LIANG", "class": "J3T", "student_id": "24083", "order": 5},
+    {"group": "夜曜组", "name_cn": "林宜彤", "name_en": "LIM YEE TONG", "class": "J2Y", "student_id": "25036", "order": 6},
+    {"group": "夜曜组", "name_cn": "潘宛瑜", "name_en": "TRACY PHUAH WANYU", "class": "J2Y", "student_id": "25071", "order": 7},
+    {"group": "夜曜组", "name_cn": "符传吉", "name_en": "FOO CHUAN JI", "class": "J2Y", "student_id": "25044", "order": 8},
+    {"group": "夜曜组", "name_cn": "陈欣怡", "name_en": "CINDY TAN XIN YI", "class": "J2F", "student_id": "25058", "order": 9},
+    {"group": "夜曜组", "name_cn": "丽亚", "name_en": "DHIYA ZULAIKHA DARWISYAH BINTI YUSNIZAN", "class": "J2F", "student_id": "25059", "order": 10},
+    {"group": "夜曜组", "name_cn": "郑宜桐", "name_en": "TEH YEE THONG", "class": "J1Y", "student_id": "26024", "order": 11},
+    
+    # 沧澜组 (10人)
+    {"group": "沧澜组", "name_cn": "浦源政", "name_en": "POH YUAN ZHENG", "class": "S2Y", "student_id": "22044", "order": 1},
+    {"group": "沧澜组", "name_cn": "吴贝优", "name_en": "GOH BEI YO", "class": "S2Y", "student_id": "22021", "order": 2},
+    {"group": "沧澜组", "name_cn": "林沛筠", "name_en": "LIM PEI JUN", "class": "S2Y", "student_id": "22030", "order": 3},
+    {"group": "沧澜组", "name_cn": "陈诗惠", "name_en": "CHAN SHI HUI", "class": "S2FA", "student_id": "22017", "order": 4},
+    {"group": "沧澜组", "name_cn": "郑憶欣", "name_en": "TEE YEE XIN", "class": "S1Y", "student_id": "23065", "order": 5},
+    {"group": "沧澜组", "name_cn": "谢楷棋", "name_en": "CHEAH KHAI QI", "class": "S1T", "student_id": "23013", "order": 6},
+    {"group": "沧澜组", "name_cn": "蔡善恩", "name_en": "CHUAH SHAN EN", "class": "J3F", "student_id": "24039", "order": 7},
+    {"group": "沧澜组", "name_cn": "许家绮", "name_en": "KOO JIA QI", "class": "J2Y", "student_id": "25031", "order": 8},
+    {"group": "沧澜组", "name_cn": "张子欣", "name_en": "TEON ZI XIN", "class": "J2F", "student_id": "25070", "order": 9},
+    {"group": "沧澜组", "name_cn": "施锦轩", "name_en": "SEE JIN XUAN", "class": "J1T", "student_id": "26092", "order": 10}
+]
+
+# 自动匹配每一行
+people = []
+yesterday_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+today_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+previous_rank = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+
+print("\n开始匹配成员...")
+
+# 确定昨天和今天的日期索引
+today_idx = len(dates) - 1
+yesterday_idx = max(0, len(dates) - 2)
+
+for member in members_list:
+    found = False
+    
+    for i in range(len(df)):
+        row = df.iloc[i].tolist()
+        
+        if len(row) > 4:
+            row_name_cn = str(row[3]) if len(row) > 3 and pd.notna(row[3]) else ""
+            row_name_en = str(row[4]) if len(row) > 4 and pd.notna(row[4]) else ""
+            
+            if (member["name_cn"] in row_name_cn or 
+                member["name_en"][:20] in row_name_en[:20]):
+                
+                # 提取分数
+                scores = []
+                total = 0
+                score_dict = {}
+                
+                # 计算今日得分和昨日得分
+                today_score = 0
+                yesterday_score = 0
+                
+                for j in range(7, len(row)):
+                    if j-7 < len(dates):
+                        date = dates[j-7]
+                        val = row[j]
+                        if pd.notna(val):
+                            try:
+                                num = float(val)
+                                scores.append(num)
+                                total += num
+                                if num > 0:
+                                    score_dict[date] = num
+                                
+                                # 记录今日和昨日得分
+                                if j-7 == today_idx:
+                                    today_score = num
+                                elif j-7 == yesterday_idx:
+                                    yesterday_score = num
+                                    
+                            except (ValueError, TypeError):
+                                scores.append(0)
+                        else:
+                            scores.append(0)
+                
+                people.append({
+                    "group": member["group"],
+                    "order": member["order"],
+                    "name_cn": member["name_cn"],
+                    "name_en": member["name_en"],
+                    "class": member["class"],
+                    "student_id": member["student_id"],
+                    "scores": scores,
+                    "score_dict": score_dict,
+                    "total": total,
+                    "today": today_score,
+                    "yesterday": yesterday_score
+                })
+                print(f"✓ 找到 {member['name_cn']} (总分: {total})")
+                found = True
+                break
+    
+    if not found:
+        print(f"✗ 找不到 {member['name_cn']}")
+
+print(f"\n总共找到 {len(people)} 人")
+
+# 按组别整理
+group_data = {g: [] for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_yesterday_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_today_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+
+for p in people:
+    group_data[p["group"]].append(p)
+    group_totals[p["group"]] += p["total"]
+    group_today_totals[p["group"]] += p["today"]
+    group_yesterday_totals[p["group"]] += p["yesterday"]
+
+# 计算变化
+group_changes = {}
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    change = group_today_totals[g] - group_yesterday_totals[g]
+    group_changes[g] = change
+
+# 每个组内按order排序
+for g in group_data:
+    group_data[g].sort(key=lambda x: x["order"])
+
+# 计算当前排名
+sorted_groups = sorted(group_totals.items(), key=lambda x: x[1], reverse=True)
+group_rank = {}
+for i, (g, _) in enumerate(sorted_groups, 1):
+    group_rank[g] = i
+
+# 模拟上次排名
+previous_rank["星穹组"] = max(1, group_rank["星穹组"] - 1) if group_rank["星穹组"] > 1 else 2
+previous_rank["夜曜组"] = max(1, group_rank["夜曜组"] - 1) if group_rank["夜曜组"] > 1 else 2
+previous_rank["沧澜组"] = max(1, group_rank["沧澜组"] - 1) if group_rank["沧澜组"] > 1 else 2
+
+# 组别颜色配置
+group_colors = {
+    "星穹组": {"primary": "#fbbf24", "light": "#fef3c7", "border": "#f59e0b"},
+    "夜曜组": {"primary": "#a78bfa", "light": "#ede9fe", "border": "#8b5cf6"},
+    "沧澜组": {"primary": "#60a5fa", "light": "#dbeafe", "border": "#3b82f6"}
+}
+
+# 生成HTML
+html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>训育处 - 学长团分数板</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -95,7 +303,7 @@
             flex-wrap: wrap;
         }
         
-        .theme-toggle, .export-btn {
+        .theme-toggle, .export-btn, .chart-btn {
             background: var(--bg-body);
             border: 1px solid var(--border-color);
             border-radius: 30px;
@@ -109,7 +317,7 @@
             transition: all 0.2s;
         }
         
-        .theme-toggle:hover, .export-btn:hover {
+        .theme-toggle:hover, .export-btn:hover, .chart-btn:hover {
             background: var(--border-color);
         }
         
@@ -376,6 +584,7 @@
             border-top: 1px solid var(--border-light);
         }
         
+        /* 动画打勾提示框 */
         .export-toast {
             position: fixed;
             bottom: 20px;
@@ -383,16 +592,146 @@
             transform: translateX(-50%) translateY(100px);
             background: var(--bg-card);
             color: var(--text-primary);
-            padding: 12px 24px;
-            border-radius: 40px;
-            box-shadow: var(--shadow);
+            padding: 16px 32px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
             z-index: 1000;
-            transition: transform 0.3s;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
         }
         
         .export-toast.show {
             transform: translateX(-50%) translateY(0);
+        }
+        
+        .checkmark {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #10b981;
+            color: white;
+            font-size: 1rem;
+            animation: checkmarkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes checkmarkPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .toast-message {
+            animation: messageSlide 0.3s ease-out;
+        }
+        
+        @keyframes messageSlide {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 统计图区域 */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            animation: chartAppear 0.5s ease-out;
+        }
+        
+        @keyframes chartAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .stat-item {
+            background: var(--bg-body);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            animation: statAppear 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .stat-item:nth-child(1) { animation-delay: 0.1s; }
+        .stat-item:nth-child(2) { animation-delay: 0.2s; }
+        .stat-item:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes statAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 2px;
         }
         
         @media (max-width: 640px) {
@@ -400,11 +739,13 @@
             .rank-grid { gap: 8px; }
             .rank-card { padding: 12px 8px; }
             .rank-icon { font-size: 1.6rem; }
+            .stats-grid { gap: 8px; }
+            .stat-item { padding: 8px; }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="capture-area">
+    <div class="container">
         <div class="header">
             <div class="header-top">
                 <h1>🏫 学长团分数板</h1>
@@ -413,56 +754,109 @@
                         <span>🌓</span>
                         <span>夜间</span>
                     </div>
-                    <div class="export-btn" onclick="exportAsImage()">
+                    <div class="chart-btn" onclick="showChartView()">
+                        <span>📊</span>
+                        <span>统计图</span>
+                    </div>
+                    <div class="export-btn" onclick="exportAsStatsImage()">
                         <span>📸</span>
-                        <span>导出</span>
+                        <span>导出统计</span>
                     </div>
                 </div>
             </div>
             <div class="subtitle">
                 <span>Prefects' Scoreboard</span>
-                <span>2026.03.07 10:36</span>
+                <span>''' + datetime.now().strftime('%Y.%m.%d %H:%M') + '''</span>
             </div>
             <input type="text" id="search" placeholder="🔍 搜索姓名、英文名、班级或学号...">
         </div>
 
+        <!-- 统计图区域（默认隐藏） -->
+        <div id="chartSection" style="display: none;">
+            <div class="chart-container">
+                <div class="chart-title">📊 各组总分对比</div>
+                <div class="chart-wrapper">
+                    <canvas id="groupChart"></canvas>
+                </div>
+                <div class="stats-grid">
+'''
+
+# 添加统计数据
+for g, total in sorted_groups:
+    change = group_changes[g]
+    if change > 0:
+        change_html = f'<span class="change-up">▲ +{int(change)}</span>'
+    elif change < 0:
+        change_html = f'<span class="change-down">▼ {int(change)}</span>'
+    else:
+        change_html = '<span class="change-steady">◆ 0</span>'
+    
+    html += f'''
+                    <div class="stat-item">
+                        <div class="stat-label">{g}</div>
+                        <div class="stat-value">{int(total)}</div>
+                        <div class="stat-change">{change_html}</div>
+                    </div>
+'''
+
+html += '''
+                </div>
+            </div>
+        </div>
+
         <div class="rank-grid">
+'''
 
-            <div class="rank-card rank-up" data-group="夜曜组" data-rank="1" data-prev-rank="2" onclick="document.getElementById('group-yeyao').scrollIntoView({behavior: 'smooth'})">
-                <span class="rank-icon">🥇</span>
+# 添加组排名卡片
+rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
+group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
+for i, (g, total) in enumerate(sorted_groups, 1):
+    group_id = group_ids[g]
+    change = group_changes[g]
+    prev_rank = previous_rank[g]
+    current_rank = group_rank[g]
+    
+    rank_animation = ""
+    if current_rank < prev_rank:
+        rank_animation = 'rank-up'
+    elif current_rank > prev_rank:
+        rank_animation = 'rank-down'
+    
+    if change > 0:
+        change_text = f'<span class="change-up">▲ +{int(change)}</span>'
+    elif change < 0:
+        change_text = f'<span class="change-down">▼ {int(change)}</span>'
+    else:
+        change_text = '<span class="change-steady">◆ 0</span>'
+    
+    html += f'''
+            <div class="rank-card {rank_animation}" data-group="{g}" data-rank="{current_rank}" data-prev-rank="{prev_rank}" onclick="document.getElementById(\'{group_id}\').scrollIntoView({{behavior: \'smooth\'}})">
+                <span class="rank-icon">{rank_icons[i]}</span>
                 <div class="rank-info">
-                    <div class="rank-name">夜曜组</div>
-                    <div class="rank-score">46<small>分</small></div>
-                    <div class="rank-change">较昨日 <span class="change-steady">◆ 0</span></div>
+                    <div class="rank-name">{g}</div>
+                    <div class="rank-score">{int(total)}<small>分</small></div>
+                    <div class="rank-change">较昨日 {change_text}</div>
                 </div>
             </div>
+'''
 
-            <div class="rank-card rank-down" data-group="星穹组" data-rank="2" data-prev-rank="1" onclick="document.getElementById('group-xingqiong').scrollIntoView({behavior: 'smooth'})">
-                <span class="rank-icon">🥈</span>
-                <div class="rank-info">
-                    <div class="rank-name">星穹组</div>
-                    <div class="rank-score">21<small>分</small></div>
-                    <div class="rank-change">较昨日 <span class="change-steady">◆ 0</span></div>
-                </div>
-            </div>
-
-            <div class="rank-card rank-down" data-group="沧澜组" data-rank="3" data-prev-rank="2" onclick="document.getElementById('group-canglan').scrollIntoView({behavior: 'smooth'})">
-                <span class="rank-icon">🥉</span>
-                <div class="rank-info">
-                    <div class="rank-name">沧澜组</div>
-                    <div class="rank-score">20<small>分</small></div>
-                    <div class="rank-change">较昨日 <span class="change-steady">◆ 0</span></div>
-                </div>
-            </div>
-
+html += '''
         </div>
 
         <div class="groups">
+'''
 
-            <div class="group-card" data-group="星穹组" id="group-xingqiong">
+# 添加三个组
+for group_name in ["星穹组", "夜曜组", "沧澜组"]:
+    members = group_data[group_name]
+    rank = group_rank[group_name]
+    group_id = group_ids[group_name]
+    
+    html += f'''
+            <div class="group-card" data-group="{group_name}" id="{group_id}">
                 <div class="group-header">
-                    <span class="group-title">星穹组</span>
-                    <span class="group-badge">第2名 · 21分</span>
+                    <span class="group-title">{group_name}</span>
+                    <span class="group-badge">第{rank}名 · {int(group_totals[group_name])}分</span>
                 </div>
                 <table class="member-table">
                     <thead>
@@ -476,439 +870,56 @@
                         </tr>
                     </thead>
                     <tbody>
+'''
 
-                        <tr data-search="陈展艺 IVAN TAN ZHAN YI S2FA 22038">
-                            <td class="rank-number">1</td>
+    for member in members:
+        score_tags = ""
+        sorted_dates = sorted(member["score_dict"].keys())
+        for date in sorted_dates[-5:]:
+            score = member["score_dict"][date]
+            score_tags += f'<span class="score-item has-score"><span class="score-date">{date}</span><span class="score-value">{int(score)}</span></span>'
+        
+        if not score_tags:
+            score_tags = '<span class="score-item">-</span>'
+        
+        name_en_short = member['name_en'][:20] + "..." if len(member['name_en']) > 20 else member['name_en']
+        
+        html += f'''
+                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
+                            <td class="rank-number">{member['order']}</td>
                             <td class="name-cell">
-                                <div class="name-cn">陈展艺</div>
-                                <div class="name-en">IVAN TAN ZHAN YI</div>
+                                <div class="name-cn">{member['name_cn']}</div>
+                                <div class="name-en">{name_en_short}</div>
                             </td>
-                            <td class="info-cell">S2FA</td>
-                            <td class="info-cell">22038</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
+                            <td class="info-cell">{member['class']}</td>
+                            <td class="info-cell">{member['student_id']}</td>
+                            <td class="scores-cell"><div class="score-tags">{score_tags}</div></td>
+                            <td class="total-cell">{int(member['total'])}</td>
                         </tr>
+'''
 
-                        <tr data-search="侯展扬 HOW ZHAN YANG S2Y 22100">
-                            <td class="rank-number">2</td>
-                            <td class="name-cell">
-                                <div class="name-cn">侯展扬</div>
-                                <div class="name-en">HOW ZHAN YANG</div>
-                            </td>
-                            <td class="info-cell">S2Y</td>
-                            <td class="info-cell">22100</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">1</td>
-                        </tr>
-
-                        <tr data-search="邱嘉瑞 KATHERINE KHOO JAI RUI J3T 24076">
-                            <td class="rank-number">3</td>
-                            <td class="name-cell">
-                                <div class="name-cn">邱嘉瑞</div>
-                                <div class="name-en">KATHERINE KHOO JAI R...</div>
-                            </td>
-                            <td class="info-cell">J3T</td>
-                            <td class="info-cell">24076</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">3</span></span></div></td>
-                            <td class="total-cell">3</td>
-                        </tr>
-
-                        <tr data-search="莎哈娜 SADHANA A/P SASU BAKIAN J3T 24078">
-                            <td class="rank-number">4</td>
-                            <td class="name-cell">
-                                <div class="name-cn">莎哈娜</div>
-                                <div class="name-en">SADHANA A/P SASU BAK...</div>
-                            </td>
-                            <td class="info-cell">J3T</td>
-                            <td class="info-cell">24078</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">4</span></span></div></td>
-                            <td class="total-cell">4</td>
-                        </tr>
-
-                        <tr data-search="李韡翰 LEE WEI HANN J3K 24068">
-                            <td class="rank-number">5</td>
-                            <td class="name-cell">
-                                <div class="name-cn">李韡翰</div>
-                                <div class="name-en">LEE WEI HANN</div>
-                            </td>
-                            <td class="info-cell">J3K</td>
-                            <td class="info-cell">24068</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">2</span></span></div></td>
-                            <td class="total-cell">2</td>
-                        </tr>
-
-                        <tr data-search="彭绍洋 PEH SHAO YANG J3T 24088">
-                            <td class="rank-number">6</td>
-                            <td class="name-cell">
-                                <div class="name-cn">彭绍洋</div>
-                                <div class="name-en">PEH SHAO YANG</div>
-                            </td>
-                            <td class="info-cell">J3T</td>
-                            <td class="info-cell">24088</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="梁纹璇 LEONG WEN XUAN J2Y 25035">
-                            <td class="rank-number">7</td>
-                            <td class="name-cell">
-                                <div class="name-cn">梁纹璇</div>
-                                <div class="name-en">LEONG WEN XUAN</div>
-                            </td>
-                            <td class="info-cell">J2Y</td>
-                            <td class="info-cell">25035</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">3</span></span></div></td>
-                            <td class="total-cell">3</td>
-                        </tr>
-
-                        <tr data-search="尤嘉乐 JUSTIN YEW JIA LE J2Y 25046">
-                            <td class="rank-number">8</td>
-                            <td class="name-cell">
-                                <div class="name-cn">尤嘉乐</div>
-                                <div class="name-en">JUSTIN YEW JIA LE</div>
-                            </td>
-                            <td class="info-cell">J2Y</td>
-                            <td class="info-cell">25046</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">D1</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">4</span></span></div></td>
-                            <td class="total-cell">8</td>
-                        </tr>
-
-                        <tr data-search="许艳棋 KHOR YAN QI J1Y 26018">
-                            <td class="rank-number">9</td>
-                            <td class="name-cell">
-                                <div class="name-cn">许艳棋</div>
-                                <div class="name-en">KHOR YAN QI</div>
-                            </td>
-                            <td class="info-cell">J1Y</td>
-                            <td class="info-cell">26018</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="林隽毓 LIM JOON YI J1Y 26032">
-                            <td class="rank-number">10</td>
-                            <td class="name-cell">
-                                <div class="name-cn">林隽毓</div>
-                                <div class="name-en">LIM JOON YI</div>
-                            </td>
-                            <td class="info-cell">J1Y</td>
-                            <td class="info-cell">26032</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
+    html += '''
                     </tbody>
                 </table>
             </div>
+'''
 
-            <div class="group-card" data-group="夜曜组" id="group-yeyao">
-                <div class="group-header">
-                    <span class="group-title">夜曜组</span>
-                    <span class="group-badge">第1名 · 46分</span>
-                </div>
-                <table class="member-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>姓名</th>
-                            <th>班级</th>
-                            <th>学号</th>
-                            <th>每日得分</th>
-                            <th>总分</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        <tr data-search="李竑证 LEE HOONG ZHENG S2FA 22040">
-                            <td class="rank-number">1</td>
-                            <td class="name-cell">
-                                <div class="name-cn">李竑证</div>
-                                <div class="name-en">LEE HOONG ZHENG</div>
-                            </td>
-                            <td class="info-cell">S2FA</td>
-                            <td class="info-cell">22040</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="廖若含 LIEW XIN YU S2Y 22029">
-                            <td class="rank-number">2</td>
-                            <td class="name-cell">
-                                <div class="name-cn">廖若含</div>
-                                <div class="name-en">LIEW XIN YU</div>
-                            </td>
-                            <td class="info-cell">S2Y</td>
-                            <td class="info-cell">22029</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="林芷嫣 LIM ZHI YAN S2Y 22083">
-                            <td class="rank-number">3</td>
-                            <td class="name-cell">
-                                <div class="name-cn">林芷嫣</div>
-                                <div class="name-en">LIM ZHI YAN</div>
-                            </td>
-                            <td class="info-cell">S2Y</td>
-                            <td class="info-cell">22083</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="周柔慈 CHEO ROU ZHI S2K 22051">
-                            <td class="rank-number">4</td>
-                            <td class="name-cell">
-                                <div class="name-cn">周柔慈</div>
-                                <div class="name-en">CHEO ROU ZHI</div>
-                            </td>
-                            <td class="info-cell">S2K</td>
-                            <td class="info-cell">22051</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">1</td>
-                        </tr>
-
-                        <tr data-search="林骏喨 LIM TEIK LIANG J3T 24083">
-                            <td class="rank-number">5</td>
-                            <td class="name-cell">
-                                <div class="name-cn">林骏喨</div>
-                                <div class="name-en">LIM TEIK LIANG</div>
-                            </td>
-                            <td class="info-cell">J3T</td>
-                            <td class="info-cell">24083</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">D1</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">3</td>
-                        </tr>
-
-                        <tr data-search="林宜彤 LIM YEE TONG J2Y 25036">
-                            <td class="rank-number">6</td>
-                            <td class="name-cell">
-                                <div class="name-cn">林宜彤</div>
-                                <div class="name-en">LIM YEE TONG</div>
-                            </td>
-                            <td class="info-cell">J2Y</td>
-                            <td class="info-cell">25036</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">D1</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">5</td>
-                        </tr>
-
-                        <tr data-search="潘宛瑜 TRACY PHUAH WANYU J2Y 25071">
-                            <td class="rank-number">7</td>
-                            <td class="name-cell">
-                                <div class="name-cn">潘宛瑜</div>
-                                <div class="name-en">TRACY PHUAH WANYU</div>
-                            </td>
-                            <td class="info-cell">J2Y</td>
-                            <td class="info-cell">25071</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">3</span></span></div></td>
-                            <td class="total-cell">3</td>
-                        </tr>
-
-                        <tr data-search="符传吉 FOO CHUAN JI J2Y 25044">
-                            <td class="rank-number">8</td>
-                            <td class="name-cell">
-                                <div class="name-cn">符传吉</div>
-                                <div class="name-en">FOO CHUAN JI</div>
-                            </td>
-                            <td class="info-cell">J2Y</td>
-                            <td class="info-cell">25044</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">D1</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">5</td>
-                        </tr>
-
-                        <tr data-search="陈欣怡 CINDY TAN XIN YI J2F 25058">
-                            <td class="rank-number">9</td>
-                            <td class="name-cell">
-                                <div class="name-cn">陈欣怡</div>
-                                <div class="name-en">CINDY TAN XIN YI</div>
-                            </td>
-                            <td class="info-cell">J2F</td>
-                            <td class="info-cell">25058</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">4</span></span></div></td>
-                            <td class="total-cell">8</td>
-                        </tr>
-
-                        <tr data-search="丽亚 DHIYA ZULAIKHA DARWISYAH BINTI YUSNIZAN J2F 25059">
-                            <td class="rank-number">10</td>
-                            <td class="name-cell">
-                                <div class="name-cn">丽亚</div>
-                                <div class="name-en">DHIYA ZULAIKHA DARWI...</div>
-                            </td>
-                            <td class="info-cell">J2F</td>
-                            <td class="info-cell">25059</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">6</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">7</span></span><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">4</span></span></div></td>
-                            <td class="total-cell">20</td>
-                        </tr>
-
-                        <tr data-search="郑宜桐 TEH YEE THONG J1Y 26024">
-                            <td class="rank-number">11</td>
-                            <td class="name-cell">
-                                <div class="name-cn">郑宜桐</div>
-                                <div class="name-en">TEH YEE THONG</div>
-                            </td>
-                            <td class="info-cell">J1Y</td>
-                            <td class="info-cell">26024</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">1</td>
-                        </tr>
-
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="group-card" data-group="沧澜组" id="group-canglan">
-                <div class="group-header">
-                    <span class="group-title">沧澜组</span>
-                    <span class="group-badge">第3名 · 20分</span>
-                </div>
-                <table class="member-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>姓名</th>
-                            <th>班级</th>
-                            <th>学号</th>
-                            <th>每日得分</th>
-                            <th>总分</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        <tr data-search="浦源政 POH YUAN ZHENG S2Y 22044">
-                            <td class="rank-number">1</td>
-                            <td class="name-cell">
-                                <div class="name-cn">浦源政</div>
-                                <div class="name-en">POH YUAN ZHENG</div>
-                            </td>
-                            <td class="info-cell">S2Y</td>
-                            <td class="info-cell">22044</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="吴贝优 GOH BEI YO S2Y 22021">
-                            <td class="rank-number">2</td>
-                            <td class="name-cell">
-                                <div class="name-cn">吴贝优</div>
-                                <div class="name-en">GOH BEI YO</div>
-                            </td>
-                            <td class="info-cell">S2Y</td>
-                            <td class="info-cell">22021</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="林沛筠 LIM PEI JUN S2Y 22030">
-                            <td class="rank-number">3</td>
-                            <td class="name-cell">
-                                <div class="name-cn">林沛筠</div>
-                                <div class="name-en">LIM PEI JUN</div>
-                            </td>
-                            <td class="info-cell">S2Y</td>
-                            <td class="info-cell">22030</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item">-</span></div></td>
-                            <td class="total-cell">0</td>
-                        </tr>
-
-                        <tr data-search="陈诗惠 CHAN SHI HUI S2FA 22017">
-                            <td class="rank-number">4</td>
-                            <td class="name-cell">
-                                <div class="name-cn">陈诗惠</div>
-                                <div class="name-en">CHAN SHI HUI</div>
-                            </td>
-                            <td class="info-cell">S2FA</td>
-                            <td class="info-cell">22017</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">3</span></span></div></td>
-                            <td class="total-cell">3</td>
-                        </tr>
-
-                        <tr data-search="郑憶欣 TEE YEE XIN S1Y 23065">
-                            <td class="rank-number">5</td>
-                            <td class="name-cell">
-                                <div class="name-cn">郑憶欣</div>
-                                <div class="name-en">TEE YEE XIN</div>
-                            </td>
-                            <td class="info-cell">S1Y</td>
-                            <td class="info-cell">23065</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">1</td>
-                        </tr>
-
-                        <tr data-search="谢楷棋 CHEAH KHAI QI S1T 23013">
-                            <td class="rank-number">6</td>
-                            <td class="name-cell">
-                                <div class="name-cn">谢楷棋</div>
-                                <div class="name-en">CHEAH KHAI QI</div>
-                            </td>
-                            <td class="info-cell">S1T</td>
-                            <td class="info-cell">23013</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span></div></td>
-                            <td class="total-cell">1</td>
-                        </tr>
-
-                        <tr data-search="蔡善恩 CHUAH SHAN EN J3F 24039">
-                            <td class="rank-number">7</td>
-                            <td class="name-cell">
-                                <div class="name-cn">蔡善恩</div>
-                                <div class="name-en">CHUAH SHAN EN</div>
-                            </td>
-                            <td class="info-cell">J3F</td>
-                            <td class="info-cell">24039</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span></div></td>
-                            <td class="total-cell">2</td>
-                        </tr>
-
-                        <tr data-search="许家绮 KOO JIA QI J2Y 25031">
-                            <td class="rank-number">8</td>
-                            <td class="name-cell">
-                                <div class="name-cn">许家绮</div>
-                                <div class="name-en">KOO JIA QI</div>
-                            </td>
-                            <td class="info-cell">J2Y</td>
-                            <td class="info-cell">25031</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">D1</span><span class="score-value">2</span></span></div></td>
-                            <td class="total-cell">9</td>
-                        </tr>
-
-                        <tr data-search="张子欣 TEON ZI XIN J2F 25070">
-                            <td class="rank-number">9</td>
-                            <td class="name-cell">
-                                <div class="name-cn">张子欣</div>
-                                <div class="name-en">TEON ZI XIN</div>
-                            </td>
-                            <td class="info-cell">J2F</td>
-                            <td class="info-cell">25070</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">2</span></span></div></td>
-                            <td class="total-cell">2</td>
-                        </tr>
-
-                        <tr data-search="施锦轩 SEE JIN XUAN J1T 26092">
-                            <td class="rank-number">10</td>
-                            <td class="name-cell">
-                                <div class="name-cn">施锦轩</div>
-                                <div class="name-en">SEE JIN XUAN</div>
-                            </td>
-                            <td class="info-cell">J1T</td>
-                            <td class="info-cell">26092</td>
-                            <td class="scores-cell"><div class="score-tags"><span class="score-item has-score"><span class="score-date">D2</span><span class="score-value">2</span></span></div></td>
-                            <td class="total-cell">2</td>
-                        </tr>
-
-                    </tbody>
-                </table>
-            </div>
-
+html += '''
         </div>
         <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 点击📸导出图片 · 显示较昨日变化
+            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 点击📊查看统计图 · 点击📸导出统计图
         </div>
     </div>
 
     <div class="export-toast" id="exportToast">
-        <span>✅</span>
-        <span>图片已保存</span>
+        <div class="checkmark" id="toastCheckmark">✓</div>
+        <span class="toast-message" id="toastMessage">图片已保存</span>
     </div>
 
     <script>
+        let groupChart = null;
+        let chartVisible = false;
+
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
@@ -930,34 +941,169 @@
             });
         });
         
-        function exportAsImage() {
-            const element = document.getElementById('capture-area');
-            const toast = document.getElementById('exportToast');
+        function showChartView() {
+            const chartSection = document.getElementById('chartSection');
+            const isHidden = chartSection.style.display === 'none';
             
-            toast.innerHTML = '<span>⏳</span><span>生成图片中...</span>';
+            if (isHidden) {
+                chartSection.style.display = 'block';
+                createChart();
+                setTimeout(() => {
+                    chartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                chartSection.style.display = 'none';
+            }
+        }
+        
+        function createChart() {
+            const ctx = document.getElementById('groupChart').getContext('2d');
+            const isNightMode = document.body.classList.contains('night-mode');
+            const textColor = isNightMode ? '#94a3b8' : '#64748b';
+            const gridColor = isNightMode ? '#334155' : '#e2e8f0';
+            
+            // 获取组数据
+            const groups = [''' + ", ".join([f"'{g}'" for g, _ in sorted_groups]) + '''];
+            const scores = [''' + ", ".join([str(int(total)) for _, total in sorted_groups]) + '''];
+            const changes = [''' + ", ".join([str(int(group_changes[g])) for g, _ in sorted_groups]) + '''];
+            
+            // 颜色数组
+            const colors = ['#fbbf24', '#a78bfa', '#60a5fa'];
+            
+            if (groupChart) {
+                groupChart.destroy();
+            }
+            
+            groupChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: groups,
+                    datasets: [{
+                        label: '总分',
+                        data: scores,
+                        backgroundColor: colors,
+                        borderRadius: 8,
+                        barPercentage: 0.6,
+                        categoryPercentage: 0.8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const change = changes[context.dataIndex];
+                                    const changeText = change > 0 ? `▲ +${change}` : change < 0 ? `▼ ${change}` : '◆ 0';
+                                    return [`总分: ${value}分`, `较昨日: ${changeText}`];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: gridColor
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: textColor
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('exportToast');
+            const checkmark = document.getElementById('toastCheckmark');
+            const messageSpan = document.getElementById('toastMessage');
+            
+            // 重置动画
+            checkmark.style.animation = 'none';
+            messageSpan.style.animation = 'none';
+            
+            // 强制重绘
+            void checkmark.offsetWidth;
+            void messageSpan.offsetWidth;
+            
+            // 设置内容
+            if (isSuccess) {
+                checkmark.innerHTML = '✓';
+                checkmark.style.background = '#10b981';
+                messageSpan.textContent = message || '图片已保存';
+            } else {
+                checkmark.innerHTML = '✗';
+                checkmark.style.background = '#ef4444';
+                messageSpan.textContent = message || '导出失败';
+            }
+            
+            // 重新添加动画
+            checkmark.style.animation = 'checkmarkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            messageSpan.style.animation = 'messageSlide 0.3s ease-out';
+            
+            // 显示toast
             toast.classList.add('show');
             
-            html2canvas(element, {
-                scale: 2,
-                backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-body'),
-                allowTaint: false,
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `学长团分数板_${new Date().toISOString().slice(0,10)}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                
-                toast.innerHTML = '<span>✅</span><span>图片已保存</span>';
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2000);
-            }).catch(error => {
-                toast.innerHTML = '<span>❌</span><span>导出失败</span>';
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2000);
-            });
+            // 3秒后隐藏
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        function exportAsStatsImage() {
+            const chartSection = document.getElementById('chartSection');
+            
+            // 临时显示统计图区域
+            const wasHidden = chartSection.style.display === 'none';
+            if (wasHidden) {
+                chartSection.style.display = 'block';
+                createChart();
+            }
+            
+            showToast('生成图片中...', true);
+            
+            // 等待图表渲染
+            setTimeout(() => {
+                html2canvas(chartSection, {
+                    scale: 2,
+                    backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-body'),
+                    allowTaint: false,
+                    useCORS: true
+                }).then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = `学长团统计图_${new Date().toISOString().slice(0,10)}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    // 如果之前是隐藏的，恢复隐藏
+                    if (wasHidden) {
+                        chartSection.style.display = 'none';
+                    }
+                    
+                    showToast('✅ 图片已保存', true);
+                }).catch(error => {
+                    showToast('❌ 导出失败', false);
+                    
+                    if (wasHidden) {
+                        chartSection.style.display = 'none';
+                    }
+                });
+            }, 500);
         }
         
         document.querySelectorAll('.rank-card').forEach(card => {
@@ -975,3 +1121,15 @@
     </script>
 </body>
 </html>
+'''
+
+# 保存HTML文件
+with open("index.html", "w", encoding="utf-8") as f:
+    f.write(html)
+
+print(f"\n✅ 生成成功！共 {len(people)} 人")
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    change = group_changes[g]
+    change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
+    print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
+print("✨ 新增功能：统计图 + 动画打勾提示")
