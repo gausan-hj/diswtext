@@ -540,6 +540,12 @@ html = '''<!DOCTYPE html>
             border-bottom: 2px solid var(--border-light);
         }
         
+        /* 让总分表头也右对齐 */
+        .member-table th:nth-child(6) {
+            text-align: right;
+            padding-right: 12px;
+        }
+        
         .member-table td {
             padding: 12px 6px;
             border-bottom: 1px solid var(--border-light);
@@ -747,6 +753,9 @@ html = '''<!DOCTYPE html>
             .reward-rank-icon { font-size: 1.5rem; min-width: 35px; }
             .total-cell { width: 60px; padding-right: 8px; }
             .info-cell { width: 70px; }
+            .member-table th:nth-child(6) {
+                padding-right: 8px;
+            }
         }
     </style>
 </head>
