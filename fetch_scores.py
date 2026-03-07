@@ -218,231 +218,253 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 优化排版
+# 生成HTML - 精致美观版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>训育处 · 学长团分数板 · 奖励机制</title>
+    <title>训育处 · 学长团分数板</title>
     <style>
         * {
-            -webkit-tap-highlight-color: rgba(0,0,0,0);
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        
+
+        /* 清新日间模式 */
         :root {
-            --bg-body: #f8fafc;
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
             --bg-card: #ffffff;
             --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-            --border-light: #f1f5f9;
-            --border-color: #e2e8f0;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05);
             
-            /* 组颜色 - 柔和版 */
+            /* 组配色 - 清新柔和 */
             --star-primary: #fbbf24;
-            --star-light: #fef3c7;
+            --star-soft: #fef9c3;
             --star-bg: #fffbeb;
             --night-primary: #a78bfa;
-            --night-light: #ede9fe;
+            --night-soft: #ede9fe;
             --night-bg: #f5f3ff;
             --ocean-primary: #60a5fa;
-            --ocean-light: #dbeafe;
+            --ocean-soft: #dbeafe;
             --ocean-bg: #eff6ff;
             
-            --score-bg: #f1f5f9;
+            --score-bg: #f8fafc;
             --score-text: #475569;
-            --score-positive-bg: #dbeafe;
-            --score-positive-text: #1e40af;
-            --change-up: #10b981;
-            --change-down: #ef4444;
-            --change-steady: #f59e0b;
+            --score-highlight: #dbeafe;
+            --score-highlight-text: #1e40af;
             --reward-pass: #dcfce7;
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
         }
-        
+
+        /* 深邃夜间模式 */
         body.night-mode {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-tertiary: #64748b;
-            --border-light: #334155;
-            --border-color: #475569;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
+            --bg-primary: #0b1120;
+            --bg-secondary: #1a2634;
+            --bg-card: #1e2a3a;
+            --text-primary: #e2e8f0;
+            --text-secondary: #a0afc0;
+            --text-tertiary: #7f8fa0;
+            --border-light: #2d3a4a;
+            --border-medium: #3a4a5a;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.4);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
             
-            --star-light: #422f1a;
-            --star-bg: #2a2a1a;
-            --night-light: #2a1f3a;
+            --star-soft: #332e1a;
+            --star-bg: #2a251a;
+            --night-soft: #2a1f3a;
             --night-bg: #1e1a2a;
-            --ocean-light: #1a2a45;
+            --ocean-soft: #1a2a45;
             --ocean-bg: #1a1f2a;
             
-            --score-bg: #2d3748;
-            --score-text: #9ca3af;
-            --score-positive-bg: #1e3a5f;
-            --score-positive-text: #93c5fd;
-            --change-up: #34d399;
-            --change-down: #f87171;
-            --change-steady: #fbbf24;
-            --reward-pass: #14532d;
-            --reward-pass-text: #bbf7d0;
-            --reward-fail: #7f1d1d;
-            --reward-fail-text: #fecaca;
+            --score-bg: #26303e;
+            --score-text: #a0afc0;
+            --score-highlight: #1e3a5f;
+            --score-highlight-text: #9ac7ff;
+            --reward-pass: #1a4731;
+            --reward-pass-text: #a7f3d0;
+            --reward-fail: #562b2b;
+            --reward-fail-text: #fecac5;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: var(--bg-body);
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
             color: var(--text-primary);
-            transition: background-color 0.3s, color 0.3s;
+            padding: 24px;
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
             line-height: 1.5;
         }
-        
+
         .container {
-            max-width: 1280px;
+            max-width: 1300px;
             margin: 0 auto;
         }
-        
-        /* 头部 - 优化间距 */
+
+        /* 头部设计 - 毛玻璃效果 */
         .header {
             background: var(--bg-card);
-            border-radius: 24px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 28px;
+            margin-bottom: 28px;
+            box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
         }
-        
+
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
             gap: 16px;
         }
-        
-        .title-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+
+        .school-icon {
+            font-size: 2.4rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+            animation: gentleFloat 3s infinite ease-in-out;
         }
-        
-        .title-icon {
-            font-size: 2rem;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
         }
-        
+
         h1 {
-            font-size: 1.6rem;
+            font-size: 2rem;
             font-weight: 600;
-            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             letter-spacing: -0.02em;
         }
-        
+
         .theme-toggle {
-            background: var(--bg-body);
-            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
             border-radius: 40px;
-            padding: 8px 20px;
+            padding: 10px 24px;
             cursor: pointer;
-            color: var(--text-primary);
-            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.3s;
         }
-        
+
         .theme-toggle:hover {
             background: var(--border-light);
+            transform: scale(1.02);
         }
-        
-        .subtitle {
+
+        .theme-toggle:active {
+            transform: scale(0.98);
+        }
+
+        .meta-info {
             display: flex;
             justify-content: space-between;
-            color: var(--text-secondary);
+            align-items: center;
+            color: var(--text-tertiary);
             font-size: 0.9rem;
             margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed var(--border-light);
+            padding-bottom: 16px;
+            border-bottom: 2px dashed var(--border-light);
         }
-        
-        .search-box {
+
+        .date-badge {
+            background: var(--bg-primary);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border-light);
+        }
+
+        /* 搜索框 - 精致设计 */
+        .search-wrapper {
             position: relative;
+            max-width: 500px;
         }
-        
+
         .search-icon {
             position: absolute;
-            left: 16px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-tertiary);
-            font-size: 1rem;
+            font-size: 1.1rem;
+            pointer-events: none;
         }
-        
+
         #search {
             width: 100%;
-            padding: 14px 20px 14px 48px;
-            border: 1px solid var(--border-color);
-            border-radius: 40px;
+            padding: 16px 20px 16px 52px;
+            border: 2px solid var(--border-light);
+            border-radius: 50px;
             font-size: 1rem;
             background: var(--bg-card);
             color: var(--text-primary);
-            transition: all 0.2s;
+            transition: all 0.3s;
         }
-        
+
         #search:focus {
             outline: none;
-            border-color: var(--text-secondary);
-            box-shadow: 0 0 0 3px rgba(100,116,139,0.1);
+            border-color: var(--text-tertiary);
+            box-shadow: 0 0 0 4px rgba(100, 116, 139, 0.1);
         }
-        
+
         #search::placeholder {
             color: var(--text-tertiary);
+            font-weight: 300;
         }
-        
-        /* 组排名卡片 - 更精致 */
+
+        /* 排名卡片 - 3D悬浮效果 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            gap: 20px;
             margin-bottom: 32px;
         }
-        
+
         .rank-card {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 18px 16px;
-            box-shadow: var(--shadow-sm);
+            border-radius: 28px;
+            padding: 22px 20px;
+            box-shadow: var(--shadow-md);
             border: 1px solid var(--border-light);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-left: 4px solid;
-            transition: all 0.2s;
+            gap: 16px;
+            border-left: 6px solid;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
         }
-        
-        .rank-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        
+
         .rank-card::before {
             content: '';
             position: absolute;
@@ -455,538 +477,491 @@ html = '''<!DOCTYPE html>
             transition: opacity 0.3s;
             pointer-events: none;
         }
-        
+
+        .rank-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+
         .rank-card:hover::before {
-            opacity: 0.3;
+            opacity: 0.4;
         }
-        
+
         .rank-card.rank-up {
-            animation: rankUp 0.5s ease;
+            animation: rankUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .rank-card.rank-down {
-            animation: rankDown 0.5s ease;
+            animation: rankDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         @keyframes rankUp {
             0%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
+            30% { transform: translateY(-6px) scale(1.02); }
             60% { transform: translateY(2px); }
         }
-        
+
         @keyframes rankDown {
             0%, 100% { transform: translateY(0); }
-            30% { transform: translateY(4px); }
+            30% { transform: translateY(6px) scale(0.98); }
             60% { transform: translateY(-2px); }
         }
-        
+
         .rank-card[data-group="星穹组"] {
             border-left-color: var(--star-primary);
-            background: linear-gradient(135deg, var(--star-bg), var(--bg-card));
+            background: linear-gradient(145deg, var(--star-bg), var(--bg-card));
         }
         .rank-card[data-group="夜曜组"] {
             border-left-color: var(--night-primary);
-            background: linear-gradient(135deg, var(--night-bg), var(--bg-card));
+            background: linear-gradient(145deg, var(--night-bg), var(--bg-card));
         }
         .rank-card[data-group="沧澜组"] {
             border-left-color: var(--ocean-primary);
-            background: linear-gradient(135deg, var(--ocean-bg), var(--bg-card));
+            background: linear-gradient(145deg, var(--ocean-bg), var(--bg-card));
         }
-        
+
         .rank-icon {
-            font-size: 2rem;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            font-size: 2.4rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
         }
-        
+
         .rank-info {
             flex: 1;
         }
-        
+
         .rank-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .rank-score {
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .rank-score small {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: var(--text-tertiary);
+            margin-left: 6px;
+        }
+
+        .rank-change {
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .change-up { color: #10b981; }
+        .change-down { color: #ef4444; }
+        .change-steady { color: #f59e0b; }
+
+        /* 组卡片 - 优雅设计 */
+        .groups {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .group-card {
+            background: var(--bg-card);
+            border-radius: 36px;
+            padding: 28px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            scroll-margin-top: 24px;
+            border-top: 6px solid;
+            transition: box-shadow 0.3s;
+        }
+
+        .group-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .group-card[data-group="星穹组"] { border-top-color: var(--star-primary); }
+        .group-card[data-group="夜曜组"] { border-top-color: var(--night-primary); }
+        .group-card[data-group="沧澜组"] { border-top-color: var(--ocean-primary); }
+
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-light);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .group-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .group-emoji {
+            font-size: 2rem;
+            background: var(--bg-primary);
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 26px;
+            border: 1px solid var(--border-light);
+        }
+
+        .group-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .group-stats {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .group-avg {
+            background: var(--bg-primary);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+            font-weight: 500;
+        }
+
+        .group-badge {
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .group-card[data-group="星穹组"] .group-badge { background: var(--star-primary); color: #1e293b; }
+        .group-card[data-group="夜曜组"] .group-badge { background: var(--night-primary); }
+        .group-card[data-group="沧澜组"] .group-badge { background: var(--ocean-primary); }
+
+        /* 表格 - 现代设计 */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 24px;
+            background: var(--bg-primary);
+            padding: 4px;
+        }
+
+        .member-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+            font-size: 0.95rem;
+        }
+
+        .member-table th {
+            text-align: left;
+            padding: 18px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            background: var(--bg-primary);
+            border-bottom: 2px solid var(--border-light);
+        }
+
+        .member-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--text-primary);
+        }
+
+        .member-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .member-table tr:hover {
+            background: var(--bg-card);
+        }
+
+        /* 列宽精细控制 */
+        .member-table th:nth-child(1) { width: 60px; text-align: center; }
+        .member-table th:nth-child(2) { width: 160px; }
+        .member-table th:nth-child(3) { width: 80px; }
+        .member-table th:nth-child(4) { width: 100px; }
+        .member-table th:nth-child(5) { width: auto; }
+        .member-table th:nth-child(6) { width: 80px; text-align: right; padding-right: 24px; }
+        .member-table th:nth-child(7) { width: 70px; text-align: center; }
+
+        .member-table td:nth-child(1) { text-align: center; font-weight: 500; color: var(--text-tertiary); }
+        .member-table td:nth-child(6) { text-align: right; padding-right: 24px; font-weight: 600; font-size: 1rem; }
+        .member-table td:nth-child(7) { text-align: center; }
+
+        .name-cn {
             font-weight: 600;
             font-size: 1rem;
             margin-bottom: 4px;
             color: var(--text-primary);
         }
-        
-        .rank-score {
-            font-weight: 700;
-            font-size: 1.3rem;
-            color: var(--text-primary);
-            line-height: 1.2;
-        }
-        
-        .rank-score small {
-            font-size: 0.75rem;
-            font-weight: 400;
-            color: var(--text-secondary);
-            margin-left: 4px;
-        }
-        
-        .rank-change {
-            font-size: 0.75rem;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-        
-        .change-up { color: var(--change-up); }
-        .change-down { color: var(--change-down); }
-        .change-steady { color: var(--change-steady); }
-        
-        /* 组卡片 - 优化间距 */
-        .groups {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-        
-        .group-card {
-            background: var(--bg-card);
-            border-radius: 28px;
-            padding: 24px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-light);
-            scroll-margin-top: 20px;
-            border-top: 4px solid;
-            transition: box-shadow 0.3s;
-        }
-        
-        .group-card:hover {
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .group-card[data-group="星穹组"] {
-            border-top-color: var(--star-primary);
-        }
-        .group-card[data-group="夜曜组"] {
-            border-top-color: var(--night-primary);
-        }
-        .group-card[data-group="沧澜组"] {
-            border-top-color: var(--ocean-primary);
-        }
-        
-        .group-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border-light);
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        
-        .group-title-section {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .group-emoji {
-            font-size: 1.6rem;
-        }
-        
-        .group-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .group-stats {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        
-        .group-badge {
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .group-card[data-group="星穹组"] .group-badge {
-            background: var(--star-primary);
-            color: #1e293b;
-        }
-        .group-card[data-group="夜曜组"] .group-badge {
-            background: var(--night-primary);
-        }
-        .group-card[data-group="沧澜组"] .group-badge {
-            background: var(--ocean-primary);
-        }
-        
-        .group-avg {
-            background: var(--bg-body);
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-light);
-        }
-        
-        /* 表格 - 优化对齐 */
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 16px;
-            margin-top: 8px;
-        }
-        
-        .member-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 750px;
-            font-size: 0.9rem;
-        }
-        
-        .member-table th {
-            text-align: left;
-            padding: 14px 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            background: var(--bg-body);
-            border-bottom: 2px solid var(--border-light);
-        }
-        
-        .member-table td {
-            padding: 14px 8px;
-            border-bottom: 1px solid var(--border-light);
-            vertical-align: middle;
-        }
-        
-        .member-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .member-table tr:hover {
-            background: var(--bg-body);
-        }
-        
-        /* 列宽定义 */
-        .member-table th:nth-child(1) { width: 50px; text-align: center; }
-        .member-table th:nth-child(2) { width: 140px; }
-        .member-table th:nth-child(3) { width: 70px; }
-        .member-table th:nth-child(4) { width: 90px; }
-        .member-table th:nth-child(5) { width: auto; }
-        .member-table th:nth-child(6) { width: 70px; text-align: right; padding-right: 16px; }
-        .member-table th:nth-child(7) { width: 60px; text-align: center; }
-        
-        .member-table td:nth-child(1) { text-align: center; color: var(--text-tertiary); font-weight: 500; }
-        .member-table td:nth-child(6) { text-align: right; padding-right: 16px; font-weight: 600; }
-        .member-table td:nth-child(7) { text-align: center; }
-        
-        .rank-number {
-            font-weight: 500;
-            color: var(--text-tertiary);
-        }
-        
-        .name-cell {
-            min-width: 140px;
-        }
-        
-        .name-cn {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 2px;
-            color: var(--text-primary);
-        }
-        
+
         .name-en {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: var(--text-tertiary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 130px;
+            max-width: 140px;
         }
-        
+
         .info-cell {
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             color: var(--text-secondary);
             font-weight: 500;
         }
-        
-        .scores-cell {
-            max-width: 220px;
-        }
-        
+
+        /* 分数标签 - 精致设计 */
         .score-tags {
             display: flex;
-            gap: 6px;
+            gap: 8px;
             flex-wrap: wrap;
         }
-        
+
         .score-item {
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 30px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 500;
             background: var(--score-bg);
             color: var(--score-text);
             border: 1px solid var(--border-light);
             transition: all 0.2s;
         }
-        
+
         .score-item:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
             box-shadow: var(--shadow-sm);
         }
-        
+
         .score-item.has-score {
-            background: var(--score-positive-bg);
-            color: var(--score-positive-text);
+            background: var(--score-highlight);
+            color: var(--score-highlight-text);
             border-color: transparent;
+            font-weight: 600;
         }
-        
-        .score-date {
-            opacity: 0.7;
-            margin-right: 2px;
-        }
-        
-        .score-value {
-            font-weight: 700;
-        }
-        
-        .total-cell {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--text-primary);
-        }
-        
-        .reward-cell {
-            font-weight: 500;
-        }
-        
+
+        .score-date { opacity: 0.7; margin-right: 3px; }
+        .score-value { font-weight: 700; }
+
+        /* 奖励标记 - 圆润设计 */
         .reward-pass, .reward-fail {
-            padding: 4px 8px;
+            padding: 5px 10px;
             border-radius: 30px;
             font-size: 0.7rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 45px;
+            min-width: 50px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        
+
         .reward-pass {
             background: var(--reward-pass);
             color: var(--reward-pass-text);
         }
-        
+
         .reward-fail {
             background: var(--reward-fail);
             color: var(--reward-fail-text);
         }
-        
-        /* 奖励卡片 - 优化样式 */
+
+        /* 奖励卡片 - 精美设计 */
         .reward-card {
             background: var(--bg-card);
-            border-radius: 28px;
-            padding: 24px;
-            margin-top: 32px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-md);
+            border-radius: 36px;
+            padding: 32px;
+            margin-top: 40px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
-            border-left: 4px solid #fbbf24;
+            border-left: 6px solid #fbbf24;
         }
-        
+
         .reward-title {
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             color: var(--text-primary);
         }
-        
+
         .reward-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 20px;
         }
-        
+
         .reward-item {
-            background: var(--bg-body);
-            border-radius: 20px;
-            padding: 16px;
+            background: var(--bg-primary);
+            border-radius: 28px;
+            padding: 24px 20px;
             display: flex;
-            gap: 12px;
+            gap: 16px;
             border: 1px solid var(--border-light);
-            transition: transform 0.2s;
+            transition: all 0.3s;
         }
-        
+
         .reward-item:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            background: var(--bg-card);
         }
-        
+
         .reward-rank-icon {
-            font-size: 2rem;
-            min-width: 48px;
-            text-align: center;
+            font-size: 2.4rem;
+            min-width: 60px;
+            height: 60px;
+            background: var(--bg-card);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-light);
         }
-        
-        .reward-content {
-            flex: 1;
-        }
-        
+
+        .reward-content { flex: 1; }
+
         .reward-rank-text {
             font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 4px;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
             color: var(--text-primary);
         }
-        
+
         .reward-desc {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+            margin-bottom: 6px;
         }
-        
+
         .reward-highlight {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             font-weight: 600;
             color: var(--text-primary);
+            background: var(--bg-card);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 30px;
+            border: 1px solid var(--border-light);
         }
-        
+
         .reward-note {
-            margin-top: 16px;
-            padding: 16px;
-            background: var(--bg-body);
-            border-radius: 16px;
-            font-size: 0.85rem;
+            margin-top: 24px;
+            padding: 18px;
+            background: var(--bg-primary);
+            border-radius: 28px;
+            font-size: 0.9rem;
             color: var(--text-secondary);
             text-align: center;
-            border: 1px dashed var(--border-light);
+            border: 2px dashed var(--border-light);
         }
-        
+
         .footer {
-            margin-top: 24px;
+            margin-top: 32px;
             text-align: center;
             color: var(--text-tertiary);
-            font-size: 0.75rem;
-            padding: 16px;
+            font-size: 0.8rem;
+            padding: 20px;
             border-top: 1px solid var(--border-light);
         }
-        
-        /* 移动端优化 */
+
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .rank-grid { gap: 16px; }
+            .rank-card { padding: 18px 16px; }
+            .rank-icon { font-size: 2rem; }
+            .rank-score { font-size: 1.4rem; }
+        }
+
         @media (max-width: 768px) {
-            body { padding: 16px; }
-            
-            .rank-grid {
-                gap: 12px;
-            }
-            
-            .rank-card {
-                padding: 14px 10px;
-            }
-            
-            .rank-icon {
-                font-size: 1.6rem;
-            }
-            
-            .rank-score {
-                font-size: 1.1rem;
-            }
-            
-            .reward-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            
-            .group-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .group-stats {
-                width: 100%;
-                justify-content: space-between;
-            }
+            body { padding: 20px; }
+            .rank-grid { gap: 12px; }
+            .reward-grid { grid-template-columns: 1fr; }
+            .group-header { flex-direction: column; align-items: flex-start; }
+            .group-stats { width: 100%; }
         }
-        
+
         @media (max-width: 640px) {
-            .rank-grid {
-                gap: 8px;
+            body { padding: 16px; }
+            h1 { font-size: 1.6rem; }
+            .school-icon { font-size: 2rem; }
+            .rank-card { padding: 14px 12px; }
+            .rank-icon { font-size: 1.6rem; }
+            .rank-score { font-size: 1.2rem; }
+            .group-card { padding: 20px; }
+            .group-title { font-size: 1.3rem; }
+            .group-emoji { width: 44px; height: 44px; font-size: 1.6rem; }
+        }
+
+        /* 加载动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            
-            .rank-card {
-                padding: 12px 8px;
-            }
-            
-            .rank-name {
-                font-size: 0.85rem;
-            }
-            
-            .rank-score {
-                font-size: 1rem;
-            }
-            
-            .rank-score small {
-                font-size: 0.65rem;
-            }
-            
-            .group-card {
-                padding: 20px;
-            }
-            
-            .group-title {
-                font-size: 1.2rem;
-            }
-            
-            .group-badge {
-                padding: 4px 12px;
-                font-size: 0.8rem;
-            }
-            
-            .member-table th {
-                padding: 10px 6px;
-                font-size: 0.65rem;
-            }
-            
-            .member-table td {
-                padding: 10px 6px;
-                font-size: 0.8rem;
-            }
-            
-            .member-table th:nth-child(6),
-            .member-table td:nth-child(6) {
-                padding-right: 12px;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
+
+        .rank-card, .group-card, .reward-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .group-card:nth-child(1) { animation-delay: 0.1s; }
+        .group-card:nth-child(2) { animation-delay: 0.2s; }
+        .group-card:nth-child(3) { animation-delay: 0.3s; }
+        .reward-card { animation-delay: 0.4s; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <div class="title-section">
-                    <span class="title-icon">🏫</span>
-                    <h1>学长团分数板</h1>
+                <div class="title-group">
+                    <span class="school-icon">🏫</span>
+                    <h1>学长团 · 荣耀榜</h1>
                 </div>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                     <span>🌓</span>
-                    <span>夜间模式</span>
+                    <span>切换主题</span>
                 </div>
             </div>
-            <div class="subtitle">
-                <span>Prefects' Scoreboard · 奖励机制</span>
-                <span>''' + datetime.now().strftime('%Y.%m.%d %H:%M') + '''</span>
+            <div class="meta-info">
+                <span>Prefects' Honor Board · 奖励机制</span>
+                <span class="date-badge">''' + datetime.now().strftime('%Y年%m月%d日 %H:%M') + '''</span>
             </div>
-            <div class="search-box">
+            <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="search" placeholder="搜索姓名、英文名、班级或学号...">
             </div>
         </div>
 
-        <!-- 组排名卡片 -->
+        <!-- 组排名卡片 - 3D悬浮效果 -->
         <div class="rank-grid">
 '''
 
@@ -1026,7 +1001,7 @@ for i, (g, total) in enumerate(sorted_groups, 1):
 html += '''
         </div>
 
-        <!-- 三组 -->
+        <!-- 组别详情 -->
         <div class="groups">
 '''
 
@@ -1041,12 +1016,12 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     html += '''
             <div class="group-card" data-group="''' + group_name + '''" id="''' + group_id + '''">
                 <div class="group-header">
-                    <div class="group-title-section">
+                    <div class="group-title-wrapper">
                         <span class="group-emoji">''' + group_emojis[group_name] + '''</span>
                         <span class="group-title">''' + group_name + '''</span>
                     </div>
                     <div class="group-stats">
-                        <span class="group-avg">平均 ''' + str(int(avg_score)) + '''</span>
+                        <span class="group-avg">平均 ''' + str(int(avg_score)) + '''分</span>
                         <span class="group-badge">第''' + str(rank) + '''名 · ''' + str(int(group_totals[group_name])) + '''分</span>
                     </div>
                 </div>
@@ -1060,7 +1035,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                                 <th>学号</th>
                                 <th>每日得分</th>
                                 <th>总分</th>
-                                <th>奖</th>
+                                <th>奖励</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1082,16 +1057,16 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         
         html += '''
                         <tr data-search="''' + member['name_cn'] + ' ' + member['name_en'] + ' ' + member['class'] + ' ' + member['student_id'] + '''">
-                            <td class="rank-number">''' + str(member['order']) + '''</td>
-                            <td class="name-cell">
+                            <td>''' + str(member['order']) + '''</td>
+                            <td>
                                 <div class="name-cn">''' + member['name_cn'] + '''</div>
                                 <div class="name-en">''' + name_en_short + '''</div>
                             </td>
                             <td class="info-cell">''' + member['class'] + '''</td>
                             <td class="info-cell">''' + member['student_id'] + '''</td>
-                            <td class="scores-cell"><div class="score-tags">''' + score_tags + '''</div></td>
-                            <td class="total-cell">''' + str(int(member['total'])) + '''</td>
-                            <td class="reward-cell"><span class="''' + member['reward_class'] + '''">''' + member['reward_status'] + '''</span></td>
+                            <td><div class="score-tags">''' + score_tags + '''</div></td>
+                            <td>''' + str(int(member['total'])) + '''</td>
+                            <td><span class="''' + member['reward_class'] + '''">''' + member['reward_status'] + '''</span></td>
                         </tr>
 '''
 
@@ -1105,7 +1080,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += '''
         </div>
 
-        <!-- 奖励规则卡片 -->
+        <!-- 奖励机制卡片 -->
         <div class="reward-card">
             <div class="reward-title">
                 <span>🎁</span>
@@ -1117,7 +1092,7 @@ html += '''
                     <div class="reward-content">
                         <div class="reward-rank-text">第一名组别</div>
                         <div class="reward-desc">个人分数 ≥ 组平均分一半</div>
-                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                        <div class="reward-highlight">✨ 免搬椅子 + 减免操步</div>
                     </div>
                 </div>
                 <div class="reward-item">
@@ -1125,7 +1100,7 @@ html += '''
                     <div class="reward-content">
                         <div class="reward-rank-text">第二名组别</div>
                         <div class="reward-desc">个人分数 ≥ 组平均分</div>
-                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                        <div class="reward-highlight">✨ 免搬椅子 + 减免操步</div>
                     </div>
                 </div>
                 <div class="reward-item">
@@ -1133,7 +1108,7 @@ html += '''
                     <div class="reward-content">
                         <div class="reward-rank-text">第三名组别</div>
                         <div class="reward-desc">个人分数 组内前三名</div>
-                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                        <div class="reward-highlight">✨ 免搬椅子 + 减免操步</div>
                     </div>
                 </div>
             </div>
@@ -1143,7 +1118,7 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间模式 · 显示较昨日变化 · 最近5次得分
+            👆 点击组排名卡片快速跳转 · 点击🌓切换主题 · 显示较昨日变化 · 最近5次得分
         </div>
     </div>
 
@@ -1200,4 +1175,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 优化：精致排版 + 对齐优化 + 响应式设计")
+print("✨ 设计：3D悬浮 + 毛玻璃 + 精致卡片 + 完美对齐")
