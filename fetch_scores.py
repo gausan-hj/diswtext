@@ -218,7 +218,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML
+# 生成HTML - 使用普通三重引号，不使用f-string
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -233,7 +233,6 @@ html = '''<!DOCTYPE html>
             padding: 0;
         }
         
-        /* 日间模式变量 */
         :root {
             --bg-body: #f5f7fa;
             --bg-card: #ffffff;
@@ -258,7 +257,6 @@ html = '''<!DOCTYPE html>
             --reward-fail-text: #991b1b;
         }
         
-        /* 夜间模式变量 */
         body.night-mode {
             --bg-body: #0f172a;
             --bg-card: #1e293b;
@@ -296,7 +294,6 @@ html = '''<!DOCTYPE html>
             margin: 0 auto;
         }
         
-        /* 头部 */
         .header {
             background: var(--bg-card);
             border-radius: 24px;
@@ -362,10 +359,8 @@ html = '''<!DOCTYPE html>
         #search:focus {
             outline: none;
             border-color: var(--text-secondary);
-            background: var(--bg-card);
         }
         
-        /* 组排名卡片 - 带变化显示 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -464,7 +459,6 @@ html = '''<!DOCTYPE html>
         .change-down { color: var(--change-down); }
         .change-steady { color: var(--change-steady); }
         
-        /* 组卡片 */
         .groups {
             display: flex;
             flex-direction: column;
@@ -524,7 +518,6 @@ html = '''<!DOCTYPE html>
             background: #60a5fa;
         }
         
-        /* 表格 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -626,7 +619,6 @@ html = '''<!DOCTYPE html>
             width: 60px;
         }
         
-        /* 奖励状态 - 对齐 */
         .reward-cell {
             text-align: center;
             width: 50px;
@@ -654,7 +646,6 @@ html = '''<!DOCTYPE html>
             min-width: 40px;
         }
         
-        /* 奖励卡片 */
         .reward-card {
             background: var(--bg-card);
             border-radius: 24px;
@@ -737,61 +728,20 @@ html = '''<!DOCTYPE html>
             padding: 16px;
         }
         
-        /* 手机端优化 */
         @media (max-width: 640px) {
             body { padding: 12px; }
-            
-            .rank-grid {
-                gap: 8px;
-            }
-            
-            .rank-card {
-                padding: 12px 8px;
-            }
-            
-            .rank-icon {
-                font-size: 1.5rem;
-            }
-            
-            .rank-name {
-                font-size: 0.85rem;
-            }
-            
-            .rank-score {
-                font-size: 1rem;
-            }
-            
-            .group-card {
-                padding: 16px;
-            }
-            
-            .group-title {
-                font-size: 1.1rem;
-            }
-            
-            .group-badge {
-                padding: 4px 10px;
-                font-size: 0.75rem;
-            }
-            
-            .member-table th {
-                font-size: 0.65rem;
-                padding: 8px 4px;
-            }
-            
-            .member-table td {
-                padding: 10px 4px;
-                font-size: 0.8rem;
-            }
-            
-            .reward-item {
-                padding: 12px;
-            }
-            
-            .reward-rank-icon {
-                font-size: 1.5rem;
-                min-width: 35px;
-            }
+            .rank-grid { gap: 8px; }
+            .rank-card { padding: 12px 8px; }
+            .rank-icon { font-size: 1.5rem; }
+            .rank-name { font-size: 0.85rem; }
+            .rank-score { font-size: 1rem; }
+            .group-card { padding: 16px; }
+            .group-title { font-size: 1.1rem; }
+            .group-badge { padding: 4px 10px; font-size: 0.75rem; }
+            .member-table th { font-size: 0.65rem; padding: 8px 4px; }
+            .member-table td { padding: 10px 4px; font-size: 0.8rem; }
+            .reward-item { padding: 12px; }
+            .reward-rank-icon { font-size: 1.5rem; min-width: 35px; }
         }
     </style>
 </head>
@@ -814,7 +764,6 @@ html = '''<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 - 带变化显示 -->
         <div class="rank-grid">
 '''
 
@@ -840,13 +789,13 @@ for i, (g, total) in enumerate(sorted_groups, 1):
     else:
         change_text = '<span class="change-steady">◆ 0</span>'
     
-    html += f'''
-            <div class="rank-card {rank_animation}" data-group="{g}" data-rank="{current_rank}" data-prev-rank="{prev_rank}" onclick="document.getElementById(\'{group_id}\').scrollIntoView({{behavior: \'smooth\'}})">
-                <span class="rank-icon">{rank_icons[i]}</span>
+    html += '''
+            <div class="rank-card ''' + rank_animation + '''" data-group="''' + g + '''" data-rank="''' + str(current_rank) + '''" data-prev-rank="''' + str(prev_rank) + '''" onclick="document.getElementById(\'''' + group_id + '''\').scrollIntoView({behavior: \'smooth\'})">
+                <span class="rank-icon">''' + rank_icons[i] + '''</span>
                 <div class="rank-info">
-                    <div class="rank-name">{g}</div>
-                    <div class="rank-score">{int(total)}<small>分</small></div>
-                    <div class="rank-change">较昨日 {change_text}</div>
+                    <div class="rank-name">''' + g + '''</div>
+                    <div class="rank-score">''' + str(int(total)) + '''<small>分</small></div>
+                    <div class="rank-change">较昨日 ''' + change_text + '''</div>
                 </div>
             </div>
 '''
@@ -854,7 +803,6 @@ for i, (g, total) in enumerate(sorted_groups, 1):
 html += '''
         </div>
 
-        <!-- 三组 -->
         <div class="groups">
 '''
 
@@ -865,14 +813,14 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     group_id = group_ids[group_name]
     avg_score = group_averages[group_name]
     
-    html += f'''
-            <div class="group-card" data-group="{group_name}" id="{group_id}">
+    html += '''
+            <div class="group-card" data-group="''' + group_name + '''" id="''' + group_id + '''">
                 <div class="group-header">
                     <div>
-                        <span class="group-title">{group_name}</span>
-                        <span style="font-size:0.75rem; color:var(--text-secondary); margin-left:6px;">平均 {int(avg_score)}</span>
+                        <span class="group-title">''' + group_name + '''</span>
+                        <span style="font-size:0.75rem; color:var(--text-secondary); margin-left:6px;">平均 ''' + str(int(avg_score)) + '''</span>
                     </div>
-                    <span class="group-badge">第{rank}名 · {int(group_totals[group_name])}分</span>
+                    <span class="group-badge">第''' + str(rank) + '''名 · ''' + str(int(group_totals[group_name])) + '''分</span>
                 </div>
                 <div class="table-container">
                     <table class="member-table">
@@ -904,13 +852,30 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         # 截断英文名
         name_en_short = member['name_en'][:15] + "…" if len(member['name_en']) > 15 else member['name_en']
         
-        html += f'''
-                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
-                            <td class="rank-number">{member['order']}</td>
+        html += '''
+                        <tr data-search="''' + member['name_cn'] + ' ' + member['name_en'] + ' ' + member['class'] + ' ' + member['student_id'] + '''">
+                            <td class="rank-number">''' + str(member['order']) + '''</td>
                             <td class="name-cell">
-                                <div class="name-cn">{member['name_cn']}</div>
-                                <div class="name-en">{name_en_short}</div>
+                                <div class="name-cn">''' + member['name_cn'] + '''</div>
+                                <div class="name-en">''' + name_en_short + '''</div>
                             </td>
-                            <td class="info-cell">{member['class']}</td>
-                            <td class="info-cell">{member['student_id']}</td>
-                            <td class="
+                            <td class="info-cell">''' + member['class'] + '''</td>
+                            <td class="info-cell">''' + member['student_id'] + '''</td>
+                            <td class="scores-cell"><div class="score-tags">''' + score_tags + '''</div></td>
+                            <td class="total-cell">''' + str(int(member['total'])) + '''</td>
+                            <td class="reward-cell"><span class="''' + member['reward_class'] + '''">''' + member['reward_status'] + '''</span></td>
+                        </tr>
+'''
+
+    html += '''
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+'''
+
+html += '''
+        </div>
+
+        <div class="reward-card">
+            <di
