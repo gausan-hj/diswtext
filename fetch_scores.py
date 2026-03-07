@@ -579,6 +579,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.3px;
+            border-bottom: 2px solid var(--border-light);
         }
         .member-table td {
             padding: 10px 4px;
@@ -849,5 +850,4 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         if not score_tags:
             score_tags = '<span class="score-item">-</span>'
         
-        # 截断英文名
-        name_en_short = member['name_en'][:20] + "..." if l
+        # 修复：使用正确
