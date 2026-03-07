@@ -1,5 +1,5 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # ===== 你要修改的地方 =====
 SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
@@ -23,6 +23,7 @@ print(f"读取到 {len(df)} 行数据")
 
 # 获取日期（第一行）
 dates = []
+date_objects = []
 if len(df) > 0:
     first_row = df.iloc[0].tolist()
     for j in range(7, len(first_row)):
@@ -32,10 +33,14 @@ if len(df) > 0:
                 if "00:00" in date_str:
                     date_str = date_str[5:10]
                 dates.append(date_str)
+                # 存储完整日期对象用于计算
+                date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
             except:
                 dates.append(f"D{j-6}")
+                date_objects.append(None)
         else:
             dates.append(f"D{j-6}")
+            date_objects.append(None)
 
 print(f"找到 {len(dates)} 个日期")
 
@@ -81,8 +86,14 @@ members_list = [
 
 # 自动匹配每一行
 people = []
+yesterday_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+today_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 
 print("\n开始匹配成员...")
+
+# 确定昨天和今天的日期索引
+today_idx = len(dates) - 1  # 最后一列是今天
+yesterday_idx = max(0, len(dates) - 2)  # 倒数第二列是昨天
 
 for member in members_list:
     found = False
@@ -101,6 +112,11 @@ for member in members_list:
                 scores = []
                 total = 0
                 score_dict = {}
+                
+                # 计算今日得分和昨日得分
+                today_score = 0
+                yesterday_score = 0
+                
                 for j in range(7, len(row)):
                     if j-7 < len(dates):
                         date = dates[j-7]
@@ -112,6 +128,13 @@ for member in members_list:
                                 total += num
                                 if num > 0:
                                     score_dict[date] = num
+                                
+                                # 记录今日和昨日得分
+                                if j-7 == today_idx:
+                                    today_score = num
+                                elif j-7 == yesterday_idx:
+                                    yesterday_score = num
+                                    
                             except (ValueError, TypeError):
                                 scores.append(0)
                         else:
@@ -126,7 +149,9 @@ for member in members_list:
                     "student_id": member["student_id"],
                     "scores": scores,
                     "score_dict": score_dict,
-                    "total": total
+                    "total": total,
+                    "today": today_score,
+                    "yesterday": yesterday_score
                 })
                 print(f"✓ 找到 {member['name_cn']} (总分: {total})")
                 found = True
@@ -140,10 +165,20 @@ print(f"\n总共找到 {len(people)} 人")
 # 按组别整理
 group_data = {g: [] for g in ["星穹组", "夜曜组", "沧澜组"]}
 group_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_yesterday_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_today_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 
 for p in people:
     group_data[p["group"]].append(p)
     group_totals[p["group"]] += p["total"]
+    group_today_totals[p["group"]] += p["today"]
+    group_yesterday_totals[p["group"]] += p["yesterday"]
+
+# 计算变化
+group_changes = {}
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    change = group_today_totals[g] - group_yesterday_totals[g]
+    group_changes[g] = change
 
 # 每个组内按order排序
 for g in group_data:
@@ -162,7 +197,7 @@ group_colors = {
     "沧澜组": {"primary": "#60a5fa", "light": "#dbeafe", "border": "#3b82f6"}
 }
 
-# 生成HTML - 加入夜间模式
+# 生成HTML - 加入夜间模式和变化显示
 html = f"""<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -195,6 +230,9 @@ html = f"""<!DOCTYPE html>
             --score-text: #334155;
             --score-positive-bg: #e0f2fe;
             --score-positive-text: #0369a1;
+            --change-up: #10b981;
+            --change-down: #ef4444;
+            --change-steady: #f59e0b;
         }}
         
         /* 夜间模式变量 */
@@ -213,6 +251,9 @@ html = f"""<!DOCTYPE html>
             --score-text: #cbd5e1;
             --score-positive-bg: #1e3a5f;
             --score-positive-text: #93c5fd;
+            --change-up: #34d399;
+            --change-down: #f87171;
+            --change-steady: #fbbf24;
         }}
         
         body {{
@@ -306,7 +347,7 @@ html = f"""<!DOCTYPE html>
             box-shadow: 0 0 0 3px rgba(148,163,184,0.1);
         }}
         
-        /* 组排名卡片 */
+        /* 组排名卡片 - 增加变化显示 */
         .rank-grid {{
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -357,12 +398,27 @@ html = f"""<!DOCTYPE html>
             font-weight: 700;
             font-size: 1.2rem;
             color: var(--text-primary);
+            line-height: 1.2;
         }}
         .rank-score small {{
             font-size: 0.7rem;
             font-weight: 400;
             color: var(--text-secondary);
             margin-left: 2px;
+        }}
+        .rank-change {{
+            font-size: 0.75rem;
+            margin-top: 2px;
+            font-weight: 500;
+        }}
+        .change-up {{
+            color: var(--change-up);
+        }}
+        .change-down {{
+            color: var(--change-down);
+        }}
+        .change-steady {{
+            color: var(--change-steady);
         }}
         
         /* 三组布局 */
@@ -566,7 +622,7 @@ html = f"""<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 -->
+        <!-- 组排名卡片 - 显示变化 -->
         <div class="rank-grid">
 """
 
@@ -575,12 +631,21 @@ rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
 group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
 for i, (g, total) in enumerate(sorted_groups, 1):
     group_id = group_ids[g]
+    change = group_changes[g]
+    if change > 0:
+        change_text = f'<span class="change-up">▲ +{int(change)}</span>'
+    elif change < 0:
+        change_text = f'<span class="change-down">▼ {int(change)}</span>'
+    else:
+        change_text = '<span class="change-steady">◆ 0</span>'
+    
     html += f"""
             <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
                 <span class="rank-icon">{rank_icons[i]}</span>
                 <div class="rank-info">
                     <div class="rank-name">{g}</div>
                     <div class="rank-score">{int(total)}<small>分</small></div>
+                    <div class="rank-change">较昨日 {change_text}</div>
                 </div>
             </div>
 """
@@ -598,6 +663,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     rank = group_rank[group_name]
     group_id = group_ids[group_name]
     color = group_colors[group_name]
+    change = group_changes[group_name]
     
     html += f"""
             <div class="group-card" data-group="{group_name}" id="{group_id}">
@@ -657,7 +723,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += """
         </div>
         <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间模式 · 显示最近5次得分
+            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间模式 · 显示较昨日变化 · 最近5次得分
         </div>
     </div>
 
@@ -694,4 +760,6 @@ with open("index.html", "w", encoding="utf-8") as f:
 
 print(f"\n✅ 生成成功！共 {len(people)} 人")
 for g in ["星穹组", "夜曜组", "沧澜组"]:
-    print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名")
+    change = group_changes[g]
+    change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
+    print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
