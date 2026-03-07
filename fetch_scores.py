@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime, timedelta
+import base64
 
 # ===== 你要修改的地方 =====
 SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
@@ -211,6 +212,7 @@ html = '''<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>训育处 - 学长团分数板</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -301,7 +303,7 @@ html = '''<!DOCTYPE html>
             flex-wrap: wrap;
         }
         
-        .theme-toggle, .export-btn {
+        .theme-toggle, .export-btn, .chart-btn {
             background: var(--bg-body);
             border: 1px solid var(--border-color);
             border-radius: 30px;
@@ -315,7 +317,7 @@ html = '''<!DOCTYPE html>
             transition: all 0.2s;
         }
         
-        .theme-toggle:hover, .export-btn:hover {
+        .theme-toggle:hover, .export-btn:hover, .chart-btn:hover {
             background: var(--border-color);
         }
         
@@ -431,6 +433,60 @@ html = '''<!DOCTYPE html>
         .change-up { color: var(--change-up); }
         .change-down { color: var(--change-down); }
         .change-steady { color: var(--change-steady); }
+        
+        /* 统计图区域 */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .stat-item {
+            background: var(--bg-body);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 2px;
+        }
         
         .groups {
             display: flex;
@@ -606,11 +662,13 @@ html = '''<!DOCTYPE html>
             .rank-grid { gap: 8px; }
             .rank-card { padding: 12px 8px; }
             .rank-icon { font-size: 1.6rem; }
+            .stats-grid { gap: 8px; }
+            .stat-item { padding: 8px; }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="capture-area">
+    <div class="container">
         <div class="header">
             <div class="header-top">
                 <h1>🏫 学长团分数板</h1>
@@ -619,9 +677,13 @@ html = '''<!DOCTYPE html>
                         <span>🌓</span>
                         <span>夜间</span>
                     </div>
-                    <div class="export-btn" onclick="exportAsImage()">
+                    <div class="chart-btn" onclick="showChartView()">
+                        <span>📊</span>
+                        <span>统计图</span>
+                    </div>
+                    <div class="export-btn" onclick="exportAsStatsImage()">
                         <span>📸</span>
-                        <span>导出</span>
+                        <span>导出统计</span>
                     </div>
                 </div>
             </div>
@@ -630,6 +692,39 @@ html = '''<!DOCTYPE html>
                 <span>''' + datetime.now().strftime('%Y.%m.%d %H:%M') + '''</span>
             </div>
             <input type="text" id="search" placeholder="🔍 搜索姓名、英文名、班级或学号...">
+        </div>
+
+        <!-- 统计图区域（默认隐藏） -->
+        <div id="chartSection" style="display: none;">
+            <div class="chart-container">
+                <div class="chart-title">📊 各组总分对比</div>
+                <div class="chart-wrapper">
+                    <canvas id="groupChart"></canvas>
+                </div>
+                <div class="stats-grid">
+'''
+
+# 添加统计数据
+for g, total in sorted_groups:
+    change = group_changes[g]
+    if change > 0:
+        change_html = f'<span class="change-up">▲ +{int(change)}</span>'
+    elif change < 0:
+        change_html = f'<span class="change-down">▼ {int(change)}</span>'
+    else:
+        change_html = '<span class="change-steady">◆ 0</span>'
+    
+    html += f'''
+                    <div class="stat-item">
+                        <div class="stat-label">{g}</div>
+                        <div class="stat-value">{int(total)}</div>
+                        <div class="stat-change">{change_html}</div>
+                    </div>
+'''
+
+html += '''
+                </div>
+            </div>
         </div>
 
         <div class="rank-grid">
@@ -735,7 +830,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += '''
         </div>
         <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 点击📸导出图片 · 显示较昨日变化
+            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 点击📊查看统计图 · 点击📸导出统计图
         </div>
     </div>
 
@@ -745,6 +840,9 @@ html += '''
     </div>
 
     <script>
+        let groupChart = null;
+        let chartVisible = false;
+
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
@@ -766,60 +864,16 @@ html += '''
             });
         });
         
-        function exportAsImage() {
-            const element = document.getElementById('capture-area');
-            const toast = document.getElementById('exportToast');
+        function showChartView() {
+            const chartSection = document.getElementById('chartSection');
+            const isHidden = chartSection.style.display === 'none';
             
-            toast.innerHTML = '<span>⏳</span><span>生成图片中...</span>';
-            toast.classList.add('show');
-            
-            html2canvas(element, {
-                scale: 2,
-                backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-body'),
-                allowTaint: false,
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `学长团分数板_${new Date().toISOString().slice(0,10)}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                
-                toast.innerHTML = '<span>✅</span><span>图片已保存</span>';
+            if (isHidden) {
+                chartSection.style.display = 'block';
+                createChart();
                 setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2000);
-            }).catch(error => {
-                toast.innerHTML = '<span>❌</span><span>导出失败</span>';
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 2000);
-            });
-        }
-        
-        document.querySelectorAll('.rank-card').forEach(card => {
-            const currentRank = parseInt(card.dataset.rank);
-            const prevRank = parseInt(card.dataset.prevRank);
-            
-            if (currentRank && prevRank) {
-                if (currentRank < prevRank) {
-                    card.classList.add('rank-up');
-                } else if (currentRank > prevRank) {
-                    card.classList.add('rank-down');
-                }
-            }
-        });
-    </script>
-</body>
-</html>
-'''
-
-# 保存HTML文件
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html)
-
-print(f"\n✅ 生成成功！共 {len(people)} 人")
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    change = group_changes[g]
-    change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
-    print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 新增功能：排名动画 + 导出图片")
+                    chartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                chartSection.style.display = 'none';
+          
