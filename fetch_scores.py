@@ -434,60 +434,6 @@ html = '''<!DOCTYPE html>
         .change-down { color: var(--change-down); }
         .change-steady { color: var(--change-steady); }
         
-        /* 统计图区域 */
-        .chart-container {
-            background: var(--bg-card);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-        }
-        
-        .chart-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--text-primary);
-        }
-        
-        .chart-wrapper {
-            position: relative;
-            height: 200px;
-            width: 100%;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 16px;
-        }
-        
-        .stat-item {
-            background: var(--bg-body);
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-        }
-        
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-        
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        
-        .stat-change {
-            font-size: 0.75rem;
-            margin-top: 2px;
-        }
-        
         .groups {
             display: flex;
             flex-direction: column;
@@ -638,6 +584,7 @@ html = '''<!DOCTYPE html>
             border-top: 1px solid var(--border-light);
         }
         
+        /* 动画打勾提示框 */
         .export-toast {
             position: fixed;
             bottom: 20px;
@@ -645,16 +592,146 @@ html = '''<!DOCTYPE html>
             transform: translateX(-50%) translateY(100px);
             background: var(--bg-card);
             color: var(--text-primary);
-            padding: 12px 24px;
-            border-radius: 40px;
-            box-shadow: var(--shadow);
+            padding: 16px 32px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             border: 1px solid var(--border-color);
             z-index: 1000;
-            transition: transform 0.3s;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
         }
         
         .export-toast.show {
             transform: translateX(-50%) translateY(0);
+        }
+        
+        .checkmark {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #10b981;
+            color: white;
+            font-size: 1rem;
+            animation: checkmarkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes checkmarkPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .toast-message {
+            animation: messageSlide 0.3s ease-out;
+        }
+        
+        @keyframes messageSlide {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 统计图区域 */
+        .chart-container {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            animation: chartAppear 0.5s ease-out;
+        }
+        
+        @keyframes chartAppear {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .stat-item {
+            background: var(--bg-body);
+            border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            animation: statAppear 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .stat-item:nth-child(1) { animation-delay: 0.1s; }
+        .stat-item:nth-child(2) { animation-delay: 0.2s; }
+        .stat-item:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes statAppear {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 2px;
         }
         
         @media (max-width: 640px) {
@@ -814,66 +891,4 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                                 <div class="name-cn">{member['name_cn']}</div>
                                 <div class="name-en">{name_en_short}</div>
                             </td>
-                            <td class="info-cell">{member['class']}</td>
-                            <td class="info-cell">{member['student_id']}</td>
-                            <td class="scores-cell"><div class="score-tags">{score_tags}</div></td>
-                            <td class="total-cell">{int(member['total'])}</td>
-                        </tr>
-'''
-
-    html += '''
-                    </tbody>
-                </table>
-            </div>
-'''
-
-html += '''
-        </div>
-        <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 点击📊查看统计图 · 点击📸导出统计图
-        </div>
-    </div>
-
-    <div class="export-toast" id="exportToast">
-        <span>✅</span>
-        <span>图片已保存</span>
-    </div>
-
-    <script>
-        let groupChart = null;
-        let chartVisible = false;
-
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('night-mode');
-        }
-        
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                allRows.forEach(row => row.style.display = '');
-                return;
-            }
-            
-            allRows.forEach(row => {
-                const searchText = row.getAttribute('data-search').toLowerCase();
-                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-            });
-        });
-        
-        function showChartView() {
-            const chartSection = document.getElementById('chartSection');
-            const isHidden = chartSection.style.display === 'none';
-            
-            if (isHidden) {
-                chartSection.style.display = 'block';
-                createChart();
-                setTimeout(() => {
-                    chartSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }, 100);
-            } else {
-                chartSection.style.display = 'none';
-          
+                            <td class="info-cel
