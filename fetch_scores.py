@@ -218,13 +218,13 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 修复总分对齐
+# 生成HTML - 优化排版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>训育处 - 学长团分数板 · 奖励机制</title>
+    <title>训育处 · 学长团分数板 · 奖励机制</title>
     <style>
         * {
             -webkit-tap-highlight-color: rgba(0,0,0,0);
@@ -234,20 +234,32 @@ html = '''<!DOCTYPE html>
         }
         
         :root {
-            --bg-body: #f5f7fa;
+            --bg-body: #f8fafc;
             --bg-card: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
             --border-light: #f1f5f9;
-            --border-color: #eef2f6;
-            --shadow: 0 2px 8px rgba(0,0,0,0.03);
-            --star-light: #fef9e7;
-            --night-light: #f5f0ff;
-            --ocean-light: #f0f7ff;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            
+            /* 组颜色 - 柔和版 */
+            --star-primary: #fbbf24;
+            --star-light: #fef3c7;
+            --star-bg: #fffbeb;
+            --night-primary: #a78bfa;
+            --night-light: #ede9fe;
+            --night-bg: #f5f3ff;
+            --ocean-primary: #60a5fa;
+            --ocean-light: #dbeafe;
+            --ocean-bg: #eff6ff;
+            
             --score-bg: #f1f5f9;
-            --score-text: #334155;
-            --score-positive-bg: #e0f2fe;
-            --score-positive-text: #0369a1;
+            --score-text: #475569;
+            --score-positive-bg: #dbeafe;
+            --score-positive-text: #1e40af;
             --change-up: #10b981;
             --change-down: #ef4444;
             --change-steady: #f59e0b;
@@ -262,14 +274,22 @@ html = '''<!DOCTYPE html>
             --bg-card: #1e293b;
             --text-primary: #f1f5f9;
             --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
             --border-light: #334155;
-            --border-color: #334155;
-            --shadow: 0 4px 12px rgba(0,0,0,0.3);
-            --star-light: #2a2a1a;
-            --night-light: #1e1a2a;
-            --ocean-light: #1a1f2a;
+            --border-color: #475569;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+            
+            --star-light: #422f1a;
+            --star-bg: #2a2a1a;
+            --night-light: #2a1f3a;
+            --night-bg: #1e1a2a;
+            --ocean-light: #1a2a45;
+            --ocean-bg: #1a1f2a;
+            
             --score-bg: #2d3748;
-            --score-text: #cbd5e1;
+            --score-text: #9ca3af;
             --score-positive-bg: #1e3a5f;
             --score-positive-text: #93c5fd;
             --change-up: #34d399;
@@ -284,43 +304,59 @@ html = '''<!DOCTYPE html>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
             background: var(--bg-body);
-            padding: 16px;
+            padding: 20px;
             color: var(--text-primary);
             transition: background-color 0.3s, color 0.3s;
+            line-height: 1.5;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
         }
         
+        /* 头部 - 优化间距 */
         .header {
             background: var(--bg-card);
             border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
         }
         
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .title-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .title-icon {
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
         
         h1 {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 600;
             color: var(--text-primary);
+            letter-spacing: -0.02em;
         }
         
         .theme-toggle {
             background: var(--bg-body);
             border: 1px solid var(--border-color);
-            border-radius: 30px;
-            padding: 8px 16px;
+            border-radius: 40px;
+            padding: 8px 20px;
             cursor: pointer;
             color: var(--text-primary);
             font-size: 0.9rem;
@@ -331,23 +367,35 @@ html = '''<!DOCTYPE html>
         }
         
         .theme-toggle:hover {
-            background: var(--border-color);
+            background: var(--border-light);
         }
         
         .subtitle {
             display: flex;
             justify-content: space-between;
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed var(--border-light);
         }
         
         .search-box {
-            margin-top: 16px;
+            position: relative;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-tertiary);
+            font-size: 1rem;
         }
         
         #search {
             width: 100%;
-            padding: 14px 18px;
+            padding: 14px 20px 14px 48px;
             border: 1px solid var(--border-color);
             border-radius: 40px;
             font-size: 1rem;
@@ -359,72 +407,95 @@ html = '''<!DOCTYPE html>
         #search:focus {
             outline: none;
             border-color: var(--text-secondary);
+            box-shadow: 0 0 0 3px rgba(100,116,139,0.1);
         }
         
+        #search::placeholder {
+            color: var(--text-tertiary);
+        }
+        
+        /* 组排名卡片 - 更精致 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 16px;
+            margin-bottom: 32px;
         }
         
         .rank-card {
             background: var(--bg-card);
-            border-radius: 18px;
-            padding: 14px 10px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 18px 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-light);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             border-left: 4px solid;
             transition: all 0.2s;
-            animation: cardAppear 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
         }
         
-        @keyframes cardAppear {
-            0% { opacity: 0; transform: translateY(10px); }
-            100% { opacity: 1; transform: translateY(0); }
+        .rank-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .rank-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .rank-card:hover::before {
+            opacity: 0.3;
         }
         
         .rank-card.rank-up {
-            animation: rankUp 0.8s ease;
+            animation: rankUp 0.5s ease;
         }
         
         .rank-card.rank-down {
-            animation: rankDown 0.8s ease;
+            animation: rankDown 0.5s ease;
         }
         
         @keyframes rankUp {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(-5px); }
+            0%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
             60% { transform: translateY(2px); }
-            100% { transform: translateY(0); }
         }
         
         @keyframes rankDown {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(5px); }
+            0%, 100% { transform: translateY(0); }
+            30% { transform: translateY(4px); }
             60% { transform: translateY(-2px); }
-            100% { transform: translateY(0); }
         }
         
         .rank-card[data-group="星穹组"] {
-            border-left-color: #fbbf24;
-            background: linear-gradient(to right, var(--star-light), var(--bg-card));
+            border-left-color: var(--star-primary);
+            background: linear-gradient(135deg, var(--star-bg), var(--bg-card));
         }
         .rank-card[data-group="夜曜组"] {
-            border-left-color: #a78bfa;
-            background: linear-gradient(to right, var(--night-light), var(--bg-card));
+            border-left-color: var(--night-primary);
+            background: linear-gradient(135deg, var(--night-bg), var(--bg-card));
         }
         .rank-card[data-group="沧澜组"] {
-            border-left-color: #60a5fa;
-            background: linear-gradient(to right, var(--ocean-light), var(--bg-card));
+            border-left-color: var(--ocean-primary);
+            background: linear-gradient(135deg, var(--ocean-bg), var(--bg-card));
         }
         
         .rank-icon {
-            font-size: 1.8rem;
+            font-size: 2rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
         
         .rank-info {
@@ -433,25 +504,28 @@ html = '''<!DOCTYPE html>
         
         .rank-name {
             font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 2px;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: var(--text-primary);
         }
         
         .rank-score {
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             color: var(--text-primary);
+            line-height: 1.2;
         }
         
         .rank-score small {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 400;
             color: var(--text-secondary);
+            margin-left: 4px;
         }
         
         .rank-change {
-            font-size: 0.7rem;
-            margin-top: 2px;
+            font-size: 0.75rem;
+            margin-top: 4px;
             font-weight: 500;
         }
         
@@ -459,160 +533,220 @@ html = '''<!DOCTYPE html>
         .change-down { color: var(--change-down); }
         .change-steady { color: var(--change-steady); }
         
+        /* 组卡片 - 优化间距 */
         .groups {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
         }
         
         .group-card {
             background: var(--bg-card);
-            border-radius: 24px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            scroll-margin-top: 10px;
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
+            scroll-margin-top: 20px;
             border-top: 4px solid;
+            transition: box-shadow 0.3s;
+        }
+        
+        .group-card:hover {
+            box-shadow: var(--shadow-lg);
         }
         
         .group-card[data-group="星穹组"] {
-            border-top-color: #fbbf24;
+            border-top-color: var(--star-primary);
         }
         .group-card[data-group="夜曜组"] {
-            border-top-color: #a78bfa;
+            border-top-color: var(--night-primary);
         }
         .group-card[data-group="沧澜组"] {
-            border-top-color: #60a5fa;
+            border-top-color: var(--ocean-primary);
         }
         
         .group-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
             border-bottom: 2px solid var(--border-light);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .group-title-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .group-emoji {
+            font-size: 1.6rem;
         }
         
         .group-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .group-stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
         
         .group-badge {
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 40px;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             font-weight: 500;
             color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .group-card[data-group="星穹组"] .group-badge {
-            background: #fbbf24;
+            background: var(--star-primary);
             color: #1e293b;
         }
         .group-card[data-group="夜曜组"] .group-badge {
-            background: #a78bfa;
+            background: var(--night-primary);
         }
         .group-card[data-group="沧澜组"] .group-badge {
-            background: #60a5fa;
+            background: var(--ocean-primary);
         }
         
+        .group-avg {
+            background: var(--bg-body);
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+        
+        /* 表格 - 优化对齐 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            border-radius: 16px;
+            margin-top: 8px;
         }
         
         .member-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px;
+            min-width: 750px;
             font-size: 0.9rem;
         }
         
         .member-table th {
             text-align: left;
-            padding: 10px 6px;
-            font-size: 0.7rem;
+            padding: 14px 8px;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-secondary);
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-body);
             border-bottom: 2px solid var(--border-light);
         }
         
-        /* 让总分表头也右对齐 */
-        .member-table th:nth-child(6) {
-            text-align: right;
-            padding-right: 12px;
-        }
-        
         .member-table td {
-            padding: 12px 6px;
+            padding: 14px 8px;
             border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
         }
         
         .member-table tr:last-child td {
             border-bottom: none;
         }
         
+        .member-table tr:hover {
+            background: var(--bg-body);
+        }
+        
+        /* 列宽定义 */
+        .member-table th:nth-child(1) { width: 50px; text-align: center; }
+        .member-table th:nth-child(2) { width: 140px; }
+        .member-table th:nth-child(3) { width: 70px; }
+        .member-table th:nth-child(4) { width: 90px; }
+        .member-table th:nth-child(5) { width: auto; }
+        .member-table th:nth-child(6) { width: 70px; text-align: right; padding-right: 16px; }
+        .member-table th:nth-child(7) { width: 60px; text-align: center; }
+        
+        .member-table td:nth-child(1) { text-align: center; color: var(--text-tertiary); font-weight: 500; }
+        .member-table td:nth-child(6) { text-align: right; padding-right: 16px; font-weight: 600; }
+        .member-table td:nth-child(7) { text-align: center; }
+        
         .rank-number {
             font-weight: 500;
-            color: var(--text-secondary);
-            width: 45px;
-            text-align: center;
+            color: var(--text-tertiary);
         }
         
         .name-cell {
-            min-width: 130px;
+            min-width: 140px;
         }
         
         .name-cn {
             font-weight: 600;
             font-size: 0.95rem;
             margin-bottom: 2px;
+            color: var(--text-primary);
         }
         
         .name-en {
             font-size: 0.65rem;
-            color: var(--text-secondary);
+            color: var(--text-tertiary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 120px;
+            max-width: 130px;
         }
         
         .info-cell {
             font-size: 0.85rem;
             color: var(--text-secondary);
-            width: 80px;
+            font-weight: 500;
         }
         
         .scores-cell {
-            max-width: 200px;
+            max-width: 220px;
         }
         
         .score-tags {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             flex-wrap: wrap;
         }
         
         .score-item {
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.65rem;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.7rem;
             font-weight: 500;
             background: var(--score-bg);
             color: var(--score-text);
+            border: 1px solid var(--border-light);
+            transition: all 0.2s;
+        }
+        
+        .score-item:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
         
         .score-item.has-score {
             background: var(--score-positive-bg);
             color: var(--score-positive-text);
+            border-color: transparent;
         }
         
         .score-date {
             opacity: 0.7;
+            margin-right: 2px;
         }
         
         .score-value {
@@ -623,76 +757,79 @@ html = '''<!DOCTYPE html>
             font-weight: 700;
             font-size: 1rem;
             color: var(--text-primary);
-            text-align: right;
-            width: 70px;
-            padding-right: 12px;
         }
         
         .reward-cell {
+            font-weight: 500;
+        }
+        
+        .reward-pass, .reward-fail {
+            padding: 4px 8px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+            min-width: 45px;
             text-align: center;
-            width: 60px;
         }
         
         .reward-pass {
             background: var(--reward-pass);
             color: var(--reward-pass-text);
-            padding: 4px 8px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: inline-block;
-            min-width: 45px;
         }
         
         .reward-fail {
             background: var(--reward-fail);
             color: var(--reward-fail-text);
-            padding: 4px 8px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            display: inline-block;
-            min-width: 45px;
         }
         
+        /* 奖励卡片 - 优化样式 */
         .reward-card {
             background: var(--bg-card);
-            border-radius: 24px;
-            padding: 20px;
-            margin-top: 30px;
+            border-radius: 28px;
+            padding: 24px;
+            margin-top: 32px;
             margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-light);
             border-left: 4px solid #fbbf24;
         }
         
         .reward-title {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 8px;
+            color: var(--text-primary);
         }
         
         .reward-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
         }
         
         .reward-item {
             background: var(--bg-body);
-            border-radius: 16px;
-            padding: 14px;
+            border-radius: 20px;
+            padding: 16px;
             display: flex;
-            align-items: center;
             gap: 12px;
+            border: 1px solid var(--border-light);
+            transition: transform 0.2s;
+        }
+        
+        .reward-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         
         .reward-rank-icon {
-            font-size: 1.8rem;
-            min-width: 40px;
+            font-size: 2rem;
+            min-width: 48px;
             text-align: center;
         }
         
@@ -703,58 +840,125 @@ html = '''<!DOCTYPE html>
         .reward-rank-text {
             font-weight: 700;
             font-size: 1rem;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            color: var(--text-primary);
         }
         
         .reward-desc {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         
         .reward-highlight {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--text-primary);
         }
         
         .reward-note {
             margin-top: 16px;
-            padding: 12px;
+            padding: 16px;
             background: var(--bg-body);
             border-radius: 16px;
             font-size: 0.85rem;
             color: var(--text-secondary);
             text-align: center;
-            border: 1px dashed var(--border-color);
+            border: 1px dashed var(--border-light);
         }
         
         .footer {
-            margin-top: 20px;
+            margin-top: 24px;
             text-align: center;
-            color: var(--text-secondary);
+            color: var(--text-tertiary);
             font-size: 0.75rem;
             padding: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+        
+        /* 移动端优化 */
+        @media (max-width: 768px) {
+            body { padding: 16px; }
+            
+            .rank-grid {
+                gap: 12px;
+            }
+            
+            .rank-card {
+                padding: 14px 10px;
+            }
+            
+            .rank-icon {
+                font-size: 1.6rem;
+            }
+            
+            .rank-score {
+                font-size: 1.1rem;
+            }
+            
+            .reward-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .group-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .group-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
         }
         
         @media (max-width: 640px) {
-            body { padding: 12px; }
-            .rank-grid { gap: 8px; }
-            .rank-card { padding: 12px 8px; }
-            .rank-icon { font-size: 1.5rem; }
-            .rank-name { font-size: 0.85rem; }
-            .rank-score { font-size: 1rem; }
-            .group-card { padding: 16px; }
-            .group-title { font-size: 1.1rem; }
-            .group-badge { padding: 4px 10px; font-size: 0.75rem; }
-            .member-table th { font-size: 0.65rem; padding: 8px 4px; }
-            .member-table td { padding: 10px 4px; font-size: 0.8rem; }
-            .reward-item { padding: 12px; }
-            .reward-rank-icon { font-size: 1.5rem; min-width: 35px; }
-            .total-cell { width: 60px; padding-right: 8px; }
-            .info-cell { width: 70px; }
-            .member-table th:nth-child(6) {
-                padding-right: 8px;
+            .rank-grid {
+                gap: 8px;
+            }
+            
+            .rank-card {
+                padding: 12px 8px;
+            }
+            
+            .rank-name {
+                font-size: 0.85rem;
+            }
+            
+            .rank-score {
+                font-size: 1rem;
+            }
+            
+            .rank-score small {
+                font-size: 0.65rem;
+            }
+            
+            .group-card {
+                padding: 20px;
+            }
+            
+            .group-title {
+                font-size: 1.2rem;
+            }
+            
+            .group-badge {
+                padding: 4px 12px;
+                font-size: 0.8rem;
+            }
+            
+            .member-table th {
+                padding: 10px 6px;
+                font-size: 0.65rem;
+            }
+            
+            .member-table td {
+                padding: 10px 6px;
+                font-size: 0.8rem;
+            }
+            
+            .member-table th:nth-child(6),
+            .member-table td:nth-child(6) {
+                padding-right: 12px;
             }
         }
     </style>
@@ -763,22 +967,26 @@ html = '''<!DOCTYPE html>
     <div class="container">
         <div class="header">
             <div class="header-top">
-                <h1>🏫 学长团分数板</h1>
+                <div class="title-section">
+                    <span class="title-icon">🏫</span>
+                    <h1>学长团分数板</h1>
+                </div>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                     <span>🌓</span>
-                    <span>夜间</span>
+                    <span>夜间模式</span>
                 </div>
             </div>
             <div class="subtitle">
-                <span>Prefects' Scoreboard</span>
+                <span>Prefects' Scoreboard · 奖励机制</span>
                 <span>''' + datetime.now().strftime('%Y.%m.%d %H:%M') + '''</span>
             </div>
             <div class="search-box">
-                <input type="text" id="search" placeholder="🔍 搜索姓名、英文名、班级或学号...">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search" placeholder="搜索姓名、英文名、班级或学号...">
             </div>
         </div>
 
-        <!-- 组排名卡片 - 带变化显示 -->
+        <!-- 组排名卡片 -->
         <div class="rank-grid">
 '''
 
@@ -823,6 +1031,7 @@ html += '''
 '''
 
 # 添加三个组
+group_emojis = {"星穹组": "✨", "夜曜组": "🌙", "沧澜组": "🌊"}
 for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     members = group_data[group_name]
     rank = group_rank[group_name]
@@ -832,11 +1041,14 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     html += '''
             <div class="group-card" data-group="''' + group_name + '''" id="''' + group_id + '''">
                 <div class="group-header">
-                    <div>
+                    <div class="group-title-section">
+                        <span class="group-emoji">''' + group_emojis[group_name] + '''</span>
                         <span class="group-title">''' + group_name + '''</span>
-                        <span style="font-size:0.75rem; color:var(--text-secondary); margin-left:6px;">平均 ''' + str(int(avg_score)) + '''</span>
                     </div>
-                    <span class="group-badge">第''' + str(rank) + '''名 · ''' + str(int(group_totals[group_name])) + '''分</span>
+                    <div class="group-stats">
+                        <span class="group-avg">平均 ''' + str(int(avg_score)) + '''</span>
+                        <span class="group-badge">第''' + str(rank) + '''名 · ''' + str(int(group_totals[group_name])) + '''分</span>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table class="member-table">
@@ -893,7 +1105,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += '''
         </div>
 
-        <!-- 奖励规则卡片 - 移到最下方 -->
+        <!-- 奖励规则卡片 -->
         <div class="reward-card">
             <div class="reward-title">
                 <span>🎁</span>
@@ -931,7 +1143,7 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间 · 显示较昨日变化 · 最近5次得分
+            👆 点击组排名卡片快速跳转 · 点击🌓切换夜间模式 · 显示较昨日变化 · 最近5次得分
         </div>
     </div>
 
@@ -988,4 +1200,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 功能：夜间模式 + 较昨日变化 + 奖励卡片 + 总分对齐")
+print("✨ 优化：精致排版 + 对齐优化 + 响应式设计")
