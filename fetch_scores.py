@@ -170,20 +170,24 @@ for g in group_data:
         avg = group_averages[g]
         
         if rank == 1:  # 第一名组别
-            p["reward_status"] = "✅ 达标" if p["total"] >= avg / 2 else "❌ 未达标"
+            p["reward_status"] = "✅" if p["total"] >= avg / 2 else "❌"
+            p["reward_text"] = "达标" if p["total"] >= avg / 2 else "未达标"
             p["reward_class"] = "reward-pass" if p["total"] >= avg / 2 else "reward-fail"
         elif rank == 2:  # 第二名组别
-            p["reward_status"] = "✅ 达标" if p["total"] >= avg else "❌ 未达标"
+            p["reward_status"] = "✅" if p["total"] >= avg else "❌"
+            p["reward_text"] = "达标" if p["total"] >= avg else "未达标"
             p["reward_class"] = "reward-pass" if p["total"] >= avg else "reward-fail"
         else:  # 第三名组别
             # 找出组内前三名
             top3 = sorted(group_data[g], key=lambda x: x["total"], reverse=True)[:3]
             top3_names = [t["name_cn"] for t in top3]
             if p["name_cn"] in top3_names:
-                p["reward_status"] = "✅ 达标"
+                p["reward_status"] = "✅"
+                p["reward_text"] = "达标"
                 p["reward_class"] = "reward-pass"
             else:
-                p["reward_status"] = "❌ 未达标"
+                p["reward_status"] = "❌"
+                p["reward_text"] = "未达标"
                 p["reward_class"] = "reward-fail"
 
 # 组别颜色配置
@@ -201,130 +205,67 @@ html = f"""<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>训育处 - 学长团分数板 · 奖励机制</title>
     <style>
-
         * {{
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-  -webkit-focus-ring-color: rgba(0,0,0,0);
-  outline: none !important;
-}}
-
-        * {{
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }}
+        
         body {{
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
             padding: 16px;
             color: #1e293b;
         }}
+        
         .container {{
             max-width: 1200px;
             margin: 0 auto;
         }}
         
-        /* 头部 */
+        /* 头部 - 简洁干净 */
         .header {{
             background: white;
             border-radius: 24px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            border: 1px solid #eef2f6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
         }}
+        
         h1 {{
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 600;
-            letter-spacing: -0.02em;
+            color: #1e293b;
             margin-bottom: 4px;
-            background: linear-gradient(135deg, #1e293b, #334155);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }}
+        
         .subtitle {{
             display: flex;
             justify-content: space-between;
-            align-items: center;
             color: #64748b;
             font-size: 0.85rem;
-            margin-top: 4px;
         }}
+        
         .search-box {{
             margin-top: 16px;
         }}
+        
         #search {{
             width: 100%;
             padding: 14px 18px;
-            border: 1.5px solid #e2e8f0;
+            border: 1px solid #e2e8f0;
             border-radius: 40px;
             font-size: 1rem;
-            background: white;
+            background: #f8fafc;
             transition: all 0.2s;
         }}
+        
         #search:focus {{
             outline: none;
             border-color: #94a3b8;
-            box-shadow: 0 0 0 3px rgba(148,163,184,0.1);
-        }}
-        
-        /* 奖励规则卡片 */
-        .reward-card {{
             background: white;
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            border: 1px solid #eef2f6;
-            border-left: 4px solid #fbbf24;
-        }}
-        .reward-title {{
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #1e293b;
-        }}
-        .reward-grid {{
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 12px;
-        }}
-        .reward-item {{
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 12px;
-        }}
-        .reward-rank {{
-            font-weight: 700;
-            font-size: 1rem;
-            margin-bottom: 8px;
-            padding-bottom: 4px;
-            border-bottom: 2px solid;
-        }}
-        .reward-rank[data-rank="1"] {{ border-bottom-color: #fbbf24; }}
-        .reward-rank[data-rank="2"] {{ border-bottom-color: #a78bfa; }}
-        .reward-rank[data-rank="3"] {{ border-bottom-color: #60a5fa; }}
-        .reward-desc {{
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 4px;
-        }}
-        .reward-highlight {{
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #1e293b;
-        }}
-        .reward-note {{
-            font-size: 0.85rem;
-            color: #64748b;
-            text-align: center;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed #e2e8f0;
         }}
         
         /* 组排名卡片 */
@@ -334,72 +275,81 @@ html = f"""<!DOCTYPE html>
             gap: 12px;
             margin-bottom: 24px;
         }}
+        
         .rank-card {{
             background: white;
-            border-radius: 20px;
-            padding: 16px 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            border: 1px solid #eef2f6;
+            border-radius: 18px;
+            padding: 14px 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #edf2f7;
             cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            border-left: 4px solid;
+            transition: all 0.2s;
         }}
+        
         .rank-card:active {{
-            transform: scale(0.98);
+            transform: scale(0.97);
         }}
+        
         .rank-card[data-group="星穹组"] {{
-            background: linear-gradient(135deg, #fef3c7, white);
-            border-left: 4px solid #fbbf24;
+            border-left-color: #fbbf24;
+            background: linear-gradient(to right, #fef9e7, white);
         }}
         .rank-card[data-group="夜曜组"] {{
-            background: linear-gradient(135deg, #ede9fe, white);
-            border-left: 4px solid #a78bfa;
+            border-left-color: #a78bfa;
+            background: linear-gradient(to right, #f5f0ff, white);
         }}
         .rank-card[data-group="沧澜组"] {{
-            background: linear-gradient(135deg, #dbeafe, white);
-            border-left: 4px solid #60a5fa;
+            border-left-color: #60a5fa;
+            background: linear-gradient(to right, #f0f7ff, white);
         }}
+        
         .rank-icon {{
-            font-size: 2rem;
-            line-height: 1;
+            font-size: 1.8rem;
         }}
+        
         .rank-info {{
             flex: 1;
         }}
+        
         .rank-name {{
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             margin-bottom: 2px;
         }}
+        
         .rank-score {{
             font-weight: 700;
             font-size: 1.2rem;
             color: #0f172a;
         }}
+        
         .rank-score small {{
             font-size: 0.7rem;
             font-weight: 400;
             color: #64748b;
-            margin-left: 2px;
         }}
         
-        /* 三组布局 */
+        /* 组卡片 */
         .groups {{
             display: flex;
             flex-direction: column;
             gap: 20px;
         }}
+        
         .group-card {{
             background: white;
             border-radius: 24px;
             padding: 20px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
-            border: 1px solid #eef2f6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
             scroll-margin-top: 10px;
             border-top: 4px solid;
         }}
+        
         .group-card[data-group="星穹组"] {{
             border-top-color: #fbbf24;
         }}
@@ -409,6 +359,7 @@ html = f"""<!DOCTYPE html>
         .group-card[data-group="沧澜组"] {{
             border-top-color: #60a5fa;
         }}
+        
         .group-header {{
             display: flex;
             justify-content: space-between;
@@ -417,11 +368,12 @@ html = f"""<!DOCTYPE html>
             padding-bottom: 12px;
             border-bottom: 2px solid #f1f5f9;
         }}
+        
         .group-title {{
             font-size: 1.3rem;
             font-weight: 600;
-            letter-spacing: -0.01em;
         }}
+        
         .group-badge {{
             padding: 6px 14px;
             border-radius: 40px;
@@ -429,6 +381,7 @@ html = f"""<!DOCTYPE html>
             font-weight: 500;
             color: white;
         }}
+        
         .group-card[data-group="星穹组"] .group-badge {{
             background: #fbbf24;
             color: #1e293b;
@@ -440,92 +393,100 @@ html = f"""<!DOCTYPE html>
             background: #60a5fa;
         }}
         
-        /* 表格样式 */
+        /* 表格 - 手机优化 */
+        .table-container {{
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }}
+        
         .member-table {{
             width: 100%;
             border-collapse: collapse;
+            min-width: 600px;
+            font-size: 0.9rem;
         }}
+        
         .member-table th {{
             text-align: left;
-            padding: 8px 4px;
-            font-size: 0.75rem;
+            padding: 10px 6px;
+            font-size: 0.7rem;
             font-weight: 600;
             color: #64748b;
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            border-bottom: 2px solid #f1f5f9;
         }}
+        
         .member-table td {{
-            padding: 10px 4px;
+            padding: 12px 6px;
             border-bottom: 1px solid #f1f5f9;
         }}
+        
         .member-table tr:last-child td {{
             border-bottom: none;
         }}
         
-        /* 序号 */
         .rank-number {{
             font-weight: 500;
             color: #94a3b8;
-            width: 35px;
+            width: 40px;
         }}
         
-        /* 姓名信息 */
         .name-cell {{
-            min-width: 110px;
+            min-width: 120px;
         }}
+        
         .name-cn {{
             font-weight: 600;
             font-size: 0.95rem;
+            margin-bottom: 2px;
         }}
+        
         .name-en {{
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: #64748b;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 120px;
+            max-width: 110px;
         }}
         
-        /* 班级学号 */
         .info-cell {{
             font-size: 0.85rem;
             color: #475569;
-            white-space: nowrap;
         }}
         
-        /* 分数标签 */
         .scores-cell {{
-            max-width: 200px;
+            max-width: 180px;
         }}
+        
         .score-tags {{
             display: flex;
             gap: 4px;
             flex-wrap: wrap;
         }}
+        
         .score-item {{
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            white-space: nowrap;
             background: #f1f5f9;
             color: #334155;
         }}
+        
         .score-item.has-score {{
             background: #e0f2fe;
             color: #0369a1;
         }}
+        
         .score-date {{
             opacity: 0.7;
         }}
+        
         .score-value {{
             font-weight: 700;
         }}
         
-        /* 总分 */
         .total-cell {{
             font-weight: 700;
             font-size: 1rem;
@@ -536,57 +497,167 @@ html = f"""<!DOCTYPE html>
         
         /* 奖励状态 */
         .reward-cell {{
-            font-weight: 500;
-            font-size: 0.8rem;
             text-align: center;
-            min-width: 70px;
+            width: 50px;
         }}
+        
         .reward-pass {{
             background: #dcfce7;
             color: #166534;
             padding: 4px 8px;
-            border-radius: 20px;
+            border-radius: 30px;
+            font-size: 0.7rem;
             font-weight: 600;
+            display: inline-block;
         }}
+        
         .reward-fail {{
             background: #fee2e2;
             color: #991b1b;
             padding: 4px 8px;
-            border-radius: 20px;
+            border-radius: 30px;
+            font-size: 0.7rem;
             font-weight: 600;
+            display: inline-block;
+        }}
+        
+        /* 奖励规则卡片 - 移到最下方 */
+        .reward-card {{
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #edf2f7;
+            border-left: 4px solid #fbbf24;
+        }}
+        
+        .reward-title {{
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }}
+        
+        .reward-grid {{
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }}
+        
+        .reward-item {{
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }}
+        
+        .reward-rank-icon {{
+            font-size: 1.8rem;
+            min-width: 40px;
+            text-align: center;
+        }}
+        
+        .reward-content {{
+            flex: 1;
+        }}
+        
+        .reward-rank-text {{
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 2px;
+        }}
+        
+        .reward-desc {{
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 2px;
+        }}
+        
+        .reward-highlight {{
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #0f172a;
+        }}
+        
+        .reward-note {{
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            color: #475569;
+            text-align: center;
+            border: 1px dashed #e2e8f0;
         }}
         
         .footer {{
-            margin-top: 32px;
+            margin-top: 20px;
             text-align: center;
             color: #94a3b8;
             font-size: 0.75rem;
             padding: 16px;
-            border-top: 1px solid #e2e8f0;
         }}
         
-        /* 移动端优化 */
+        /* 手机端优化 */
         @media (max-width: 640px) {{
             body {{ padding: 12px; }}
-            .rank-grid {{ gap: 8px; }}
-            .rank-card {{ padding: 12px 8px; }}
-            .rank-icon {{ font-size: 1.6rem; }}
-            .score-tags {{ gap: 2px; }}
-            .score-item {{ padding: 2px 6px; font-size: 0.65rem; }}
-            .member-table th {{
-                font-size: 0.7rem;
-            }}
-            .member-table td {{
-                padding: 8px 2px;
-                font-size: 0.85rem;
-            }}
-            .reward-grid {{
-                grid-template-columns: 1fr;
+            
+            .rank-grid {{
                 gap: 8px;
             }}
-            .reward-cell {{
-                min-width: 60px;
-                font-size: 0.7rem;
+            
+            .rank-card {{
+                padding: 12px 8px;
+            }}
+            
+            .rank-icon {{
+                font-size: 1.5rem;
+            }}
+            
+            .rank-name {{
+                font-size: 0.85rem;
+            }}
+            
+            .rank-score {{
+                font-size: 1rem;
+            }}
+            
+            .group-card {{
+                padding: 16px;
+            }}
+            
+            .group-title {{
+                font-size: 1.1rem;
+            }}
+            
+            .group-badge {{
+                padding: 4px 10px;
+                font-size: 0.75rem;
+            }}
+            
+            .member-table th {{
+                font-size: 0.65rem;
+                padding: 8px 4px;
+            }}
+            
+            .member-table td {{
+                padding: 10px 4px;
+                font-size: 0.8rem;
+            }}
+            
+            .reward-item {{
+                padding: 12px;
+            }}
+            
+            .reward-rank-icon {{
+                font-size: 1.5rem;
+                min-width: 35px;
             }}
         }}
     </style>
@@ -594,41 +665,13 @@ html = f"""<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏫 学长团分数板 · 奖励机制</h1>
+            <h1>🏫 学长团分数板</h1>
             <div class="subtitle">
-                <span>Prefects' Scoreboard · Reward System</span>
+                <span>Prefects' Scoreboard</span>
                 <span>{datetime.now().strftime('%Y.%m.%d %H:%M')}</span>
             </div>
             <div class="search-box">
                 <input type="text" id="search" placeholder="🔍 搜索姓名、英文名、班级或学号...">
-            </div>
-        </div>
-
-        <!-- 奖励规则卡片 -->
-        <div class="reward-card">
-            <div class="reward-title">
-                <span>🎁</span>
-                <span>本轮奖励机制</span>
-            </div>
-            <div class="reward-grid">
-                <div class="reward-item">
-                    <div class="reward-rank" data-rank="1">🥇 第一名组别</div>
-                    <div class="reward-desc">个人分数 ≥ 组平均分一半</div>
-                    <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
-                </div>
-                <div class="reward-item">
-                    <div class="reward-rank" data-rank="2">🥈 第二名组别</div>
-                    <div class="reward-desc">个人分数 ≥ 组平均分</div>
-                    <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
-                </div>
-                <div class="reward-item">
-                    <div class="reward-rank" data-rank="3">🥉 第三名组别</div>
-                    <div class="reward-desc">个人分数 组内前三名</div>
-                    <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
-                </div>
-            </div>
-            <div class="reward-note">
-                ⚡ 第一名组别达标者额外获得一份奖励 · 公平原则，不负每一位付出的学长
             </div>
         </div>
 
@@ -663,7 +706,6 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     members = group_data[group_name]
     rank = group_rank[group_name]
     group_id = group_ids[group_name]
-    color = group_colors[group_name]
     avg_score = group_averages[group_name]
     
     html += f"""
@@ -671,29 +713,29 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                 <div class="group-header">
                     <div>
                         <span class="group-title">{group_name}</span>
-                        <span style="font-size:0.8rem; color:#64748b; margin-left:8px;">平均分 {int(avg_score)}</span>
+                        <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">平均 {int(avg_score)}</span>
                     </div>
                     <span class="group-badge">第{rank}名 · {int(group_totals[group_name])}分</span>
                 </div>
-                <table class="member-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>姓名</th>
-                            <th>班级</th>
-                            <th>学号</th>
-                            <th>每日得分</th>
-                            <th>总分</th>
-                            <th>奖励</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <div class="table-container">
+                    <table class="member-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>姓名</th>
+                                <th>班级</th>
+                                <th>学号</th>
+                                <th>得分</th>
+                                <th>总分</th>
+                                <th>奖</th>
+                            </tr>
+                        </thead>
+                        <tbody>
     """
     
     for member in members:
         # 生成每日得分标签
         score_tags = ""
-        # 显示最近5个有分数的日期
         sorted_dates = sorted(member["score_dict"].keys())
         for date in sorted_dates[-5:]:
             score = member["score_dict"][date]
@@ -703,7 +745,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
             score_tags = '<span class="score-item">-</span>'
         
         # 截断英文名
-        name_en_short = member['name_en'][:20] + "..." if len(member['name_en']) > 20 else member['name_en']
+        name_en_short = member['name_en'][:15] + "…" if len(member['name_en']) > 15 else member['name_en']
         
         html += f"""
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
@@ -721,13 +763,52 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         """
     
     html += """
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
     """
 
 html += """
         </div>
+
+        <!-- 奖励规则卡片 - 移到最下方 -->
+        <div class="reward-card">
+            <div class="reward-title">
+                <span>🎁</span>
+                <span>本轮奖励机制</span>
+            </div>
+            <div class="reward-grid">
+                <div class="reward-item">
+                    <div class="reward-rank-icon">🥇</div>
+                    <div class="reward-content">
+                        <div class="reward-rank-text">第一名组别</div>
+                        <div class="reward-desc">个人分数 ≥ 组平均分一半</div>
+                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                    </div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-rank-icon">🥈</div>
+                    <div class="reward-content">
+                        <div class="reward-rank-text">第二名组别</div>
+                        <div class="reward-desc">个人分数 ≥ 组平均分</div>
+                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                    </div>
+                </div>
+                <div class="reward-item">
+                    <div class="reward-rank-icon">🥉</div>
+                    <div class="reward-content">
+                        <div class="reward-rank-text">第三名组别</div>
+                        <div class="reward-desc">个人分数 组内前三名</div>
+                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
+                    </div>
+                </div>
+            </div>
+            <div class="reward-note">
+                ⚡ 第一名组别达标者额外获得一份奖励 · 公平原则，不负每一位付出的学长
+            </div>
+        </div>
+
         <div class="footer">
             👆 点击组排名卡片快速跳转 · 显示最近5次得分 · ✅达标可免搬椅子+减免操步
         </div>
@@ -764,7 +845,7 @@ print("\n📊 奖励统计:")
 for g in ["星穹组", "夜曜组", "沧澜组"]:
     if g in group_data:
         members = group_data[g]
-        pass_count = sum(1 for m in members if "✅" in m["reward_status"])
+        pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名")
-print("✨ 新增功能：奖励机制 + 达标状态显示")
+print("✨ 奖励卡片已移到最下方 + 手机版美化")
