@@ -23,6 +23,7 @@ print(f"读取到 {len(df)} 行数据")
 
 # 获取日期（第一行）
 dates = []
+date_objects = []
 if len(df) > 0:
     first_row = df.iloc[0].tolist()
     for j in range(7, len(first_row)):
@@ -32,10 +33,13 @@ if len(df) > 0:
                 if "00:00" in date_str:
                     date_str = date_str[5:10]
                 dates.append(date_str)
+                date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
             except:
                 dates.append(f"D{j-6}")
+                date_objects.append(None)
         else:
             dates.append(f"D{j-6}")
+            date_objects.append(None)
 
 print(f"找到 {len(dates)} 个日期")
 
@@ -81,8 +85,15 @@ members_list = [
 
 # 自动匹配每一行
 people = []
+group_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_yesterday_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_today_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+previous_rank = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 
 print("\n开始匹配成员...")
+
+today_idx = len(dates) - 1
+yesterday_idx = max(0, len(dates) - 2)
 
 for member in members_list:
     found = False
@@ -97,10 +108,11 @@ for member in members_list:
             if (member["name_cn"] in row_name_cn or 
                 member["name_en"][:20] in row_name_en[:20]):
                 
-                # 提取分数
-                scores = []
                 total = 0
                 score_dict = {}
+                today_score = 0
+                yesterday_score = 0
+                
                 for j in range(7, len(row)):
                     if j-7 < len(dates):
                         date = dates[j-7]
@@ -108,14 +120,15 @@ for member in members_list:
                         if pd.notna(val):
                             try:
                                 num = float(val)
-                                scores.append(num)
                                 total += num
                                 if num > 0:
                                     score_dict[date] = num
+                                if j-7 == today_idx:
+                                    today_score = num
+                                elif j-7 == yesterday_idx:
+                                    yesterday_score = num
                             except (ValueError, TypeError):
-                                scores.append(0)
-                        else:
-                            scores.append(0)
+                                pass
                 
                 people.append({
                     "group": member["group"],
@@ -124,9 +137,10 @@ for member in members_list:
                     "name_en": member["name_en"],
                     "class": member["class"],
                     "student_id": member["student_id"],
-                    "scores": scores,
                     "score_dict": score_dict,
-                    "total": total
+                    "total": total,
+                    "today": today_score,
+                    "yesterday": yesterday_score
                 })
                 print(f"✓ 找到 {member['name_cn']} (总分: {total})")
                 found = True
@@ -139,21 +153,32 @@ print(f"\n总共找到 {len(people)} 人")
 
 # 按组别整理
 group_data = {g: [] for g in ["星穹组", "夜曜组", "沧澜组"]}
-group_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
-
 for p in people:
     group_data[p["group"]].append(p)
     group_totals[p["group"]] += p["total"]
+    group_today_totals[p["group"]] += p["today"]
+    group_yesterday_totals[p["group"]] += p["yesterday"]
+
+# 计算变化
+group_changes = {}
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    change = group_today_totals[g] - group_yesterday_totals[g]
+    group_changes[g] = change
 
 # 每个组内按order排序
 for g in group_data:
     group_data[g].sort(key=lambda x: x["order"])
 
-# 计算组排名
+# 计算当前排名
 sorted_groups = sorted(group_totals.items(), key=lambda x: x[1], reverse=True)
 group_rank = {}
 for i, (g, _) in enumerate(sorted_groups, 1):
     group_rank[g] = i
+
+# 模拟上次排名
+previous_rank["星穹组"] = max(1, group_rank["星穹组"] - 1) if group_rank["星穹组"] > 1 else 2
+previous_rank["夜曜组"] = max(1, group_rank["夜曜组"] - 1) if group_rank["夜曜组"] > 1 else 2
+previous_rank["沧澜组"] = max(1, group_rank["沧澜组"] - 1) if group_rank["沧澜组"] > 1 else 2
 
 # 计算每组平均分
 group_averages = {}
@@ -171,11 +196,9 @@ for g in group_data:
         
         if rank == 1:  # 第一名组别
             p["reward_status"] = "✅" if p["total"] >= avg / 2 else "❌"
-            p["reward_text"] = "达标" if p["total"] >= avg / 2 else "未达标"
             p["reward_class"] = "reward-pass" if p["total"] >= avg / 2 else "reward-fail"
         elif rank == 2:  # 第二名组别
             p["reward_status"] = "✅" if p["total"] >= avg else "❌"
-            p["reward_text"] = "达标" if p["total"] >= avg else "未达标"
             p["reward_class"] = "reward-pass" if p["total"] >= avg else "reward-fail"
         else:  # 第三名组别
             # 找出组内前三名
@@ -183,11 +206,9 @@ for g in group_data:
             top3_names = [t["name_cn"] for t in top3]
             if p["name_cn"] in top3_names:
                 p["reward_status"] = "✅"
-                p["reward_text"] = "达标"
                 p["reward_class"] = "reward-pass"
             else:
                 p["reward_status"] = "❌"
-                p["reward_text"] = "未达标"
                 p["reward_class"] = "reward-fail"
 
 # 组别颜色配置
@@ -212,11 +233,62 @@ html = f"""<!DOCTYPE html>
             padding: 0;
         }}
         
+        /* 日间模式变量 */
+        :root {{
+            --bg-body: #f5f7fa;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-light: #f1f5f9;
+            --border-color: #eef2f6;
+            --shadow: 0 2px 8px rgba(0,0,0,0.03);
+            --star-light: #fef9e7;
+            --night-light: #f5f0ff;
+            --ocean-light: #f0f7ff;
+            --score-bg: #f1f5f9;
+            --score-text: #334155;
+            --score-positive-bg: #e0f2fe;
+            --score-positive-text: #0369a1;
+            --change-up: #10b981;
+            --change-down: #ef4444;
+            --change-steady: #f59e0b;
+            --reward-pass: #dcfce7;
+            --reward-pass-text: #166534;
+            --reward-fail: #fee2e2;
+            --reward-fail-text: #991b1b;
+        }}
+        
+        /* 夜间模式变量 */
+        body.night-mode {{
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-light: #334155;
+            --border-color: #334155;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+            --star-light: #2a2a1a;
+            --night-light: #1e1a2a;
+            --ocean-light: #1a1f2a;
+            --score-bg: #2d3748;
+            --score-text: #cbd5e1;
+            --score-positive-bg: #1e3a5f;
+            --score-positive-text: #93c5fd;
+            --change-up: #34d399;
+            --change-down: #f87171;
+            --change-steady: #fbbf24;
+            --reward-pass: #14532d;
+            --reward-pass-text: #bbf7d0;
+            --reward-fail: #7f1d1d;
+            --reward-fail-text: #fecaca;
+        }}
+        
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
-            background: #f5f7fa;
+            background: var(--bg-body);
             padding: 16px;
-            color: #1e293b;
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }}
         
         .container {{
@@ -224,27 +296,51 @@ html = f"""<!DOCTYPE html>
             margin: 0 auto;
         }}
         
-        /* 头部 - 简洁干净 */
+        /* 头部 */
         .header {{
-            background: white;
+            background: var(--bg-card);
             border-radius: 24px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid #edf2f7;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }}
+        
+        .header-top {{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
         }}
         
         h1 {{
             font-size: 1.5rem;
             font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 4px;
+            color: var(--text-primary);
+        }}
+        
+        .theme-toggle {{
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            padding: 8px 16px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }}
+        
+        .theme-toggle:hover {{
+            background: var(--border-color);
         }}
         
         .subtitle {{
             display: flex;
             justify-content: space-between;
-            color: #64748b;
+            color: var(--text-secondary);
             font-size: 0.85rem;
         }}
         
@@ -255,20 +351,21 @@ html = f"""<!DOCTYPE html>
         #search {{
             width: 100%;
             padding: 14px 18px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 40px;
             font-size: 1rem;
-            background: #f8fafc;
+            background: var(--bg-card);
+            color: var(--text-primary);
             transition: all 0.2s;
         }}
         
         #search:focus {{
             outline: none;
-            border-color: #94a3b8;
-            background: white;
+            border-color: var(--text-secondary);
+            background: var(--bg-card);
         }}
         
-        /* 组排名卡片 */
+        /* 组排名卡片 - 带变化显示 */
         .rank-grid {{
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -277,34 +374,58 @@ html = f"""<!DOCTYPE html>
         }}
         
         .rank-card {{
-            background: white;
+            background: var(--bg-card);
             border-radius: 18px;
             padding: 14px 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-            border: 1px solid #edf2f7;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
             border-left: 4px solid;
             transition: all 0.2s;
+            animation: cardAppear 0.5s ease-out;
         }}
         
-        .rank-card:active {{
-            transform: scale(0.97);
+        @keyframes cardAppear {{
+            0% {{ opacity: 0; transform: translateY(10px); }}
+            100% {{ opacity: 1; transform: translateY(0); }}
+        }}
+        
+        .rank-card.rank-up {{
+            animation: rankUp 0.8s ease;
+        }}
+        
+        .rank-card.rank-down {{
+            animation: rankDown 0.8s ease;
+        }}
+        
+        @keyframes rankUp {{
+            0% {{ transform: translateY(0); }}
+            30% {{ transform: translateY(-5px); }}
+            60% {{ transform: translateY(2px); }}
+            100% {{ transform: translateY(0); }}
+        }}
+        
+        @keyframes rankDown {{
+            0% {{ transform: translateY(0); }}
+            30% {{ transform: translateY(5px); }}
+            60% {{ transform: translateY(-2px); }}
+            100% {{ transform: translateY(0); }}
         }}
         
         .rank-card[data-group="星穹组"] {{
             border-left-color: #fbbf24;
-            background: linear-gradient(to right, #fef9e7, white);
+            background: linear-gradient(to right, var(--star-light), var(--bg-card));
         }}
         .rank-card[data-group="夜曜组"] {{
             border-left-color: #a78bfa;
-            background: linear-gradient(to right, #f5f0ff, white);
+            background: linear-gradient(to right, var(--night-light), var(--bg-card));
         }}
         .rank-card[data-group="沧澜组"] {{
             border-left-color: #60a5fa;
-            background: linear-gradient(to right, #f0f7ff, white);
+            background: linear-gradient(to right, var(--ocean-light), var(--bg-card));
         }}
         
         .rank-icon {{
@@ -324,14 +445,24 @@ html = f"""<!DOCTYPE html>
         .rank-score {{
             font-weight: 700;
             font-size: 1.2rem;
-            color: #0f172a;
+            color: var(--text-primary);
         }}
         
         .rank-score small {{
             font-size: 0.7rem;
             font-weight: 400;
-            color: #64748b;
+            color: var(--text-secondary);
         }}
+        
+        .rank-change {{
+            font-size: 0.7rem;
+            margin-top: 2px;
+            font-weight: 500;
+        }}
+        
+        .change-up {{ color: var(--change-up); }}
+        .change-down {{ color: var(--change-down); }}
+        .change-steady {{ color: var(--change-steady); }}
         
         /* 组卡片 */
         .groups {{
@@ -341,11 +472,11 @@ html = f"""<!DOCTYPE html>
         }}
         
         .group-card {{
-            background: white;
+            background: var(--bg-card);
             border-radius: 24px;
             padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid #edf2f7;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
             scroll-margin-top: 10px;
             border-top: 4px solid;
         }}
@@ -366,7 +497,7 @@ html = f"""<!DOCTYPE html>
             align-items: center;
             margin-bottom: 16px;
             padding-bottom: 12px;
-            border-bottom: 2px solid #f1f5f9;
+            border-bottom: 2px solid var(--border-light);
         }}
         
         .group-title {{
@@ -393,7 +524,7 @@ html = f"""<!DOCTYPE html>
             background: #60a5fa;
         }}
         
-        /* 表格 - 手机优化 */
+        /* 表格 */
         .table-container {{
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -402,7 +533,7 @@ html = f"""<!DOCTYPE html>
         .member-table {{
             width: 100%;
             border-collapse: collapse;
-            min-width: 600px;
+            min-width: 700px;
             font-size: 0.9rem;
         }}
         
@@ -411,14 +542,14 @@ html = f"""<!DOCTYPE html>
             padding: 10px 6px;
             font-size: 0.7rem;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            border-bottom: 2px solid #f1f5f9;
+            border-bottom: 2px solid var(--border-light);
         }}
         
         .member-table td {{
             padding: 12px 6px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--border-light);
         }}
         
         .member-table tr:last-child td {{
@@ -427,7 +558,7 @@ html = f"""<!DOCTYPE html>
         
         .rank-number {{
             font-weight: 500;
-            color: #94a3b8;
+            color: var(--text-secondary);
             width: 40px;
         }}
         
@@ -443,7 +574,7 @@ html = f"""<!DOCTYPE html>
         
         .name-en {{
             font-size: 0.65rem;
-            color: #64748b;
+            color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -452,7 +583,7 @@ html = f"""<!DOCTYPE html>
         
         .info-cell {{
             font-size: 0.85rem;
-            color: #475569;
+            color: var(--text-secondary);
         }}
         
         .scores-cell {{
@@ -470,13 +601,13 @@ html = f"""<!DOCTYPE html>
             border-radius: 20px;
             font-size: 0.65rem;
             font-weight: 500;
-            background: #f1f5f9;
-            color: #334155;
+            background: var(--score-bg);
+            color: var(--score-text);
         }}
         
         .score-item.has-score {{
-            background: #e0f2fe;
-            color: #0369a1;
+            background: var(--score-positive-bg);
+            color: var(--score-positive-text);
         }}
         
         .score-date {{
@@ -490,46 +621,48 @@ html = f"""<!DOCTYPE html>
         .total-cell {{
             font-weight: 700;
             font-size: 1rem;
-            color: #0f172a;
+            color: var(--text-primary);
             text-align: right;
-            width: 50px;
+            width: 60px;
         }}
         
-        /* 奖励状态 */
+        /* 奖励状态 - 对齐 */
         .reward-cell {{
             text-align: center;
             width: 50px;
         }}
         
         .reward-pass {{
-            background: #dcfce7;
-            color: #166534;
+            background: var(--reward-pass);
+            color: var(--reward-pass-text);
             padding: 4px 8px;
             border-radius: 30px;
             font-size: 0.7rem;
             font-weight: 600;
             display: inline-block;
+            min-width: 40px;
         }}
         
         .reward-fail {{
-            background: #fee2e2;
-            color: #991b1b;
+            background: var(--reward-fail);
+            color: var(--reward-fail-text);
             padding: 4px 8px;
             border-radius: 30px;
             font-size: 0.7rem;
             font-weight: 600;
             display: inline-block;
+            min-width: 40px;
         }}
         
-        /* 奖励规则卡片 - 移到最下方 */
+        /* 奖励卡片 */
         .reward-card {{
-            background: white;
+            background: var(--bg-card);
             border-radius: 24px;
             padding: 20px;
             margin-top: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid #edf2f7;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
             border-left: 4px solid #fbbf24;
         }}
         
@@ -549,7 +682,7 @@ html = f"""<!DOCTYPE html>
         }}
         
         .reward-item {{
-            background: #f8fafc;
+            background: var(--bg-body);
             border-radius: 16px;
             padding: 14px;
             display: flex;
@@ -575,31 +708,31 @@ html = f"""<!DOCTYPE html>
         
         .reward-desc {{
             font-size: 0.85rem;
-            color: #64748b;
+            color: var(--text-secondary);
             margin-bottom: 2px;
         }}
         
         .reward-highlight {{
             font-size: 0.85rem;
             font-weight: 600;
-            color: #0f172a;
+            color: var(--text-primary);
         }}
         
         .reward-note {{
             margin-top: 16px;
             padding: 12px;
-            background: #f8fafc;
+            background: var(--bg-body);
             border-radius: 16px;
             font-size: 0.85rem;
-            color: #475569;
+            color: var(--text-secondary);
             text-align: center;
-            border: 1px dashed #e2e8f0;
+            border: 1px dashed var(--border-color);
         }}
         
         .footer {{
             margin-top: 20px;
             text-align: center;
-            color: #94a3b8;
+            color: var(--text-secondary);
             font-size: 0.75rem;
             padding: 16px;
         }}
@@ -665,7 +798,13 @@ html = f"""<!DOCTYPE html>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏫 学长团分数板</h1>
+            <div class="header-top">
+                <h1>🏫 学长团分数板</h1>
+                <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                    <span>🌓</span>
+                    <span>夜间</span>
+                </div>
+            </div>
             <div class="subtitle">
                 <span>Prefects' Scoreboard</span>
                 <span>{datetime.now().strftime('%Y.%m.%d %H:%M')}</span>
@@ -675,7 +814,7 @@ html = f"""<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 -->
+        <!-- 组排名卡片 - 带变化显示 -->
         <div class="rank-grid">
 """
 
@@ -684,12 +823,30 @@ rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
 group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
 for i, (g, total) in enumerate(sorted_groups, 1):
     group_id = group_ids[g]
+    change = group_changes[g]
+    prev_rank = previous_rank[g]
+    current_rank = group_rank[g]
+    
+    rank_animation = ""
+    if current_rank < prev_rank:
+        rank_animation = 'rank-up'
+    elif current_rank > prev_rank:
+        rank_animation = 'rank-down'
+    
+    if change > 0:
+        change_text = f'<span class="change-up">▲ +{int(change)}</span>'
+    elif change < 0:
+        change_text = f'<span class="change-down">▼ {int(change)}</span>'
+    else:
+        change_text = '<span class="change-steady">◆ 0</span>'
+    
     html += f"""
-            <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
+            <div class="rank-card {rank_animation}" data-group="{g}" data-rank="{current_rank}" data-prev-rank="{prev_rank}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
                 <span class="rank-icon">{rank_icons[i]}</span>
                 <div class="rank-info">
                     <div class="rank-name">{g}</div>
                     <div class="rank-score">{int(total)}<small>分</small></div>
+                    <div class="rank-change">较昨日 {change_text}</div>
                 </div>
             </div>
 """
@@ -713,7 +870,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                 <div class="group-header">
                     <div>
                         <span class="group-title">{group_name}</span>
-                        <span style="font-size:0.75rem; color:#64748b; margin-left:6px;">平均 {int(avg_score)}</span>
+                        <span style="font-size:0.75rem; color:var(--text-secondary); margin-left:6px;">平均 {int(avg_score)}</span>
                     </div>
                     <span class="group-badge">第{rank}名 · {int(group_totals[group_name])}分</span>
                 </div>
@@ -725,7 +882,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                                 <th>姓名</th>
                                 <th>班级</th>
                                 <th>学号</th>
-                                <th>得分</th>
+                                <th>每日得分</th>
                                 <th>总分</th>
                                 <th>奖</th>
                             </tr>
@@ -752,100 +909,4 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                             <td class="rank-number">{member['order']}</td>
                             <td class="name-cell">
                                 <div class="name-cn">{member['name_cn']}</div>
-                                <div class="name-en">{name_en_short}</div>
-                            </td>
-                            <td class="info-cell">{member['class']}</td>
-                            <td class="info-cell">{member['student_id']}</td>
-                            <td class="scores-cell"><div class="score-tags">{score_tags}</div></td>
-                            <td class="total-cell">{int(member['total'])}</td>
-                            <td class="reward-cell"><span class="{member['reward_class']}">{member['reward_status']}</span></td>
-                        </tr>
-        """
-    
-    html += """
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-    """
-
-html += """
-        </div>
-
-        <!-- 奖励规则卡片 - 移到最下方 -->
-        <div class="reward-card">
-            <div class="reward-title">
-                <span>🎁</span>
-                <span>本轮奖励机制</span>
-            </div>
-            <div class="reward-grid">
-                <div class="reward-item">
-                    <div class="reward-rank-icon">🥇</div>
-                    <div class="reward-content">
-                        <div class="reward-rank-text">第一名组别</div>
-                        <div class="reward-desc">个人分数 ≥ 组平均分一半</div>
-                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
-                    </div>
-                </div>
-                <div class="reward-item">
-                    <div class="reward-rank-icon">🥈</div>
-                    <div class="reward-content">
-                        <div class="reward-rank-text">第二名组别</div>
-                        <div class="reward-desc">个人分数 ≥ 组平均分</div>
-                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
-                    </div>
-                </div>
-                <div class="reward-item">
-                    <div class="reward-rank-icon">🥉</div>
-                    <div class="reward-content">
-                        <div class="reward-rank-text">第三名组别</div>
-                        <div class="reward-desc">个人分数 组内前三名</div>
-                        <div class="reward-highlight">✅ 免搬椅子 + 减免操步</div>
-                    </div>
-                </div>
-            </div>
-            <div class="reward-note">
-                ⚡ 第一名组别达标者额外获得一份奖励 · 公平原则，不负每一位付出的学长
-            </div>
-        </div>
-
-        <div class="footer">
-            👆 点击组排名卡片快速跳转 · 显示最近5次得分 · ✅达标可免搬椅子+减免操步
-        </div>
-    </div>
-
-    <script>
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            
-            if (searchTerm === '') {
-                allRows.forEach(row => row.style.display = '');
-                return;
-            }
-            
-            allRows.forEach(row => {
-                const searchText = row.getAttribute('data-search').toLowerCase();
-                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-            });
-        });
-    </script>
-</body>
-</html>
-"""
-
-# 保存HTML文件
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(html)
-
-print(f"\n✅ 生成成功！共 {len(people)} 人")
-print("\n📊 奖励统计:")
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    if g in group_data:
-        members = group_data[g]
-        pass_count = sum(1 for m in members if m["reward_status"] == "✅")
-        print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-    print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名")
-print("✨ 奖励卡片已移到最下方 + 手机版美化")
+                                <div c
