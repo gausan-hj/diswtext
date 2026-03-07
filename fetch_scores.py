@@ -21,20 +21,34 @@ except:
 
 print(f"读取到 {len(df)} 行数据")
 
-# 获取日期（第一行）
+# 获取日期（第一行）- 修复版本
 dates = []
 date_objects = []
 if len(df) > 0:
     first_row = df.iloc[0].tolist()
+    print("第一行日期数据:", first_row[7:15])  # 调试用
+    
     for j in range(7, len(first_row)):
         if pd.notna(first_row[j]):
             date_str = str(first_row[j])
             try:
+                # 处理 "2026-03-02 00:00:00" 格式
                 if "00:00" in date_str:
+                    # 提取 03-02
                     date_str = date_str[5:10]
-                dates.append(date_str)
-                date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
-            except:
+                    dates.append(date_str)
+                    try:
+                        date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
+                    except:
+                        date_objects.append(None)
+                    print(f"成功解析日期: {date_str}")  # 调试用
+                else:
+                    # 其他格式，直接使用
+                    dates.append(date_str)
+                    date_objects.append(None)
+                    print(f"使用原日期: {date_str}")  # 调试用
+            except Exception as e:
+                print(f"日期解析失败: {date_str}, 错误: {e}")
                 dates.append(f"D{j-6}")
                 date_objects.append(None)
         else:
@@ -42,6 +56,7 @@ if len(df) > 0:
             date_objects.append(None)
 
 print(f"找到 {len(dates)} 个日期")
+print("前5个日期:", dates[:5])
 
 # ===== 成员名单 =====
 members_list = [
@@ -102,7 +117,6 @@ for member in members_list:
             row_name_cn = str(row[3]) if len(row) > 3 and pd.notna(row[3]) else ""
             row_name_en = str(row[4]) if len(row) > 4 and pd.notna(row[4]) else ""
             if (member["name_cn"] in row_name_cn or member["name_en"][:20] in row_name_en[:20]):
-                scores = []
                 total = 0
                 score_dict = {}
                 today_score = 0
@@ -114,7 +128,6 @@ for member in members_list:
                         if pd.notna(val):
                             try:
                                 num = float(val)
-                                scores.append(num)
                                 total += num
                                 if num > 0:
                                     score_dict[date] = num
@@ -123,9 +136,7 @@ for member in members_list:
                                 elif j-7 == yesterday_idx:
                                     yesterday_score = num
                             except (ValueError, TypeError):
-                                scores.append(0)
-                        else:
-                            scores.append(0)
+                                pass
                 people.append({
                     "group": member["group"],
                     "order": member["order"],
@@ -769,8 +780,9 @@ with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
 
 print(f"\n✅ 生成成功！共 {len(people)} 人")
+print("日期示例:", dates[:5])
 for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  {g}: {len(group_data[g])}人, {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 功能：排名动画 + 夜间模式 + 较昨日变化")
+print("✨ 功能：排名动画 + 夜间模式 + 较昨日变化 + 修复日期显示")
