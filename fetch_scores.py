@@ -221,7 +221,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 修复导航栏
+# 生成HTML - 华为风格深色模式动画
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -305,16 +305,50 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             padding: 20px;
             min-height: 100vh;
-            transition: background 0.3s, color 0.3s;
+            transition: none; /* 移除默认过渡，使用自定义动画 */
             line-height: 1.5;
+            position: relative;
         }
 
+        /* 华为风格深色模式动画层 */
+        .theme-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .theme-overlay.active {
+            opacity: 1;
+        }
+
+        .theme-circle {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--circle-color, #000);
+            transition: width 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2), height 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+            pointer-events: none;
+            z-index: 10000;
+            mix-blend-mode: destination-out; /* 关键：让圆圈变成空洞 */
+        }
+
+        /* 容器 */
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
-        /* 头部 - 简洁设计 */
+        /* 头部 */
         .header {
             background: var(--card-bg);
             border-radius: 32px;
@@ -360,6 +394,8 @@ html = '''<!DOCTYPE html>
             font-size: 0.9rem;
             color: var(--text-primary);
             transition: background 0.2s;
+            position: relative;
+            z-index: 10001;
         }
 
         .theme-toggle:hover {
@@ -821,6 +857,10 @@ html = '''<!DOCTYPE html>
     </style>
 </head>
 <body>
+    <!-- 华为风格深色模式动画层 -->
+    <div class="theme-overlay" id="themeOverlay"></div>
+    <div class="theme-circle" id="themeCircle"></div>
+
     <div class="container">
         <div class="header">
             <div class="header-top">
@@ -828,7 +868,7 @@ html = '''<!DOCTYPE html>
                     <span class="school-icon">🏫</span>
                     <h1>学长团 · 荣耀榜</h1>
                 </div>
-                <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                <div class="theme-toggle" id="themeToggle">
                     <span>🌓</span>
                     <span>切换深色</span>
                 </div>
@@ -1036,7 +1076,58 @@ html += '''
         
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeOverlay = document.getElementById('themeOverlay');
+        const themeCircle = document.getElementById('themeCircle');
         
+        // 华为风格深色模式切换
+        themeToggle.addEventListener('click', (e) => {
+            // 获取点击位置
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            // 计算最大半径（对角线长度）
+            const maxRadius = Math.sqrt(
+                Math.max(x, window.innerWidth - x) ** 2 + 
+                Math.max(y, window.innerHeight - y) ** 2
+            );
+            
+            // 设置圆圈位置
+            themeCircle.style.left = x + 'px';
+            themeCircle.style.top = y + 'px';
+            
+            // 根据当前模式设置圆圈颜色
+            const isNightMode = document.body.classList.contains('night-mode');
+            // 切换到深色模式时用黑色圆圈，切换到浅色模式时用白色圆圈
+            themeCircle.style.setProperty('--circle-color', isNightMode ? '#ffffff' : '#000000');
+            
+            // 显示圆圈
+            themeCircle.style.width = '0px';
+            themeCircle.style.height = '0px';
+            
+            // 强制重绘
+            void themeCircle.offsetWidth;
+            
+            // 开始动画 - 扩展到最大半径
+            themeCircle.style.width = (maxRadius * 2) + 'px';
+            themeCircle.style.height = (maxRadius * 2) + 'px';
+            
+            // 显示遮罩
+            themeOverlay.classList.add('active');
+            
+            // 延迟切换模式，让动画有时间展开
+            setTimeout(() => {
+                document.body.classList.toggle('night-mode');
+            }, 100);
+            
+            // 动画结束后重置
+            setTimeout(() => {
+                themeCircle.style.width = '0';
+                themeCircle.style.height = '0';
+                themeOverlay.classList.remove('active');
+            }, 800);
+        });
+
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             allRows.forEach(row => {
@@ -1062,4 +1153,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 导航栏已修复 + 无白光无旋转")
+print("✨ 华为风格深色模式动画：点击圆圈扩散，空洞效果")
