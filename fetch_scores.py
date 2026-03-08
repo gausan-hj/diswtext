@@ -221,7 +221,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 华为风格深色模式动画
+# 生成HTML - 按钮动画版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -305,47 +305,13 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             padding: 20px;
             min-height: 100vh;
-            transition: none; /* 移除默认过渡，使用自定义动画 */
+            transition: background 0.5s ease, color 0.4s ease, border-color 0.3s ease;
             line-height: 1.5;
-            position: relative;
         }
 
-        /* 华为风格深色模式动画层 */
-        .theme-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .theme-overlay.active {
-            opacity: 1;
-        }
-
-        .theme-circle {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--circle-color, #000);
-            transition: width 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2), height 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-            pointer-events: none;
-            z-index: 10000;
-            mix-blend-mode: destination-out; /* 关键：让圆圈变成空洞 */
-        }
-
-        /* 容器 */
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            position: relative;
-            z-index: 1;
         }
 
         /* 头部 */
@@ -356,6 +322,7 @@ html = '''<!DOCTYPE html>
             margin-bottom: 24px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
+            transition: background 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .header-top {
@@ -373,15 +340,21 @@ html = '''<!DOCTYPE html>
 
         .school-icon {
             font-size: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .school-icon:hover {
+            transform: scale(1.1);
         }
 
         h1 {
             font-size: 1.6rem;
             font-weight: 600;
             color: var(--text-primary);
+            transition: color 0.4s ease;
         }
 
-        /* 深色模式按钮 */
+        /* 深色模式按钮 - 丰富动画 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -393,13 +366,58 @@ html = '''<!DOCTYPE html>
             gap: 8px;
             font-size: 0.9rem;
             color: var(--text-primary);
-            transition: background 0.2s;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
-            z-index: 10001;
+            overflow: hidden;
         }
 
         .theme-toggle:hover {
+            transform: scale(1.05);
             background: var(--border-light);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* 按钮图标动画 */
+        .theme-toggle .toggle-icon {
+            display: inline-block;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .theme-toggle:hover .toggle-icon {
+            transform: rotate(180deg) scale(1.2);
+        }
+
+        body.night-mode .theme-toggle .toggle-icon {
+            animation: moonGlow 2s infinite alternate;
+        }
+
+        @keyframes moonGlow {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.1); opacity: 0.9; }
+        }
+
+        /* 按钮点击波纹 */
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease-out, height 0.4s ease-out;
+            pointer-events: none;
+        }
+
+        .theme-toggle:active::after {
+            width: 200px;
+            height: 200px;
         }
 
         .meta-info {
@@ -411,6 +429,7 @@ html = '''<!DOCTYPE html>
             border-bottom: 2px dashed var(--border-subtle);
             color: var(--text-tertiary);
             font-size: 0.85rem;
+            transition: border-color 0.3s ease, color 0.3s ease;
         }
 
         .date-badge {
@@ -419,6 +438,7 @@ html = '''<!DOCTYPE html>
             border-radius: 30px;
             font-size: 0.8rem;
             border: 1px solid var(--border-subtle);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
 
         .search-wrapper {
@@ -432,6 +452,7 @@ html = '''<!DOCTYPE html>
             transform: translateY(-50%);
             color: var(--text-tertiary);
             font-size: 1rem;
+            transition: color 0.3s ease;
         }
 
         #search {
@@ -442,7 +463,7 @@ html = '''<!DOCTYPE html>
             font-size: 0.95rem;
             background: var(--bg-primary);
             color: var(--text-primary);
-            transition: all 0.2s;
+            transition: all 0.3s ease;
         }
 
         #search:focus {
@@ -470,7 +491,7 @@ html = '''<!DOCTYPE html>
             align-items: center;
             gap: 12px;
             border-left: 4px solid;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease, border-color 0.3s ease;
         }
 
         .rank-card:hover {
@@ -497,6 +518,11 @@ html = '''<!DOCTYPE html>
 
         .rank-icon {
             font-size: 1.8rem;
+            transition: transform 0.3s ease;
+        }
+
+        .rank-card:hover .rank-icon {
+            transform: scale(1.1);
         }
 
         .rank-info {
@@ -507,6 +533,8 @@ html = '''<!DOCTYPE html>
             font-weight: 600;
             font-size: 0.95rem;
             margin-bottom: 4px;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .rank-score {
@@ -515,12 +543,15 @@ html = '''<!DOCTYPE html>
             display: flex;
             align-items: baseline;
             gap: 4px;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .rank-score small {
             font-size: 0.7rem;
             font-weight: 400;
             color: var(--text-tertiary);
+            transition: color 0.3s ease;
         }
 
         .rank-change {
@@ -543,6 +574,11 @@ html = '''<!DOCTYPE html>
             border: 1px solid var(--border-subtle);
             scroll-margin-top: 16px;
             border-top: 4px solid;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .group-card:hover {
+            box-shadow: var(--shadow-lg);
         }
 
         .group-card[data-group="星穹组"] { border-top-color: var(--star-primary); }
@@ -556,6 +592,7 @@ html = '''<!DOCTYPE html>
             margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-subtle);
+            transition: border-color 0.3s ease;
         }
 
         .group-title-wrapper {
@@ -566,11 +603,18 @@ html = '''<!DOCTYPE html>
 
         .group-emoji {
             font-size: 1.4rem;
+            transition: transform 0.3s ease;
+        }
+
+        .group-card:hover .group-emoji {
+            transform: scale(1.1);
         }
 
         .group-title {
             font-size: 1.3rem;
             font-weight: 600;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .group-stats {
@@ -586,6 +630,7 @@ html = '''<!DOCTYPE html>
             border-radius: 30px;
             color: var(--text-secondary);
             border: 1px solid var(--border-subtle);
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
 
         .group-badge {
@@ -593,6 +638,11 @@ html = '''<!DOCTYPE html>
             padding: 4px 12px;
             border-radius: 30px;
             color: white;
+            transition: transform 0.2s ease;
+        }
+
+        .group-badge:hover {
+            transform: scale(1.05);
         }
 
         .group-card[data-group="星穹组"] .group-badge { background: var(--star-primary); }
@@ -620,12 +670,13 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-subtle);
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
 
         .member-table td {
             padding: 12px 8px;
             border-bottom: 1px solid var(--border-subtle);
-            transition: background 0.2s;
+            transition: background 0.2s, border-color 0.3s ease, color 0.3s ease;
         }
 
         .member-table tr:hover td {
@@ -644,6 +695,8 @@ html = '''<!DOCTYPE html>
             font-weight: 600;
             font-size: 0.95rem;
             margin-bottom: 2px;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .name-en {
@@ -653,11 +706,13 @@ html = '''<!DOCTYPE html>
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 130px;
+            transition: color 0.3s ease;
         }
 
         .info-cell {
             font-size: 0.85rem;
             color: var(--text-secondary);
+            transition: color 0.3s ease;
         }
 
         /* 分数标签 */
@@ -675,6 +730,12 @@ html = '''<!DOCTYPE html>
             background: var(--score-bg);
             color: var(--score-text);
             border: 1px solid var(--border-subtle);
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .score-item:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
         }
 
         .score-item.has-score {
@@ -693,6 +754,11 @@ html = '''<!DOCTYPE html>
             display: inline-block;
             min-width: 40px;
             text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .reward-pass:hover, .reward-fail:hover {
+            transform: scale(1.05);
         }
 
         .reward-pass {
@@ -715,6 +781,7 @@ html = '''<!DOCTYPE html>
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             border-left: 6px solid var(--star-primary);
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .reward-header {
@@ -726,12 +793,18 @@ html = '''<!DOCTYPE html>
 
         .reward-icon {
             font-size: 2.4rem;
+            transition: transform 0.3s ease;
+        }
+
+        .reward-section:hover .reward-icon {
+            transform: scale(1.1);
         }
 
         .reward-header h2 {
             font-size: 1.6rem;
             font-weight: 700;
             color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .reward-subtitle {
@@ -740,6 +813,7 @@ html = '''<!DOCTYPE html>
             margin-bottom: 20px;
             padding-left: 12px;
             border-left: 3px solid var(--star-primary);
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
 
         .reward-content {
@@ -754,7 +828,7 @@ html = '''<!DOCTYPE html>
             border-radius: 24px;
             padding: 20px;
             border: 1px solid var(--border-subtle);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease, border-color 0.3s ease;
         }
 
         .reward-item:hover {
@@ -771,12 +845,18 @@ html = '''<!DOCTYPE html>
 
         .rank-medal {
             font-size: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .reward-item:hover .rank-medal {
+            transform: scale(1.1);
         }
 
         .rank-title {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--text-primary);
+            transition: color 0.3s ease;
         }
 
         .reward-desc {
@@ -784,6 +864,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             margin-bottom: 12px;
             line-height: 1.5;
+            transition: color 0.3s ease;
         }
 
         .reward-condition {
@@ -795,6 +876,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             border: 1px solid var(--border-light);
             margin-bottom: 10px;
+            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
         .reward-benefit {
@@ -804,6 +886,7 @@ html = '''<!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 5px;
+            transition: color 0.3s ease;
         }
 
         .reward-note {
@@ -815,11 +898,13 @@ html = '''<!DOCTYPE html>
             font-size: 0.9rem;
             color: var(--text-secondary);
             text-align: center;
+            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
 
         .reward-extra {
             color: var(--night-primary);
             font-weight: 600;
+            transition: color 0.3s ease;
         }
 
         .reward-footer {
@@ -828,6 +913,7 @@ html = '''<!DOCTYPE html>
             font-size: 0.9rem;
             color: var(--text-tertiary);
             font-style: italic;
+            transition: color 0.3s ease;
         }
 
         .footer {
@@ -837,6 +923,7 @@ html = '''<!DOCTYPE html>
             font-size: 0.75rem;
             padding: 16px;
             border-top: 1px solid var(--border-subtle);
+            transition: color 0.3s ease, border-color 0.3s ease;
         }
 
         @media (max-width: 768px) {
@@ -857,10 +944,6 @@ html = '''<!DOCTYPE html>
     </style>
 </head>
 <body>
-    <!-- 华为风格深色模式动画层 -->
-    <div class="theme-overlay" id="themeOverlay"></div>
-    <div class="theme-circle" id="themeCircle"></div>
-
     <div class="container">
         <div class="header">
             <div class="header-top">
@@ -868,8 +951,8 @@ html = '''<!DOCTYPE html>
                     <span class="school-icon">🏫</span>
                     <h1>学长团 · 荣耀榜</h1>
                 </div>
-                <div class="theme-toggle" id="themeToggle">
-                    <span>🌓</span>
+                <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                    <span class="toggle-icon">🌓</span>
                     <span>切换深色</span>
                 </div>
             </div>
@@ -1076,58 +1159,7 @@ html += '''
         
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
-        const themeToggle = document.getElementById('themeToggle');
-        const themeOverlay = document.getElementById('themeOverlay');
-        const themeCircle = document.getElementById('themeCircle');
         
-        // 华为风格深色模式切换
-        themeToggle.addEventListener('click', (e) => {
-            // 获取点击位置
-            const x = e.clientX;
-            const y = e.clientY;
-            
-            // 计算最大半径（对角线长度）
-            const maxRadius = Math.sqrt(
-                Math.max(x, window.innerWidth - x) ** 2 + 
-                Math.max(y, window.innerHeight - y) ** 2
-            );
-            
-            // 设置圆圈位置
-            themeCircle.style.left = x + 'px';
-            themeCircle.style.top = y + 'px';
-            
-            // 根据当前模式设置圆圈颜色
-            const isNightMode = document.body.classList.contains('night-mode');
-            // 切换到深色模式时用黑色圆圈，切换到浅色模式时用白色圆圈
-            themeCircle.style.setProperty('--circle-color', isNightMode ? '#ffffff' : '#000000');
-            
-            // 显示圆圈
-            themeCircle.style.width = '0px';
-            themeCircle.style.height = '0px';
-            
-            // 强制重绘
-            void themeCircle.offsetWidth;
-            
-            // 开始动画 - 扩展到最大半径
-            themeCircle.style.width = (maxRadius * 2) + 'px';
-            themeCircle.style.height = (maxRadius * 2) + 'px';
-            
-            // 显示遮罩
-            themeOverlay.classList.add('active');
-            
-            // 延迟切换模式，让动画有时间展开
-            setTimeout(() => {
-                document.body.classList.toggle('night-mode');
-            }, 100);
-            
-            // 动画结束后重置
-            setTimeout(() => {
-                themeCircle.style.width = '0';
-                themeCircle.style.height = '0';
-                themeOverlay.classList.remove('active');
-            }, 800);
-        });
-
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             allRows.forEach(row => {
@@ -1153,4 +1185,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 华为风格深色模式动画：点击圆圈扩散，空洞效果")
+print("✨ 按钮动画：悬停放大 + 图标旋转 + 点击波纹 + 整体过渡")
