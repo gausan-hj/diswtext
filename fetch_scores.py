@@ -221,7 +221,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 华为传输动画版
+# 生成HTML - 简洁清爽版（无白光、无旋转）
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -267,9 +267,6 @@ html = '''<!DOCTYPE html>
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
-            
-            --huawei-blue: #0070f0;
-            --huawei-light: #e6f0ff;
         }
 
         body.night-mode {
@@ -300,9 +297,6 @@ html = '''<!DOCTYPE html>
             --reward-pass-text: #bbf7d0;
             --reward-fail: #562b2b;
             --reward-fail-text: #fecaca;
-            
-            --huawei-blue: #4098ff;
-            --huawei-light: #1e3a6f;
         }
 
         body {
@@ -320,129 +314,7 @@ html = '''<!DOCTYPE html>
             margin: 0 auto;
         }
 
-        /* 华为传输按钮 */
-        .huawei-transfer-btn {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            border-radius: 30px;
-            background: var(--huawei-blue);
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 112, 240, 0.3);
-            transition: transform 0.2s;
-            overflow: hidden;
-        }
-
-        .huawei-transfer-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .huawei-transfer-btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-icon {
-            color: white;
-            font-size: 24px;
-            position: relative;
-            z-index: 2;
-        }
-
-        /* 华为传输圆圈动画 */
-        .transfer-circle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .transfer-circle.active {
-            animation: huaweiWave 1.5s ease-out;
-        }
-
-        @keyframes huaweiWave {
-            0% {
-                width: 0;
-                height: 0;
-                opacity: 0.8;
-            }
-            100% {
-                width: 200px;
-                height: 200px;
-                opacity: 0;
-            }
-        }
-
-        /* 数据传输波纹 */
-        .data-ripple {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--huawei-blue) 0%, transparent 70%);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        .data-ripple.active {
-            animation: dataWave 1s ease-out;
-        }
-
-        @keyframes dataWave {
-            0% {
-                width: 0;
-                height: 0;
-                opacity: 0.6;
-            }
-            100% {
-                width: 300px;
-                height: 300px;
-                opacity: 0;
-            }
-        }
-
-        /* 数据传输粒子 */
-        .data-particle {
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: var(--huawei-blue);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9998;
-            opacity: 0;
-        }
-
-        .data-particle.active {
-            animation: particleFly 1s ease-out;
-        }
-
-        @keyframes particleFly {
-            0% {
-                transform: translate(0, 0) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translate(var(--tx), var(--ty)) scale(0);
-                opacity: 0;
-            }
-        }
-
-        /* 头部 */
+        /* 头部 - 简洁设计 */
         .header {
             background: var(--card-bg);
             border-radius: 32px;
@@ -450,7 +322,6 @@ html = '''<!DOCTYPE html>
             margin-bottom: 24px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
-            position: relative;
         }
 
         .header-top {
@@ -458,8 +329,6 @@ html = '''<!DOCTYPE html>
             justify-content: space-between;
             align-items: center;
             margin-bottom: 16px;
-            flex-wrap: wrap;
-            gap: 16px;
         }
 
         .title-group {
@@ -478,13 +347,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        /* 深色模式按钮 */
+        /* 深色模式按钮 - 无动画 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -496,25 +359,11 @@ html = '''<!DOCTYPE html>
             gap: 8px;
             font-size: 0.9rem;
             color: var(--text-primary);
-            transition: all 0.2s ease;
+            transition: background 0.2s;
         }
 
         .theme-toggle:hover {
             background: var(--border-light);
-            transform: scale(1.02);
-        }
-
-        .theme-toggle:active {
-            transform: scale(0.98);
-        }
-
-        .theme-toggle .toggle-icon {
-            display: inline-block;
-            transition: transform 0.3s;
-        }
-
-        body.night-mode .theme-toggle .toggle-icon {
-            transform: rotate(360deg);
         }
 
         .meta-info {
@@ -566,7 +415,7 @@ html = '''<!DOCTYPE html>
             box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
         }
 
-        /* 组排名卡片 */
+        /* 组排名卡片 - 无旋转 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -922,7 +771,7 @@ html = '''<!DOCTYPE html>
             border-radius: 24px;
             padding: 20px;
             border: 1px solid var(--border-subtle);
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s;
         }
 
         .reward-item:hover {
@@ -1013,69 +862,11 @@ html = '''<!DOCTYPE html>
             to { opacity: 1; }
         }
 
-        /* 数据传输状态提示 */
-        .transfer-status {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--card-bg);
-            color: var(--text-primary);
-            padding: 12px 24px;
-            border-radius: 40px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 10000;
-        }
-
-        .transfer-status.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--huawei-blue);
-            animation: statusPulse 1s infinite;
-        }
-
-        @keyframes statusPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-        }
-
-        .status-text {
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .status-progress {
-            width: 60px;
-            height: 4px;
-            background: var(--border-light);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--huawei-blue);
-            border-radius: 2px;
-            transition: width 0.3s;
-        }
-
         @media (max-width: 768px) {
             body { padding: 16px; }
             h1 { font-size: 1.4rem; }
             .reward-content { grid-template-columns: 1fr; }
             .rank-grid { gap: 10px; }
-            .transfer-status { bottom: 10px; padding: 10px 20px; }
         }
 
         @media (max-width: 640px) {
@@ -1085,8 +876,6 @@ html = '''<!DOCTYPE html>
             .rank-score { font-size: 1.1rem; }
             .group-card { padding: 16px; }
             .group-title { font-size: 1.1rem; }
-            .huawei-transfer-btn { width: 50px; height: 50px; }
-            .btn-icon { font-size: 20px; }
         }
     </style>
 </head>
@@ -1098,16 +887,9 @@ html = '''<!DOCTYPE html>
                     <span class="school-icon">🏫</span>
                     <h1>学长团 · 荣耀榜</h1>
                 </div>
-                <div class="action-buttons">
-                    <!-- 华为传输按钮 -->
-                    <button class="huawei-transfer-btn" id="transferBtn">
-                        <div class="transfer-circle" id="transferCircle"></div>
-                        <span class="btn-icon">📲</span>
-                    </button>
-                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
-                        <span class="toggle-icon">🌓</span>
-                        <span>切换深色</span>
-                    </div>
+                <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                    <span>🌓</span>
+                    <span>切换深色</span>
                 </div>
             </div>
             <div class="meta-info">
@@ -1308,19 +1090,7 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片快速跳转 · 点击📲传输数据 · 点击🌓切换深色模式 · 显示较昨日变化 · 最近5次得分
-        </div>
-    </div>
-
-    <!-- 数据波纹 -->
-    <div class="data-ripple" id="dataRipple"></div>
-    
-    <!-- 传输状态 -->
-    <div class="transfer-status" id="transferStatus">
-        <div class="status-dot"></div>
-        <div class="status-text">正在传输数据...</div>
-        <div class="status-progress">
-            <div class="progress-bar" id="progressBar"></div>
+            👆 点击排名卡片快速跳转 · 点击🌓切换深色模式 · 显示较昨日变化 · 最近5次得分
         </div>
     </div>
 
@@ -1331,115 +1101,15 @@ html += '''
         
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
-        const transferBtn = document.getElementById('transferBtn');
-        const transferCircle = document.getElementById('transferCircle');
-        const dataRipple = document.getElementById('dataRipple');
-        const transferStatus = document.getElementById('transferStatus');
-        const progressBar = document.getElementById('progressBar');
         
-        // 华为传输动画
-        function startHuaweiTransfer() {
-            // 按钮圆圈动画
-            transferCircle.classList.remove('active');
-            void transferCircle.offsetWidth;
-            transferCircle.classList.add('active');
-            
-            // 中心波纹动画
-            dataRipple.classList.remove('active');
-            void dataRipple.offsetWidth;
-            dataRipple.classList.add('active');
-            
-            // 显示传输状态
-            transferStatus.classList.add('show');
-            
-            // 模拟传输进度
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                    
-                    // 传输完成，隐藏状态
-                    setTimeout(() => {
-                        transferStatus.classList.remove('show');
-                    }, 1000);
-                }
-                progressBar.style.width = progress + '%';
-            }, 200);
-            
-            // 创建飞行的粒子
-            for (let i = 0; i < 10; i++) {
-                setTimeout(() => {
-                    createParticle();
-                }, i * 50);
-            }
-            
-            // 模拟数据更新动画
-            document.querySelectorAll('.rank-card, .group-card').forEach(el => {
-                el.style.transform = 'scale(0.98)';
-                el.style.transition = 'transform 0.3s';
-                setTimeout(() => {
-                    el.style.transform = '';
-                }, 300);
-            });
-            
-            // 数字翻转效果
-            document.querySelectorAll('.member-table td:last-child').forEach(cell => {
-                cell.style.transform = 'scale(1.1)';
-                cell.style.transition = 'transform 0.3s';
-                setTimeout(() => {
-                    cell.style.transform = '';
-                }, 300);
-            });
-        }
-        
-        // 创建飞行粒子
-        function createParticle() {
-            const particle = document.createElement('div');
-            particle.className = 'data-particle';
-            
-            // 随机起始位置
-            const startX = Math.random() * window.innerWidth;
-            const startY = Math.random() * window.innerHeight;
-            
-            // 随机终点偏移
-            const tx = (Math.random() - 0.5) * 200;
-            const ty = (Math.random() - 0.5) * 200;
-            
-            particle.style.left = startX + 'px';
-            particle.style.top = startY + 'px';
-            particle.style.setProperty('--tx', tx + 'px');
-            particle.style.setProperty('--ty', ty + 'px');
-            
-            document.body.appendChild(particle);
-            
-            // 激活动画
-            void particle.offsetWidth;
-            particle.classList.add('active');
-            
-            // 动画结束后移除
-            setTimeout(() => {
-                particle.remove();
-            }, 1000);
-        }
-        
-        transferBtn.addEventListener('click', startHuaweiTransfer);
-
-        // 搜索功能
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
-            
             allRows.forEach(row => {
                 const searchText = row.getAttribute('data-search').toLowerCase();
-                if (searchText.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
+                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
             });
         });
-
+        
         // 排名动画
         document.querySelectorAll('.rank-card').forEach(card => {
             const currentRank = parseInt(card.dataset.rank);
@@ -1470,4 +1140,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 华为传输动画：圆圈波纹 + 飞行粒子 + 进度条 + 数字跳动")
+print("✨ 简洁清爽版：无白光、无旋转、无传输按钮")
