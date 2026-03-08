@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>训育处 · 学长团荣耀榜</title>
     <style>
         * {
@@ -43,6 +43,10 @@
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
+            
+            --change-up: #10b981;
+            --change-down: #ef4444;
+            --change-steady: #f59e0b;
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
@@ -95,7 +99,7 @@
             margin: 0 auto;
         }
 
-        /* 头部 - 手机优化 */
+        /* 头部 */
         .header {
             background: var(--card-bg);
             border-radius: 24px;
@@ -128,7 +132,7 @@
             color: var(--text-primary);
         }
 
-        /* 深色模式按钮 - 手机优化 */
+        /* 深色模式按钮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -212,7 +216,7 @@
             border-color: var(--text-tertiary);
         }
 
-        /* 组排名卡片 - 手机网格优化 */
+        /* 组排名卡片 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -281,13 +285,14 @@
         .rank-change {
             font-size: 0.6rem;
             margin-top: 2px;
+            font-weight: 500;
         }
 
-        .change-up { color: #10b981; }
-        .change-down { color: #ef4444; }
-        .change-steady { color: #f59e0b; }
+        .change-up { color: var(--change-up); }
+        .change-down { color: var(--change-down); }
+        .change-steady { color: var(--change-steady); }
 
-        /* 组卡片 - 手机优化 */
+        /* 组卡片 */
         .groups {
             display: flex;
             flex-direction: column;
@@ -360,7 +365,7 @@
         .group-card[data-group="夜曜组"] .group-badge { background: var(--night-primary); }
         .group-card[data-group="沧澜组"] .group-badge { background: var(--ocean-primary); }
 
-        /* 表格 - 手机横滑优化 */
+        /* 表格 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -394,7 +399,6 @@
             border-bottom: none;
         }
 
-        /* 手机端列宽调整 - 更紧凑 */
         .member-table th:nth-child(1) { width: 30px; text-align: center; }
         .member-table th:nth-child(2) { width: 90px; }
         .member-table th:nth-child(3) { width: 45px; }
@@ -431,7 +435,7 @@
             color: var(--text-secondary);
         }
 
-        /* 分数标签 - 手机紧凑 */
+        /* 分数标签 */
         .score-tags {
             display: flex;
             gap: 2px;
@@ -476,7 +480,7 @@
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 - 手机优化 */
+        /* 奖励机制卡片 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
             border-radius: 20px;
@@ -605,7 +609,6 @@
             border-top: 1px solid var(--border-subtle);
         }
 
-        /* 小屏手机优化 */
         @media (max-width: 360px) {
             .rank-name { font-size: 0.7rem; }
             .rank-score { font-size: 0.9rem; }
@@ -631,7 +634,7 @@
             </div>
             <div class="meta-info">
                 <span>训育处 · 奖励机制</span>
-                <span class="date-badge">03/08 05:37</span>
+                <span class="date-badge">03/08 05:42</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -639,7 +642,7 @@
             </div>
         </div>
 
-        <!-- 组排名卡片 -->
+        <!-- 组排名卡片 - 带变化显示 -->
         <div class="rank-grid">
 
             <div class="rank-card" data-group="星穹组" onclick="document.getElementById('group-xingqiong').scrollIntoView({behavior: 'smooth'})">
@@ -1222,7 +1225,7 @@
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 较昨日变化 · 最近5次得分
+            👆 点击排名卡片跳转 · 🌓切换深色 · 显示较昨日变化 · 最近5次得分
         </div>
     </div>
 
