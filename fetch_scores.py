@@ -1,8 +1,10 @@
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
+import base64
+import io
 
 # ===== 你要修改的地方 =====
-SHEET_ID = "1MH2Ew4Q0fQFYPzynXulOAUC7z35O__c2"
+SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
 SHEET_NAME = "Sheet3"
 # ========================
 
@@ -23,14 +25,8 @@ print(f"读取到 {len(df)} 行数据")
 
 # 获取日期（第一行）
 dates = []
-date_objects = []
 if len(df) > 0:
     first_row = df.iloc[0].tolist()
-    print("\n📅 第一行日期数据:")
-    for j in range(7, min(15, len(first_row))):  # 只显示前几个
-        if pd.notna(first_row[j]):
-            print(f"  列{j}: {first_row[j]}")
-    
     for j in range(7, len(first_row)):
         if pd.notna(first_row[j]):
             date_str = str(first_row[j])
@@ -38,27 +34,12 @@ if len(df) > 0:
                 if "00:00" in date_str:
                     date_str = date_str[5:10]
                 dates.append(date_str)
-                try:
-                    date_objects.append(datetime.strptime(first_row[j][:10], '%Y-%m-%d'))
-                except:
-                    date_objects.append(None)
             except:
                 dates.append("")
-                date_objects.append(None)
         else:
             dates.append("")
-            date_objects.append(None)
 
-print(f"\n找到 {len(dates)} 个日期")
-print(f"日期列表: {dates[:10]}")
-
-# 确定昨天和今天的日期索引
-today_idx = len(dates) - 1  # 最后一列是今天
-yesterday_idx = max(0, len(dates) - 2)  # 倒数第二列是昨天
-
-print(f"\n📊 日期索引:")
-print(f"  今日索引: {today_idx} ({dates[today_idx] if today_idx < len(dates) else '无'})")
-print(f"  昨日索引: {yesterday_idx} ({dates[yesterday_idx] if yesterday_idx < len(dates) else '无'})")
+print(f"找到 {len(dates)} 个日期")
 
 # ===== 成员名单 =====
 members_list = [
@@ -103,9 +84,6 @@ members_list = [
 # 自动匹配每一行
 people = []
 group_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
-group_yesterday_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
-group_today_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
-previous_rank = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 
 print("\n开始匹配成员...")
 
@@ -124,10 +102,7 @@ for member in members_list:
                 
                 total = 0
                 score_dict = {}
-                today_score = 0
-                yesterday_score = 0
                 
-                # 提取分数
                 for j in range(7, len(row)):
                     if j-7 < len(dates):
                         date = dates[j-7]
@@ -138,14 +113,6 @@ for member in members_list:
                                 total += num
                                 if num > 0:
                                     score_dict[date] = num
-                                
-                                # 记录今日得分（最后一列）
-                                if j-7 == today_idx:
-                                    today_score = num
-                                # 记录昨日得分（倒数第二列）
-                                elif j-7 == yesterday_idx:
-                                    yesterday_score = num
-                                    
                             except (ValueError, TypeError):
                                 pass
                 
@@ -157,17 +124,9 @@ for member in members_list:
                     "class": member["class"],
                     "student_id": member["student_id"],
                     "score_dict": score_dict,
-                    "total": total,
-                    "today": today_score,
-                    "yesterday": yesterday_score
+                    "total": total
                 })
-                
-                # 调试信息
-                if today_score > 0 or yesterday_score > 0:
-                    print(f"✓ 找到 {member['name_cn']} (总分: {total}, 今日: {today_score}, 昨日: {yesterday_score})")
-                else:
-                    print(f"✓ 找到 {member['name_cn']} (总分: {total})")
-                    
+                print(f"✓ 找到 {member['name_cn']} (总分: {total})")
                 found = True
                 break
     
@@ -176,23 +135,18 @@ for member in members_list:
 
 print(f"\n总共找到 {len(people)} 人")
 
+if len(people) == 0:
+    print("❌ 没有找到任何人！请检查：")
+    print("1. Google Sheets 权限是否设置为 '任何知道链接的人可查看'")
+    print("2. Sheet 名字是否正确（当前是 Sheet3）")
+    print("3. 数据格式是否和 Excel 一致")
+    exit(1)
+
 # 按组别整理
 group_data = {g: [] for g in ["星穹组", "夜曜组", "沧澜组"]}
 for p in people:
     group_data[p["group"]].append(p)
     group_totals[p["group"]] += p["total"]
-    group_today_totals[p["group"]] += p["today"]
-    group_yesterday_totals[p["group"]] += p["yesterday"]
-
-# 计算变化
-group_changes = {}
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    change = group_today_totals[g] - group_yesterday_totals[g]
-    group_changes[g] = change
-
-print("\n📊 组别总分变化:")
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    print(f"  {g}: 今日 {int(group_today_totals[g])} 分, 昨日 {int(group_yesterday_totals[g])} 分, 变化 {int(group_changes[g])} 分")
 
 # 每个组内按order排序
 for g in group_data:
@@ -203,11 +157,6 @@ sorted_groups = sorted(group_totals.items(), key=lambda x: x[1], reverse=True)
 group_rank = {}
 for i, (g, _) in enumerate(sorted_groups, 1):
     group_rank[g] = i
-
-# 模拟上次排名（用于动画）
-previous_rank["星穹组"] = max(1, group_rank["星穹组"] - 1) if group_rank["星穹组"] > 1 else 2
-previous_rank["夜曜组"] = max(1, group_rank["夜曜组"] - 1) if group_rank["夜曜组"] > 1 else 2
-previous_rank["沧澜组"] = max(1, group_rank["沧澜组"] - 1) if group_rank["沧澜组"] > 1 else 2
 
 # 计算每组平均分
 group_averages = {}
@@ -240,13 +189,14 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 完整版
+# 生成HTML - 带下载按钮和统计图
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 · 学长团荣耀榜</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -286,10 +236,6 @@ html = '''<!DOCTYPE html>
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
-            
-            --change-up: #10b981;
-            --change-down: #ef4444;
-            --change-steady: #f59e0b;
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
@@ -357,6 +303,8 @@ html = '''<!DOCTYPE html>
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .title-group {
@@ -373,6 +321,12 @@ html = '''<!DOCTYPE html>
             font-size: 1.3rem;
             font-weight: 600;
             color: var(--text-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         /* 深色模式按钮 */
@@ -394,6 +348,32 @@ html = '''<!DOCTYPE html>
         .theme-toggle:active {
             background: var(--border-light);
             transform: scale(0.98);
+        }
+
+        /* 下载按钮 */
+        .download-btn {
+            background: var(--star-primary);
+            border: none;
+            border-radius: 30px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: #1a2b3c;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .download-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        body.night-mode .download-btn {
+            color: #ffffff;
         }
 
         .moon-icon {
@@ -457,6 +437,97 @@ html = '''<!DOCTYPE html>
         #search:focus {
             outline: none;
             border-color: var(--text-tertiary);
+        }
+
+        /* 统计图卡片 */
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-subtle);
+            display: none;
+        }
+
+        .chart-card.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .close-chart {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-rank {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
         /* 组排名卡片 */
@@ -524,16 +595,6 @@ html = '''<!DOCTYPE html>
             font-weight: 400;
             color: var(--text-tertiary);
         }
-
-        .rank-change {
-            font-size: 0.6rem;
-            margin-top: 2px;
-            font-weight: 500;
-        }
-
-        .change-up { color: var(--change-up); }
-        .change-down { color: var(--change-down); }
-        .change-steady { color: var(--change-steady); }
 
         /* 组卡片 */
         .groups {
@@ -776,10 +837,6 @@ html = '''<!DOCTYPE html>
             gap: 8px;
         }
 
-        .reward-item:active {
-            transform: scale(0.99);
-        }
-
         .reward-rank {
             display: flex;
             align-items: center;
@@ -794,12 +851,6 @@ html = '''<!DOCTYPE html>
         .rank-title {
             font-size: 0.9rem;
             font-weight: 600;
-        }
-
-        .reward-desc {
-            font-size: 0.7rem;
-            color: var(--text-tertiary);
-            margin-bottom: 4px;
         }
 
         .reward-condition {
@@ -852,6 +903,42 @@ html = '''<!DOCTYPE html>
             border-top: 1px solid var(--border-subtle);
         }
 
+        /* 下载提示 */
+        .download-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            font-size: 0.8rem;
+        }
+
+        .download-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--star-primary);
+            color: #1a2b3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
         @media (max-width: 360px) {
             .rank-name { font-size: 0.7rem; }
             .rank-score { font-size: 0.9rem; }
@@ -859,6 +946,7 @@ html = '''<!DOCTYPE html>
             .member-table { min-width: 500px; }
             .name-cn { max-width: 70px; }
             .name-en { max-width: 70px; }
+            .action-buttons { width: 100%; justify-content: flex-end; }
         }
     </style>
 </head>
@@ -870,9 +958,15 @@ html = '''<!DOCTYPE html>
                     <span class="school-icon">🏫</span>
                     <h1>学长团荣耀榜</h1>
                 </div>
-                <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
-                    <span class="moon-icon">🌓</span>
-                    <span>深色</span>
+                <div class="action-buttons">
+                    <button class="download-btn" id="downloadBtn">
+                        <span>📊</span>
+                        <span>下载统计</span>
+                    </button>
+                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                        <span class="moon-icon">🌓</span>
+                        <span>深色</span>
+                    </div>
                 </div>
             </div>
             <div class="meta-info">
@@ -885,23 +979,36 @@ html = '''<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 - 带变化显示 -->
+        <!-- 统计图卡片 -->
+        <div class="chart-card" id="chartCard">
+            <div class="chart-header">
+                <span class="chart-title">
+                    <span>📊</span>
+                    各组总分对比
+                </span>
+                <button class="close-chart" id="closeChart">关闭</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="groupChart"></canvas>
+            </div>
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <!-- 组排名卡片 -->
         <div class="rank-grid">
 '''
 
 # 添加组排名卡片
 rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
 group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
+group_colors = [ "#eab308", "#a855f7", "#3b82f6"]
+group_list = []
+total_list = []
+
 for i, (g, total) in enumerate(sorted_groups, 1):
     group_id = group_ids[g]
-    change = group_changes[g]
-    
-    if change > 0:
-        change_text = f'<span class="change-up">▲{int(change)}</span>'
-    elif change < 0:
-        change_text = f'<span class="change-down">▼{int(change)}</span>'
-    else:
-        change_text = '<span class="change-steady">◆0</span>'
+    group_list.append(g)
+    total_list.append(int(total))
     
     html += f'''
             <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
@@ -909,10 +1016,21 @@ for i, (g, total) in enumerate(sorted_groups, 1):
                 <div class="rank-info">
                     <div class="rank-name">{g}</div>
                     <div class="rank-score">{int(total)}<small>分</small></div>
-                    <div class="rank-change">{change_text}</div>
                 </div>
             </div>
 '''
+
+# 准备统计数据
+stats_data = []
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        stats_data.append({
+            "group": g,
+            "total": int(group_totals[g]),
+            "rank": group_rank[g],
+            "members": len(group_data[g]),
+            "avg": int(group_averages[g])
+        })
 
 html += '''
         </div>
@@ -1047,18 +1165,149 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 显示较昨日变化 · 最近5次得分
+            👆 点击排名卡片跳转 · 🌓切换深色 · 📊下载统计 · 最近5次得分
         </div>
     </div>
 
+    <!-- 下载提示 -->
+    <div class="download-toast" id="downloadToast">
+        <span class="toast-icon">✓</span>
+        <span id="toastMessage">统计图已生成</span>
+    </div>
+
     <script>
+        // 检查系统主题偏好
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
         
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const chartCard = document.getElementById('chartCard');
+        const closeChart = document.getElementById('closeChart');
+        const downloadToast = document.getElementById('downloadToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const statsGrid = document.getElementById('statsGrid');
         
+        // 统计数据
+        const statsData = [
+'''
+
+for stat in stats_data:
+    html += f'''            {{ group: "{stat['group']}", total: {stat['total']}, rank: {stat['rank']}, members: {stat['members']}, avg: {stat['avg']} }},\n'''
+
+html += '''        ];
+
+        // 组数据
+        const groups = ''' + str(group_list) + ''';
+        const scores = ''' + str(total_list) + ''';
+        const colors = ["#eab308", "#a855f7", "#3b82f6"];
+        
+        let chart = null;
+
+        // 显示提示
+        function showToast(message, isSuccess = true) {
+            toastMessage.textContent = message;
+            downloadToast.classList.add('show');
+            setTimeout(() => {
+                downloadToast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 生成统计图
+        function generateChart() {
+            const ctx = document.getElementById('groupChart').getContext('2d');
+            const isNightMode = document.body.classList.contains('night-mode');
+            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
+            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: groups,
+                    datasets: [{
+                        label: '总分',
+                        data: scores,
+                        backgroundColor: colors,
+                        borderRadius: 6,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const group = groups[context.dataIndex];
+                                    const stat = statsData.find(s => s.group === group);
+                                    return [
+                                        `总分: ${value}分`,
+                                        `排名: 第${stat.rank}名`,
+                                        `人数: ${stat.members}人`,
+                                        `平均: ${stat.avg}分`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 生成统计卡片
+        function generateStatsGrid() {
+            let html = '';
+            statsData.forEach(stat => {
+                html += `
+                    <div class="stat-item">
+                        <div class="stat-label">${stat.group}</div>
+                        <div class="stat-value">${stat.total}</div>
+                        <div class="stat-rank">第${stat.rank}名 · ${stat.members}人</div>
+                    </div>
+                `;
+            });
+            statsGrid.innerHTML = html;
+        }
+
+        // 下载按钮点击
+        downloadBtn.addEventListener('click', () => {
+            // 显示统计图卡片
+            chartCard.classList.add('show');
+            
+            // 生成图表和统计卡片
+            generateChart();
+            generateStatsGrid();
+            
+            // 显示提示
+            showToast('📊 统计图已生成');
+        });
+
+        // 关闭统计图
+        closeChart.addEventListener('click', () => {
+            chartCard.classList.remove('show');
+        });
+
+        // 搜索功能
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             allRows.forEach(row => {
@@ -1066,6 +1315,15 @@ html += '''
                 row.style.display = searchText.includes(searchTerm) ? '' : 'none';
             });
         });
+
+        // 深色模式切换时更新图表颜色
+        const observer = new MutationObserver(() => {
+            if (chart && chartCard.classList.contains('show')) {
+                generateChart();
+            }
+        });
+        
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     </script>
 </body>
 </html>'''
@@ -1081,7 +1339,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-    change = group_changes[g]
-    change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
-    print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 较昨日变化功能已启用")
+print("✨ 新增功能：下载统计图 + 组排名 + 个人分数")
