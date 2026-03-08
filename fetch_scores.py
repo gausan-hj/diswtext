@@ -221,7 +221,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 顺畅按钮动画版
+# 生成HTML - 月亮天平效果
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -352,7 +352,7 @@ html = '''<!DOCTYPE html>
             will-change: color;
         }
 
-        /* 深色模式按钮 - 顺畅动画 */
+        /* 深色模式按钮 - 月亮天平效果 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -366,6 +366,8 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             transition: background 0.15s ease, transform 0.15s ease;
             will-change: transform, background;
+            overflow: hidden;
+            position: relative;
         }
 
         .theme-toggle:hover {
@@ -377,14 +379,22 @@ html = '''<!DOCTYPE html>
             transform: scale(0.98);
         }
 
-        .theme-toggle .toggle-icon {
+        /* 月亮图标 - 左右天平效果 */
+        .moon-icon {
             display: inline-block;
-            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             will-change: transform;
         }
 
-        .theme-toggle:hover .toggle-icon {
-            transform: rotate(180deg);
+        /* 深色模式时，月亮黑色部分在左边（旋转-90度） */
+        body.night-mode .moon-icon {
+            transform: rotate(-90deg);
+        }
+
+        /* 浅色模式时，月亮白色部分在左边（旋转90度） */
+        body:not(.night-mode) .moon-icon {
+            transform: rotate(90deg);
         }
 
         .meta-info {
@@ -913,7 +923,7 @@ html = '''<!DOCTYPE html>
                     <h1>学长团 · 荣耀榜</h1>
                 </div>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
-                    <span class="toggle-icon">🌓</span>
+                    <span class="moon-icon">🌙</span>
                     <span>切换深色</span>
                 </div>
             </div>
@@ -1146,4 +1156,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 顺畅动画：0.1-0.2秒过渡 + will-change优化 + 轻量效果")
+print("✨ 月亮天平效果：深色模式旋转-90度，浅色模式旋转90度")
