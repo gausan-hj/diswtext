@@ -359,7 +359,7 @@
             margin-top: 2px;
         }
 
-        /* 组排名卡片 - 修复颜色 */
+        /* 组排名卡片 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -384,7 +384,6 @@
             transform: scale(0.98);
         }
 
-        /* 明确指定每个组的颜色 */
         .rank-card[data-group="星穹组"] {
             border-left-color: #eab308 !important;
             background: linear-gradient(to right, #fefae8, var(--card-bg));
@@ -426,7 +425,7 @@
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 - 修复颜色 */
+        /* 组卡片 */
         .group-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -795,7 +794,7 @@
             </div>
             <div class="meta-info">
                 <span>训育处 · 奖励机制</span>
-                <span class="date-badge">03/08 06:02</span>
+                <span class="date-badge">03/08 06:13</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1432,14 +1431,18 @@
         
         // 统计数据
         const statsData = [
-            { group: "星穹组", total: 21, rank: 2, members: 10, avg: 2 },
-            { group: "夜曜组", total: 46, rank: 1, members: 11, avg: 4 },
-            { group: "沧澜组", total: 20, rank: 3, members: 10, avg: 2 },
+            { group: "星穹组", total: 21, rank: 2, members: 10, avg: 2, color: "#eab308" },
+            { group: "夜曜组", total: 46, rank: 1, members: 11, avg: 4, color: "#a855f7" },
+            { group: "沧澜组", total: 20, rank: 3, members: 10, avg: 2, color: "#3b82f6" },
         ];
 
-        // 组数据 - 修复颜色顺序
-        const groups = ['夜曜组', '星穹组', '沧澜组'];
-        const scores = [46, 21, 20];
+        // 组数据 - 按固定顺序
+        const groups = ["星穹组", "夜曜组", "沧澜组"];
+        const scores = [
+            statsData.find(s => s.group === "星穹組").total,
+            statsData.find(s => s.group === "夜曜组").total,
+            statsData.find(s => s.group === "沧澜组").total
+        ];
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
         
         let chart = null;
