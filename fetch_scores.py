@@ -84,6 +84,7 @@ members_list = [
 # 自动匹配每一行
 people = []
 group_totals = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
+group_members_count = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 
 print("\n开始匹配成员...")
 
@@ -147,6 +148,7 @@ group_data = {g: [] for g in ["星穹组", "夜曜组", "沧澜组"]}
 for p in people:
     group_data[p["group"]].append(p)
     group_totals[p["group"]] += p["total"]
+    group_members_count[p["group"]] += 1
 
 # 每个组内按order排序
 for g in group_data:
@@ -189,7 +191,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 带下载按钮和统计图
+# 生成HTML - 修复颜色和下载功能
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -197,6 +199,7 @@ html = '''<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 · 学长团荣耀榜</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -218,6 +221,7 @@ html = '''<!DOCTYPE html>
             --shadow-md: 0 4px 12px rgba(0,0,0,0.04);
             --shadow-lg: 0 8px 20px rgba(0,0,0,0.06);
             
+            /* 组颜色 - 明确定义 */
             --star-primary: #eab308;
             --star-light: #fef9c3;
             --star-bg: #fefae8;
@@ -481,6 +485,25 @@ html = '''<!DOCTYPE html>
             gap: 6px;
         }
 
+        .chart-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .save-chart-btn {
+            background: var(--star-primary);
+            border: none;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: #1a2b3c;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         .close-chart {
             background: var(--bg-primary);
             border: 1px solid var(--border-subtle);
@@ -530,7 +553,7 @@ html = '''<!DOCTYPE html>
             margin-top: 2px;
         }
 
-        /* 组排名卡片 */
+        /* 组排名卡片 - 修复颜色 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -555,17 +578,18 @@ html = '''<!DOCTYPE html>
             transform: scale(0.98);
         }
 
+        /* 明确指定每个组的颜色 */
         .rank-card[data-group="星穹组"] {
-            border-left-color: var(--star-primary);
-            background: linear-gradient(to right, var(--star-bg), var(--card-bg));
+            border-left-color: #eab308 !important;
+            background: linear-gradient(to right, #fefae8, var(--card-bg));
         }
         .rank-card[data-group="夜曜组"] {
-            border-left-color: var(--night-primary);
-            background: linear-gradient(to right, var(--night-bg), var(--card-bg));
+            border-left-color: #a855f7 !important;
+            background: linear-gradient(to right, #faf5ff, var(--card-bg));
         }
         .rank-card[data-group="沧澜组"] {
-            border-left-color: var(--ocean-primary);
-            background: linear-gradient(to right, var(--ocean-bg), var(--card-bg));
+            border-left-color: #3b82f6 !important;
+            background: linear-gradient(to right, #f0f7ff, var(--card-bg));
         }
 
         .rank-icon {
@@ -596,13 +620,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 */
-        .groups {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
+        /* 组卡片 - 修复颜色 */
         .group-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -613,9 +631,9 @@ html = '''<!DOCTYPE html>
             border-top: 3px solid;
         }
 
-        .group-card[data-group="星穹组"] { border-top-color: var(--star-primary); }
-        .group-card[data-group="夜曜组"] { border-top-color: var(--night-primary); }
-        .group-card[data-group="沧澜组"] { border-top-color: var(--ocean-primary); }
+        .group-card[data-group="星穹组"] { border-top-color: #eab308 !important; }
+        .group-card[data-group="夜曜组"] { border-top-color: #a855f7 !important; }
+        .group-card[data-group="沧澜组"] { border-top-color: #3b82f6 !important; }
 
         .group-header {
             display: flex;
@@ -665,9 +683,9 @@ html = '''<!DOCTYPE html>
             white-space: nowrap;
         }
 
-        .group-card[data-group="星穹组"] .group-badge { background: var(--star-primary); }
-        .group-card[data-group="夜曜组"] .group-badge { background: var(--night-primary); }
-        .group-card[data-group="沧澜组"] .group-badge { background: var(--ocean-primary); }
+        .group-card[data-group="星穹组"] .group-badge { background: #eab308; }
+        .group-card[data-group="夜曜组"] .group-badge { background: #a855f7; }
+        .group-card[data-group="沧澜组"] .group-badge { background: #3b82f6; }
 
         /* 表格 */
         .table-container {
@@ -793,7 +811,7 @@ html = '''<!DOCTYPE html>
             margin-bottom: 16px;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
-            border-left: 4px solid var(--star-primary);
+            border-left: 4px solid #eab308;
         }
 
         .reward-header {
@@ -817,7 +835,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             margin-bottom: 12px;
             padding-left: 8px;
-            border-left: 2px solid var(--star-primary);
+            border-left: 2px solid #eab308;
         }
 
         .reward-content {
@@ -931,7 +949,7 @@ html = '''<!DOCTYPE html>
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: var(--star-primary);
+            background: #eab308;
             color: #1a2b3c;
             display: flex;
             align-items: center;
@@ -986,7 +1004,13 @@ html = '''<!DOCTYPE html>
                     <span>📊</span>
                     各组总分对比
                 </span>
-                <button class="close-chart" id="closeChart">关闭</button>
+                <div class="chart-actions">
+                    <button class="save-chart-btn" id="saveChartBtn">
+                        <span>💾</span>
+                        <span>保存到相册</span>
+                    </button>
+                    <button class="close-chart" id="closeChart">关闭</button>
+                </div>
             </div>
             <div class="chart-container">
                 <canvas id="groupChart"></canvas>
@@ -1001,7 +1025,6 @@ html = '''<!DOCTYPE html>
 # 添加组排名卡片
 rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
 group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
-group_colors = [ "#eab308", "#a855f7", "#3b82f6"]
 group_list = []
 total_list = []
 
@@ -1184,6 +1207,7 @@ html += '''
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
         const downloadBtn = document.getElementById('downloadBtn');
+        const saveChartBtn = document.getElementById('saveChartBtn');
         const chartCard = document.getElementById('chartCard');
         const closeChart = document.getElementById('closeChart');
         const downloadToast = document.getElementById('downloadToast');
@@ -1199,7 +1223,7 @@ for stat in stats_data:
 
 html += '''        ];
 
-        // 组数据
+        // 组数据 - 修复颜色顺序
         const groups = ''' + str(group_list) + ''';
         const scores = ''' + str(total_list) + ''';
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
@@ -1289,7 +1313,35 @@ html += '''        ];
             statsGrid.innerHTML = html;
         }
 
-        // 下载按钮点击
+        // 保存统计图到相册
+        async function saveChartToGallery() {
+            const chartCard = document.getElementById('chartCard');
+            
+            try {
+                showToast('📸 正在生成图片...');
+                
+                // 使用html2canvas将图表卡片转为图片
+                const canvas = await html2canvas(chartCard, {
+                    scale: 2,
+                    backgroundColor: getComputedStyle(document.body).backgroundColor,
+                    allowTaint: false,
+                    useCORS: true
+                });
+                
+                // 创建下载链接
+                const link = document.createElement('a');
+                link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                showToast('✅ 已保存到相册');
+            } catch (error) {
+                console.error('保存失败:', error);
+                showToast('❌ 保存失败');
+            }
+        }
+
+        // 下载按钮点击 - 显示统计图
         downloadBtn.addEventListener('click', () => {
             // 显示统计图卡片
             chartCard.classList.add('show');
@@ -1298,9 +1350,13 @@ html += '''        ];
             generateChart();
             generateStatsGrid();
             
-            // 显示提示
             showToast('📊 统计图已生成');
         });
+
+        // 保存按钮点击
+        if (saveChartBtn) {
+            saveChartBtn.addEventListener('click', saveChartToGallery);
+        }
 
         // 关闭统计图
         closeChart.addEventListener('click', () => {
@@ -1339,4 +1395,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 新增功能：下载统计图 + 组排名 + 个人分数")
+print("✨ 修复：组颜色 + 下载到相册功能")
