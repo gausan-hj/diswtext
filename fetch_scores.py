@@ -221,7 +221,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 简洁清爽版（无白光、无旋转）
+# 生成HTML - 修复导航栏
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -347,7 +347,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
         }
 
-        /* 深色模式按钮 - 无动画 */
+        /* 深色模式按钮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -415,7 +415,7 @@ html = '''<!DOCTYPE html>
             box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
         }
 
-        /* 组排名卡片 - 无旋转 */
+        /* 组排名卡片 - 导航栏 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -435,20 +435,6 @@ html = '''<!DOCTYPE html>
             gap: 12px;
             border-left: 4px solid;
             transition: transform 0.2s, box-shadow 0.2s;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.5s forwards;
-        }
-
-        .rank-card:nth-child(1) { animation-delay: 0.1s; }
-        .rank-card:nth-child(2) { animation-delay: 0.2s; }
-        .rank-card:nth-child(3) { animation-delay: 0.3s; }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .rank-card:hover {
@@ -471,28 +457,6 @@ html = '''<!DOCTYPE html>
         .rank-card[data-group="沧澜组"] {
             border-left-color: var(--ocean-primary);
             background: linear-gradient(to right, var(--ocean-bg), var(--card-bg));
-        }
-
-        .rank-card.rank-up {
-            animation: rankUp 0.4s ease;
-        }
-
-        .rank-card.rank-down {
-            animation: rankDown 0.4s ease;
-        }
-
-        @keyframes rankUp {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
-            60% { transform: translateY(2px); }
-            100% { transform: translateY(0); }
-        }
-
-        @keyframes rankDown {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(4px); }
-            60% { transform: translateY(-2px); }
-            100% { transform: translateY(0); }
         }
 
         .rank-icon {
@@ -543,20 +507,6 @@ html = '''<!DOCTYPE html>
             border: 1px solid var(--border-subtle);
             scroll-margin-top: 16px;
             border-top: 4px solid;
-            opacity: 0;
-            transform: translateX(-20px);
-            animation: slideIn 0.5s forwards;
-        }
-
-        .group-card:nth-child(1) { animation-delay: 0.2s; }
-        .group-card:nth-child(2) { animation-delay: 0.3s; }
-        .group-card:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
         }
 
         .group-card[data-group="星穹组"] { border-top-color: var(--star-primary); }
@@ -729,9 +679,6 @@ html = '''<!DOCTYPE html>
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             border-left: 6px solid var(--star-primary);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.6s 0.5s forwards;
         }
 
         .reward-header {
@@ -854,12 +801,6 @@ html = '''<!DOCTYPE html>
             font-size: 0.75rem;
             padding: 16px;
             border-top: 1px solid var(--border-subtle);
-            opacity: 0;
-            animation: fadeIn 0.5s 0.9s forwards;
-        }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
         }
 
         @media (max-width: 768px) {
@@ -902,7 +843,7 @@ html = '''<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 -->
+        <!-- 组排名卡片 - 导航栏 -->
         <div class="rank-grid">
 '''
 
@@ -915,12 +856,6 @@ for i, (g, total) in enumerate(sorted_groups, 1):
     prev_rank = previous_rank[g]
     current_rank = group_rank[g]
     
-    rank_animation = ""
-    if current_rank < prev_rank:
-        rank_animation = 'rank-up'
-    elif current_rank > prev_rank:
-        rank_animation = 'rank-down'
-    
     if change > 0:
         change_text = f'<span style="color:#10b981">▲ +{int(change)}</span>'
     elif change < 0:
@@ -929,7 +864,7 @@ for i, (g, total) in enumerate(sorted_groups, 1):
         change_text = '<span style="color:#f59e0b">◆ 0</span>'
     
     html += '''
-            <div class="rank-card ''' + rank_animation + '''" data-group="''' + g + '''" data-rank="''' + str(current_rank) + '''" data-prev-rank="''' + str(prev_rank) + '''" onclick="document.getElementById(\'''' + group_id + '''\').scrollIntoView({behavior: 'smooth'})">
+            <div class="rank-card" data-group="''' + g + '''" onclick="document.getElementById(\'''' + group_id + '''\').scrollIntoView({behavior: 'smooth'})">
                 <span class="rank-icon">''' + rank_icons[i] + '''</span>
                 <div class="rank-info">
                     <div class="rank-name">''' + g + '''</div>
@@ -1022,7 +957,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 html += '''
         </div>
 
-        <!-- 奖励机制卡片 - 移到最下面 -->
+        <!-- 奖励机制卡片 -->
         <div class="reward-section">
             <div class="reward-header">
                 <span class="reward-icon">🎁</span>
@@ -1109,19 +1044,6 @@ html += '''
                 row.style.display = searchText.includes(searchTerm) ? '' : 'none';
             });
         });
-        
-        // 排名动画
-        document.querySelectorAll('.rank-card').forEach(card => {
-            const currentRank = parseInt(card.dataset.rank);
-            const prevRank = parseInt(card.dataset.prevRank);
-            if (currentRank && prevRank) {
-                if (currentRank < prevRank) {
-                    card.classList.add('rank-up');
-                } else if (currentRank > prevRank) {
-                    card.classList.add('rank-down');
-                }
-            }
-        });
     </script>
 </body>
 </html>'''
@@ -1140,4 +1062,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 简洁清爽版：无白光、无旋转、无传输按钮")
+print("✨ 导航栏已修复 + 无白光无旋转")
