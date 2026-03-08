@@ -191,7 +191,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 修复颜色和下载功能
+# 生成HTML - 修复统计图颜色
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -553,7 +553,7 @@ html = '''<!DOCTYPE html>
             margin-top: 2px;
         }
 
-        /* 组排名卡片 - 修复颜色 */
+        /* 组排名卡片 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -578,7 +578,6 @@ html = '''<!DOCTYPE html>
             transform: scale(0.98);
         }
 
-        /* 明确指定每个组的颜色 */
         .rank-card[data-group="星穹组"] {
             border-left-color: #eab308 !important;
             background: linear-gradient(to right, #fefae8, var(--card-bg));
@@ -620,7 +619,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 - 修复颜色 */
+        /* 组卡片 */
         .group-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -1052,7 +1051,8 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
             "total": int(group_totals[g]),
             "rank": group_rank[g],
             "members": len(group_data[g]),
-            "avg": int(group_averages[g])
+            "avg": int(group_averages[g]),
+            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
         })
 
 html += '''
@@ -1218,14 +1218,21 @@ html += '''
         const statsData = [
 '''
 
-for stat in stats_data:
-    html += f'''            {{ group: "{stat['group']}", total: {stat['total']}, rank: {stat['rank']}, members: {stat['members']}, avg: {stat['avg']} }},\n'''
+# 按固定顺序输出统计图数据
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    for stat in stats_data:
+        if stat["group"] == g:
+            html += f'''            {{ group: "{stat['group']}", total: {stat['total']}, rank: {stat['rank']}, members: {stat['members']}, avg: {stat['avg']}, color: "{stat['color']}" }},\n'''
 
 html += '''        ];
 
-        // 组数据 - 修复颜色顺序
-        const groups = ''' + str(group_list) + ''';
-        const scores = ''' + str(total_list) + ''';
+        // 组数据 - 按固定顺序
+        const groups = ["星穹组", "夜曜组", "沧澜组"];
+        const scores = [
+            statsData.find(s => s.group === "星穹組").total,
+            statsData.find(s => s.group === "夜曜组").total,
+            statsData.find(s => s.group === "沧澜组").total
+        ];
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
         
         let chart = null;
@@ -1395,4 +1402,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 修复：组颜色 + 下载到相册功能")
+print("✨ 修复：统计图颜色顺序（星穹黄、夜曜紫、沧澜蓝）")
