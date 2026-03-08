@@ -139,7 +139,7 @@
             align-items: center;
         }
 
-        /* 深色模式按钮 */
+        /* 深色模式按钮 - 无白光 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -359,7 +359,7 @@
             margin-top: 2px;
         }
 
-        /* 组排名卡片 */
+        /* 组排名卡片 - 移除所有白光效果 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -378,6 +378,8 @@
             align-items: center;
             gap: 6px;
             border-left: 3px solid;
+            transition: transform 0.1s ease;
+            /* 移除所有伪元素和光效 */
         }
 
         .rank-card:active {
@@ -425,7 +427,7 @@
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 */
+        /* 组卡片 - 移除所有白光效果 */
         .group-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -434,6 +436,7 @@
             border: 1px solid var(--border-subtle);
             scroll-margin-top: 12px;
             border-top: 3px solid;
+            /* 移除所有伪元素和光效 */
         }
 
         .group-card[data-group="星穹组"] { border-top-color: #eab308 !important; }
@@ -607,7 +610,7 @@
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 */
+        /* 奖励机制卡片 - 移除所有光效 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
             border-radius: 20px;
@@ -794,7 +797,7 @@
             </div>
             <div class="meta-info">
                 <span>训育处 · 奖励机制</span>
-                <span class="date-badge">03/08 06:13</span>
+                <span class="date-badge">03/08 06:20</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1439,7 +1442,7 @@
         // 组数据 - 按固定顺序
         const groups = ["星穹组", "夜曜组", "沧澜组"];
         const scores = [
-            statsData.find(s => s.group === "星穹組").total,
+            statsData.find(s => s.group === "星穹组").total,
             statsData.find(s => s.group === "夜曜组").total,
             statsData.find(s => s.group === "沧澜组").total
         ];
@@ -1537,21 +1540,31 @@
             try {
                 showToast('📸 正在生成图片...');
                 
-                // 使用html2canvas将图表卡片转为图片
-                const canvas = await html2canvas(chartCard, {
-                    scale: 2,
-                    backgroundColor: getComputedStyle(document.body).backgroundColor,
-                    allowTaint: false,
-                    useCORS: true
-                });
+                // 确保图表已生成
+                if (!chart) {
+                    generateChart();
+                }
                 
-                // 创建下载链接
-                const link = document.createElement('a');
-                link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+                // 等待图表渲染
+                setTimeout(async () => {
+                    // 使用html2canvas将图表卡片转为图片
+                    const canvas = await html2canvas(chartCard, {
+                        scale: 2,
+                        backgroundColor: getComputedStyle(document.body).backgroundColor,
+                        allowTaint: false,
+                        useCORS: true,
+                        logging: false
+                    });
+                    
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    showToast('✅ 已保存到相册');
+                }, 500);
                 
-                showToast('✅ 已保存到相册');
             } catch (error) {
                 console.error('保存失败:', error);
                 showToast('❌ 保存失败');
