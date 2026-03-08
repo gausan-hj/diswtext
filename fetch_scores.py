@@ -221,7 +221,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 月亮天平效果
+# 生成HTML - 旋转月亮版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -307,7 +307,6 @@ html = '''<!DOCTYPE html>
             min-height: 100vh;
             transition: background 0.2s ease, color 0.2s ease;
             line-height: 1.5;
-            will-change: background, color;
         }
 
         .container {
@@ -324,7 +323,6 @@ html = '''<!DOCTYPE html>
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, border-color 0.2s ease;
-            will-change: background, border-color;
         }
 
         .header-top {
@@ -349,10 +347,9 @@ html = '''<!DOCTYPE html>
             font-weight: 600;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
-        /* 深色模式按钮 - 月亮天平效果 */
+        /* 深色模式按钮 - 旋转月亮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -365,9 +362,6 @@ html = '''<!DOCTYPE html>
             font-size: 0.9rem;
             color: var(--text-primary);
             transition: background 0.15s ease, transform 0.15s ease;
-            will-change: transform, background;
-            overflow: hidden;
-            position: relative;
         }
 
         .theme-toggle:hover {
@@ -379,22 +373,21 @@ html = '''<!DOCTYPE html>
             transform: scale(0.98);
         }
 
-        /* 月亮图标 - 左右天平效果 */
+        /* 月亮图标 - 旋转实现黑白互换 */
         .moon-icon {
             display: inline-block;
             font-size: 1.2rem;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            will-change: transform;
+            transition: transform 0.2s ease;
         }
 
-        /* 深色模式时，月亮黑色部分在左边（旋转-90度） */
+        /* 深色模式：黑色在左（不旋转） */
         body.night-mode .moon-icon {
-            transform: rotate(-90deg);
+            transform: rotate(0deg);
         }
 
-        /* 浅色模式时，月亮白色部分在左边（旋转90度） */
+        /* 浅色模式：白色在左（旋转180度） */
         body:not(.night-mode) .moon-icon {
-            transform: rotate(90deg);
+            transform: rotate(180deg);
         }
 
         .meta-info {
@@ -407,7 +400,6 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             font-size: 0.85rem;
             transition: border-color 0.2s ease, color 0.2s ease;
-            will-change: border-color, color;
         }
 
         .date-badge {
@@ -417,7 +409,6 @@ html = '''<!DOCTYPE html>
             font-size: 0.8rem;
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, border-color 0.2s ease;
-            will-change: background, border-color;
         }
 
         .search-wrapper {
@@ -432,7 +423,6 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             font-size: 1rem;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         #search {
@@ -444,7 +434,6 @@ html = '''<!DOCTYPE html>
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: border-color 0.2s ease, background 0.2s ease;
-            will-change: border-color, background;
         }
 
         #search:focus {
@@ -472,7 +461,6 @@ html = '''<!DOCTYPE html>
             gap: 12px;
             border-left: 4px solid;
             transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
-            will-change: transform, box-shadow, background, border-color;
         }
 
         .rank-card:hover {
@@ -511,7 +499,6 @@ html = '''<!DOCTYPE html>
             margin-bottom: 4px;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .rank-score {
@@ -522,7 +509,6 @@ html = '''<!DOCTYPE html>
             gap: 4px;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .rank-score small {
@@ -530,13 +516,16 @@ html = '''<!DOCTYPE html>
             font-weight: 400;
             color: var(--text-tertiary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .rank-change {
             font-size: 0.7rem;
             margin-top: 2px;
         }
+
+        .change-up { color: #10b981; }
+        .change-down { color: #ef4444; }
+        .change-steady { color: #f59e0b; }
 
         /* 组卡片 */
         .groups {
@@ -554,7 +543,6 @@ html = '''<!DOCTYPE html>
             scroll-margin-top: 16px;
             border-top: 4px solid;
             transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
-            will-change: background, border-color, box-shadow;
         }
 
         .group-card:hover {
@@ -573,7 +561,6 @@ html = '''<!DOCTYPE html>
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-subtle);
             transition: border-color 0.2s ease;
-            will-change: border-color;
         }
 
         .group-title-wrapper {
@@ -591,7 +578,6 @@ html = '''<!DOCTYPE html>
             font-weight: 600;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .group-stats {
@@ -608,7 +594,6 @@ html = '''<!DOCTYPE html>
             color: var(--text-secondary);
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-            will-change: background, border-color, color;
         }
 
         .group-badge {
@@ -644,14 +629,12 @@ html = '''<!DOCTYPE html>
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-subtle);
             transition: color 0.2s ease, border-color 0.2s ease;
-            will-change: color, border-color;
         }
 
         .member-table td {
             padding: 12px 8px;
             border-bottom: 1px solid var(--border-subtle);
             transition: background 0.1s ease, border-color 0.2s ease, color 0.2s ease;
-            will-change: background, border-color, color;
         }
 
         .member-table tr:hover td {
@@ -672,7 +655,6 @@ html = '''<!DOCTYPE html>
             margin-bottom: 2px;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .name-en {
@@ -683,14 +665,12 @@ html = '''<!DOCTYPE html>
             text-overflow: ellipsis;
             max-width: 130px;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .info-cell {
             font-size: 0.85rem;
             color: var(--text-secondary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         /* 分数标签 */
@@ -709,7 +689,6 @@ html = '''<!DOCTYPE html>
             color: var(--score-text);
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-            will-change: background, color, border-color;
         }
 
         .score-item.has-score {
@@ -751,7 +730,6 @@ html = '''<!DOCTYPE html>
             border: 1px solid var(--border-light);
             border-left: 6px solid var(--star-primary);
             transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
-            will-change: background, border-color, box-shadow;
         }
 
         .reward-header {
@@ -770,7 +748,6 @@ html = '''<!DOCTYPE html>
             font-weight: 700;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-subtitle {
@@ -780,7 +757,6 @@ html = '''<!DOCTYPE html>
             padding-left: 12px;
             border-left: 3px solid var(--star-primary);
             transition: color 0.2s ease, border-color 0.2s ease;
-            will-change: color, border-color;
         }
 
         .reward-content {
@@ -796,7 +772,6 @@ html = '''<!DOCTYPE html>
             padding: 20px;
             border: 1px solid var(--border-subtle);
             transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
-            will-change: transform, box-shadow, background, border-color;
         }
 
         .reward-item:hover {
@@ -820,7 +795,6 @@ html = '''<!DOCTYPE html>
             font-weight: 700;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-desc {
@@ -829,7 +803,6 @@ html = '''<!DOCTYPE html>
             margin-bottom: 12px;
             line-height: 1.5;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-condition {
@@ -842,7 +815,6 @@ html = '''<!DOCTYPE html>
             border: 1px solid var(--border-light);
             margin-bottom: 10px;
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-            will-change: background, color, border-color;
         }
 
         .reward-benefit {
@@ -853,7 +825,6 @@ html = '''<!DOCTYPE html>
             align-items: center;
             gap: 5px;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-note {
@@ -866,14 +837,12 @@ html = '''<!DOCTYPE html>
             color: var(--text-secondary);
             text-align: center;
             transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-            will-change: background, border-color, color;
         }
 
         .reward-extra {
             color: var(--night-primary);
             font-weight: 600;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-footer {
@@ -883,7 +852,6 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             font-style: italic;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .footer {
@@ -894,7 +862,6 @@ html = '''<!DOCTYPE html>
             padding: 16px;
             border-top: 1px solid var(--border-subtle);
             transition: color 0.2s ease, border-color 0.2s ease;
-            will-change: color, border-color;
         }
 
         @media (max-width: 768px) {
@@ -923,7 +890,7 @@ html = '''<!DOCTYPE html>
                     <h1>学长团 · 荣耀榜</h1>
                 </div>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
-                    <span class="moon-icon">🌙</span>
+                    <span class="moon-icon">🌓</span>
                     <span>切换深色</span>
                 </div>
             </div>
@@ -951,19 +918,19 @@ for i, (g, total) in enumerate(sorted_groups, 1):
     current_rank = group_rank[g]
     
     if change > 0:
-        change_text = f'<span style="color:#10b981">▲ +{int(change)}</span>'
+        change_text = f'<span class="change-up">▲ +{int(change)}</span>'
     elif change < 0:
-        change_text = f'<span style="color:#ef4444">▼ {int(change)}</span>'
+        change_text = f'<span class="change-down">▼ {int(change)}</span>'
     else:
-        change_text = '<span style="color:#f59e0b">◆ 0</span>'
+        change_text = '<span class="change-steady">◆ 0</span>'
     
-    html += '''
-            <div class="rank-card" data-group="''' + g + '''" onclick="document.getElementById(\'''' + group_id + '''\').scrollIntoView({behavior: 'smooth'})">
-                <span class="rank-icon">''' + rank_icons[i] + '''</span>
+    html += f'''
+            <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
+                <span class="rank-icon">{rank_icons[i]}</span>
                 <div class="rank-info">
-                    <div class="rank-name">''' + g + '''</div>
-                    <div class="rank-score">''' + str(int(total)) + '''<small>分</small></div>
-                    <div class="rank-change">''' + change_text + '''</div>
+                    <div class="rank-name">{g}</div>
+                    <div class="rank-score">{int(total)}<small>分</small></div>
+                    <div class="rank-change">{change_text}</div>
                 </div>
             </div>
 '''
@@ -983,16 +950,16 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     group_id = group_ids[group_name]
     avg_score = group_averages[group_name]
     
-    html += '''
-            <div class="group-card" data-group="''' + group_name + '''" id="''' + group_id + '''">
+    html += f'''
+            <div class="group-card" data-group="{group_name}" id="{group_id}">
                 <div class="group-header">
                     <div class="group-title-wrapper">
-                        <span class="group-emoji">''' + group_emojis[group_name] + '''</span>
-                        <span class="group-title">''' + group_name + '''</span>
+                        <span class="group-emoji">{group_emojis[group_name]}</span>
+                        <span class="group-title">{group_name}</span>
                     </div>
                     <div class="group-stats">
-                        <span class="group-avg">平均''' + str(int(avg_score)) + '''</span>
-                        <span class="group-badge">第''' + str(rank) + '''名</span>
+                        <span class="group-avg">平均{int(avg_score)}</span>
+                        <span class="group-badge">第{rank}名</span>
                     </div>
                 </div>
                 <div class="table-container">
@@ -1026,18 +993,18 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         # 截断英文名
         name_en_short = member['name_en'][:15] + "…" if len(member['name_en']) > 15 else member['name_en']
         
-        html += '''
-                        <tr data-search="''' + member['name_cn'] + ' ' + member['name_en'] + ' ' + member['class'] + ' ' + member['student_id'] + '''">
-                            <td>''' + str(member['order']) + '''</td>
+        html += f'''
+                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
+                            <td>{member['order']}</td>
                             <td>
-                                <div class="name-cn">''' + member['name_cn'] + '''</div>
-                                <div class="name-en">''' + name_en_short + '''</div>
+                                <div class="name-cn">{member['name_cn']}</div>
+                                <div class="name-en">{name_en_short}</div>
                             </td>
-                            <td class="info-cell">''' + member['class'] + '''</td>
-                            <td class="info-cell">''' + member['student_id'] + '''</td>
-                            <td><div class="score-tags">''' + score_tags + '''</div></td>
-                            <td>''' + str(int(member['total'])) + '''</td>
-                            <td><span class="''' + member['reward_class'] + '''">''' + member['reward_status'] + '''</span></td>
+                            <td class="info-cell">{member['class']}</td>
+                            <td class="info-cell">{member['student_id']}</td>
+                            <td><div class="score-tags">{score_tags}</div></td>
+                            <td>{int(member['total'])}</td>
+                            <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
                         </tr>
 '''
 
@@ -1156,4 +1123,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 月亮天平效果：深色模式旋转-90度，浅色模式旋转90度")
+print("✨ 旋转月亮：🌓 旋转180°实现黑白互换")
