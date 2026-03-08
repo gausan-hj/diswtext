@@ -191,7 +191,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 修复统计图颜色
+# 生成HTML - 修复统计图下载和移除白光
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -333,7 +333,7 @@ html = '''<!DOCTYPE html>
             align-items: center;
         }
 
-        /* 深色模式按钮 */
+        /* 深色模式按钮 - 无白光 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -553,7 +553,7 @@ html = '''<!DOCTYPE html>
             margin-top: 2px;
         }
 
-        /* 组排名卡片 */
+        /* 组排名卡片 - 移除所有白光效果 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -572,6 +572,8 @@ html = '''<!DOCTYPE html>
             align-items: center;
             gap: 6px;
             border-left: 3px solid;
+            transition: transform 0.1s ease;
+            /* 移除所有伪元素和光效 */
         }
 
         .rank-card:active {
@@ -619,7 +621,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 */
+        /* 组卡片 - 移除所有白光效果 */
         .group-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -628,6 +630,7 @@ html = '''<!DOCTYPE html>
             border: 1px solid var(--border-subtle);
             scroll-margin-top: 12px;
             border-top: 3px solid;
+            /* 移除所有伪元素和光效 */
         }
 
         .group-card[data-group="星穹组"] { border-top-color: #eab308 !important; }
@@ -801,7 +804,7 @@ html = '''<!DOCTYPE html>
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 */
+        /* 奖励机制卡片 - 移除所有光效 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
             border-radius: 20px;
@@ -1229,7 +1232,7 @@ html += '''        ];
         // 组数据 - 按固定顺序
         const groups = ["星穹组", "夜曜组", "沧澜组"];
         const scores = [
-            statsData.find(s => s.group === "星穹組").total,
+            statsData.find(s => s.group === "星穹组").total,
             statsData.find(s => s.group === "夜曜组").total,
             statsData.find(s => s.group === "沧澜组").total
         ];
@@ -1327,21 +1330,31 @@ html += '''        ];
             try {
                 showToast('📸 正在生成图片...');
                 
-                // 使用html2canvas将图表卡片转为图片
-                const canvas = await html2canvas(chartCard, {
-                    scale: 2,
-                    backgroundColor: getComputedStyle(document.body).backgroundColor,
-                    allowTaint: false,
-                    useCORS: true
-                });
+                // 确保图表已生成
+                if (!chart) {
+                    generateChart();
+                }
                 
-                // 创建下载链接
-                const link = document.createElement('a');
-                link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+                // 等待图表渲染
+                setTimeout(async () => {
+                    // 使用html2canvas将图表卡片转为图片
+                    const canvas = await html2canvas(chartCard, {
+                        scale: 2,
+                        backgroundColor: getComputedStyle(document.body).backgroundColor,
+                        allowTaint: false,
+                        useCORS: true,
+                        logging: false
+                    });
+                    
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    showToast('✅ 已保存到相册');
+                }, 500);
                 
-                showToast('✅ 已保存到相册');
             } catch (error) {
                 console.error('保存失败:', error);
                 showToast('❌ 保存失败');
@@ -1402,4 +1415,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 修复：统计图颜色顺序（星穹黄、夜曜紫、沧澜蓝）")
+print("✨ 修复：统计图下载 + 移除所有白光")
