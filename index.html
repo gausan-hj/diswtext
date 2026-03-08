@@ -123,7 +123,7 @@
             color: var(--text-primary);
         }
 
-        /* 深色模式按钮 - 无动画 */
+        /* 深色模式按钮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -191,7 +191,7 @@
             box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
         }
 
-        /* 组排名卡片 - 无旋转 */
+        /* 组排名卡片 - 导航栏 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -211,20 +211,6 @@
             gap: 12px;
             border-left: 4px solid;
             transition: transform 0.2s, box-shadow 0.2s;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.5s forwards;
-        }
-
-        .rank-card:nth-child(1) { animation-delay: 0.1s; }
-        .rank-card:nth-child(2) { animation-delay: 0.2s; }
-        .rank-card:nth-child(3) { animation-delay: 0.3s; }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .rank-card:hover {
@@ -247,28 +233,6 @@
         .rank-card[data-group="沧澜组"] {
             border-left-color: var(--ocean-primary);
             background: linear-gradient(to right, var(--ocean-bg), var(--card-bg));
-        }
-
-        .rank-card.rank-up {
-            animation: rankUp 0.4s ease;
-        }
-
-        .rank-card.rank-down {
-            animation: rankDown 0.4s ease;
-        }
-
-        @keyframes rankUp {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
-            60% { transform: translateY(2px); }
-            100% { transform: translateY(0); }
-        }
-
-        @keyframes rankDown {
-            0% { transform: translateY(0); }
-            30% { transform: translateY(4px); }
-            60% { transform: translateY(-2px); }
-            100% { transform: translateY(0); }
         }
 
         .rank-icon {
@@ -319,20 +283,6 @@
             border: 1px solid var(--border-subtle);
             scroll-margin-top: 16px;
             border-top: 4px solid;
-            opacity: 0;
-            transform: translateX(-20px);
-            animation: slideIn 0.5s forwards;
-        }
-
-        .group-card:nth-child(1) { animation-delay: 0.2s; }
-        .group-card:nth-child(2) { animation-delay: 0.3s; }
-        .group-card:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes slideIn {
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
         }
 
         .group-card[data-group="星穹组"] { border-top-color: var(--star-primary); }
@@ -505,9 +455,6 @@
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             border-left: 6px solid var(--star-primary);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.6s 0.5s forwards;
         }
 
         .reward-header {
@@ -630,12 +577,6 @@
             font-size: 0.75rem;
             padding: 16px;
             border-top: 1px solid var(--border-subtle);
-            opacity: 0;
-            animation: fadeIn 0.5s 0.9s forwards;
-        }
-
-        @keyframes fadeIn {
-            to { opacity: 1; }
         }
 
         @media (max-width: 768px) {
@@ -670,7 +611,7 @@
             </div>
             <div class="meta-info">
                 <span>训育处 · 奖励机制 · 公平公正</span>
-                <span class="date-badge">2026年03月08日 02:03</span>
+                <span class="date-badge">2026年03月08日 02:09</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -678,10 +619,10 @@
             </div>
         </div>
 
-        <!-- 组排名卡片 -->
+        <!-- 组排名卡片 - 导航栏 -->
         <div class="rank-grid">
 
-            <div class="rank-card rank-up" data-group="夜曜组" data-rank="1" data-prev-rank="2" onclick="document.getElementById('group-yeyao').scrollIntoView({behavior: 'smooth'})">
+            <div class="rank-card" data-group="夜曜组" onclick="document.getElementById('group-yeyao').scrollIntoView({behavior: 'smooth'})">
                 <span class="rank-icon">🥇</span>
                 <div class="rank-info">
                     <div class="rank-name">夜曜组</div>
@@ -690,7 +631,7 @@
                 </div>
             </div>
 
-            <div class="rank-card rank-down" data-group="星穹组" data-rank="2" data-prev-rank="1" onclick="document.getElementById('group-xingqiong').scrollIntoView({behavior: 'smooth'})">
+            <div class="rank-card" data-group="星穹组" onclick="document.getElementById('group-xingqiong').scrollIntoView({behavior: 'smooth'})">
                 <span class="rank-icon">🥈</span>
                 <div class="rank-info">
                     <div class="rank-name">星穹组</div>
@@ -699,7 +640,7 @@
                 </div>
             </div>
 
-            <div class="rank-card rank-down" data-group="沧澜组" data-rank="3" data-prev-rank="2" onclick="document.getElementById('group-canglan').scrollIntoView({behavior: 'smooth'})">
+            <div class="rank-card" data-group="沧澜组" onclick="document.getElementById('group-canglan').scrollIntoView({behavior: 'smooth'})">
                 <span class="rank-icon">🥉</span>
                 <div class="rank-info">
                     <div class="rank-name">沧澜组</div>
@@ -1211,7 +1152,7 @@
 
         </div>
 
-        <!-- 奖励机制卡片 - 移到最下面 -->
+        <!-- 奖励机制卡片 -->
         <div class="reward-section">
             <div class="reward-header">
                 <span class="reward-icon">🎁</span>
@@ -1297,19 +1238,6 @@
                 const searchText = row.getAttribute('data-search').toLowerCase();
                 row.style.display = searchText.includes(searchTerm) ? '' : 'none';
             });
-        });
-        
-        // 排名动画
-        document.querySelectorAll('.rank-card').forEach(card => {
-            const currentRank = parseInt(card.dataset.rank);
-            const prevRank = parseInt(card.dataset.prevRank);
-            if (currentRank && prevRank) {
-                if (currentRank < prevRank) {
-                    card.classList.add('rank-up');
-                } else if (currentRank > prevRank) {
-                    card.classList.add('rank-down');
-                }
-            }
         });
     </script>
 </body>
