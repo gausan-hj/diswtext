@@ -221,7 +221,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 按钮动画版
+# 生成HTML - 顺畅按钮动画版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -305,8 +305,9 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             padding: 20px;
             min-height: 100vh;
-            transition: background 0.5s ease, color 0.4s ease, border-color 0.3s ease;
+            transition: background 0.2s ease, color 0.2s ease;
             line-height: 1.5;
+            will-change: background, color;
         }
 
         .container {
@@ -322,7 +323,8 @@ html = '''<!DOCTYPE html>
             margin-bottom: 24px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
-            transition: background 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: background 0.2s ease, border-color 0.2s ease;
+            will-change: background, border-color;
         }
 
         .header-top {
@@ -340,21 +342,17 @@ html = '''<!DOCTYPE html>
 
         .school-icon {
             font-size: 2rem;
-            transition: transform 0.3s ease;
-        }
-
-        .school-icon:hover {
-            transform: scale(1.1);
         }
 
         h1 {
             font-size: 1.6rem;
             font-weight: 600;
             color: var(--text-primary);
-            transition: color 0.4s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
-        /* 深色模式按钮 - 丰富动画 */
+        /* 深色模式按钮 - 顺畅动画 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -366,58 +364,27 @@ html = '''<!DOCTYPE html>
             gap: 8px;
             font-size: 0.9rem;
             color: var(--text-primary);
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-            overflow: hidden;
+            transition: background 0.15s ease, transform 0.15s ease;
+            will-change: transform, background;
         }
 
         .theme-toggle:hover {
-            transform: scale(1.05);
             background: var(--border-light);
-            box-shadow: var(--shadow-lg);
+            transform: scale(1.02);
         }
 
         .theme-toggle:active {
-            transform: scale(0.95);
+            transform: scale(0.98);
         }
 
-        /* 按钮图标动画 */
         .theme-toggle .toggle-icon {
             display: inline-block;
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.3s ease;
+            will-change: transform;
         }
 
         .theme-toggle:hover .toggle-icon {
-            transform: rotate(180deg) scale(1.2);
-        }
-
-        body.night-mode .theme-toggle .toggle-icon {
-            animation: moonGlow 2s infinite alternate;
-        }
-
-        @keyframes moonGlow {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(1.1); opacity: 0.9; }
-        }
-
-        /* 按钮点击波纹 */
-        .theme-toggle::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.4s ease-out, height 0.4s ease-out;
-            pointer-events: none;
-        }
-
-        .theme-toggle:active::after {
-            width: 200px;
-            height: 200px;
+            transform: rotate(180deg);
         }
 
         .meta-info {
@@ -429,7 +396,8 @@ html = '''<!DOCTYPE html>
             border-bottom: 2px dashed var(--border-subtle);
             color: var(--text-tertiary);
             font-size: 0.85rem;
-            transition: border-color 0.3s ease, color 0.3s ease;
+            transition: border-color 0.2s ease, color 0.2s ease;
+            will-change: border-color, color;
         }
 
         .date-badge {
@@ -438,7 +406,8 @@ html = '''<!DOCTYPE html>
             border-radius: 30px;
             font-size: 0.8rem;
             border: 1px solid var(--border-subtle);
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.2s ease, border-color 0.2s ease;
+            will-change: background, border-color;
         }
 
         .search-wrapper {
@@ -452,7 +421,8 @@ html = '''<!DOCTYPE html>
             transform: translateY(-50%);
             color: var(--text-tertiary);
             font-size: 1rem;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         #search {
@@ -463,13 +433,13 @@ html = '''<!DOCTYPE html>
             font-size: 0.95rem;
             background: var(--bg-primary);
             color: var(--text-primary);
-            transition: all 0.3s ease;
+            transition: border-color 0.2s ease, background 0.2s ease;
+            will-change: border-color, background;
         }
 
         #search:focus {
             outline: none;
             border-color: var(--text-tertiary);
-            box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
         }
 
         /* 组排名卡片 - 导航栏 */
@@ -491,16 +461,17 @@ html = '''<!DOCTYPE html>
             align-items: center;
             gap: 12px;
             border-left: 4px solid;
-            transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease, border-color 0.3s ease;
+            transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+            will-change: transform, box-shadow, background, border-color;
         }
 
         .rank-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: var(--shadow-lg);
         }
 
         .rank-card:active {
-            transform: scale(0.98);
+            transform: scale(0.99);
         }
 
         .rank-card[data-group="星穹组"] {
@@ -518,11 +489,6 @@ html = '''<!DOCTYPE html>
 
         .rank-icon {
             font-size: 1.8rem;
-            transition: transform 0.3s ease;
-        }
-
-        .rank-card:hover .rank-icon {
-            transform: scale(1.1);
         }
 
         .rank-info {
@@ -534,7 +500,8 @@ html = '''<!DOCTYPE html>
             font-size: 0.95rem;
             margin-bottom: 4px;
             color: var(--text-primary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .rank-score {
@@ -544,14 +511,16 @@ html = '''<!DOCTYPE html>
             align-items: baseline;
             gap: 4px;
             color: var(--text-primary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .rank-score small {
             font-size: 0.7rem;
             font-weight: 400;
             color: var(--text-tertiary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .rank-change {
@@ -574,7 +543,8 @@ html = '''<!DOCTYPE html>
             border: 1px solid var(--border-subtle);
             scroll-margin-top: 16px;
             border-top: 4px solid;
-            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
+            will-change: background, border-color, box-shadow;
         }
 
         .group-card:hover {
@@ -592,7 +562,8 @@ html = '''<!DOCTYPE html>
             margin-bottom: 16px;
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-subtle);
-            transition: border-color 0.3s ease;
+            transition: border-color 0.2s ease;
+            will-change: border-color;
         }
 
         .group-title-wrapper {
@@ -603,18 +574,14 @@ html = '''<!DOCTYPE html>
 
         .group-emoji {
             font-size: 1.4rem;
-            transition: transform 0.3s ease;
-        }
-
-        .group-card:hover .group-emoji {
-            transform: scale(1.1);
         }
 
         .group-title {
             font-size: 1.3rem;
             font-weight: 600;
             color: var(--text-primary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .group-stats {
@@ -630,7 +597,8 @@ html = '''<!DOCTYPE html>
             border-radius: 30px;
             color: var(--text-secondary);
             border: 1px solid var(--border-subtle);
-            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            will-change: background, border-color, color;
         }
 
         .group-badge {
@@ -638,11 +606,6 @@ html = '''<!DOCTYPE html>
             padding: 4px 12px;
             border-radius: 30px;
             color: white;
-            transition: transform 0.2s ease;
-        }
-
-        .group-badge:hover {
-            transform: scale(1.05);
         }
 
         .group-card[data-group="星穹组"] .group-badge { background: var(--star-primary); }
@@ -670,13 +633,15 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-subtle);
-            transition: color 0.3s ease, border-color 0.3s ease;
+            transition: color 0.2s ease, border-color 0.2s ease;
+            will-change: color, border-color;
         }
 
         .member-table td {
             padding: 12px 8px;
             border-bottom: 1px solid var(--border-subtle);
-            transition: background 0.2s, border-color 0.3s ease, color 0.3s ease;
+            transition: background 0.1s ease, border-color 0.2s ease, color 0.2s ease;
+            will-change: background, border-color, color;
         }
 
         .member-table tr:hover td {
@@ -696,7 +661,8 @@ html = '''<!DOCTYPE html>
             font-size: 0.95rem;
             margin-bottom: 2px;
             color: var(--text-primary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .name-en {
@@ -706,13 +672,15 @@ html = '''<!DOCTYPE html>
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 130px;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .info-cell {
             font-size: 0.85rem;
             color: var(--text-secondary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         /* 分数标签 */
@@ -730,12 +698,8 @@ html = '''<!DOCTYPE html>
             background: var(--score-bg);
             color: var(--score-text);
             border: 1px solid var(--border-subtle);
-            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .score-item:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-sm);
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            will-change: background, color, border-color;
         }
 
         .score-item.has-score {
@@ -754,11 +718,6 @@ html = '''<!DOCTYPE html>
             display: inline-block;
             min-width: 40px;
             text-align: center;
-            transition: transform 0.2s ease;
-        }
-
-        .reward-pass:hover, .reward-fail:hover {
-            transform: scale(1.05);
         }
 
         .reward-pass {
@@ -781,7 +740,8 @@ html = '''<!DOCTYPE html>
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             border-left: 6px solid var(--star-primary);
-            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
+            will-change: background, border-color, box-shadow;
         }
 
         .reward-header {
@@ -793,18 +753,14 @@ html = '''<!DOCTYPE html>
 
         .reward-icon {
             font-size: 2.4rem;
-            transition: transform 0.3s ease;
-        }
-
-        .reward-section:hover .reward-icon {
-            transform: scale(1.1);
         }
 
         .reward-header h2 {
             font-size: 1.6rem;
             font-weight: 700;
             color: var(--text-primary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .reward-subtitle {
@@ -813,7 +769,8 @@ html = '''<!DOCTYPE html>
             margin-bottom: 20px;
             padding-left: 12px;
             border-left: 3px solid var(--star-primary);
-            transition: color 0.3s ease, border-color 0.3s ease;
+            transition: color 0.2s ease, border-color 0.2s ease;
+            will-change: color, border-color;
         }
 
         .reward-content {
@@ -828,11 +785,12 @@ html = '''<!DOCTYPE html>
             border-radius: 24px;
             padding: 20px;
             border: 1px solid var(--border-subtle);
-            transition: transform 0.2s, box-shadow 0.2s, background 0.3s ease, border-color 0.3s ease;
+            transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+            will-change: transform, box-shadow, background, border-color;
         }
 
         .reward-item:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: var(--shadow-lg);
         }
 
@@ -845,18 +803,14 @@ html = '''<!DOCTYPE html>
 
         .rank-medal {
             font-size: 2rem;
-            transition: transform 0.3s ease;
-        }
-
-        .reward-item:hover .rank-medal {
-            transform: scale(1.1);
         }
 
         .rank-title {
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--text-primary);
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .reward-desc {
@@ -864,7 +818,8 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
             margin-bottom: 12px;
             line-height: 1.5;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .reward-condition {
@@ -876,7 +831,8 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             border: 1px solid var(--border-light);
             margin-bottom: 10px;
-            transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            will-change: background, color, border-color;
         }
 
         .reward-benefit {
@@ -886,7 +842,8 @@ html = '''<!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 5px;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .reward-note {
@@ -898,13 +855,15 @@ html = '''<!DOCTYPE html>
             font-size: 0.9rem;
             color: var(--text-secondary);
             text-align: center;
-            transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            will-change: background, border-color, color;
         }
 
         .reward-extra {
             color: var(--night-primary);
             font-weight: 600;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .reward-footer {
@@ -913,7 +872,8 @@ html = '''<!DOCTYPE html>
             font-size: 0.9rem;
             color: var(--text-tertiary);
             font-style: italic;
-            transition: color 0.3s ease;
+            transition: color 0.2s ease;
+            will-change: color;
         }
 
         .footer {
@@ -923,7 +883,8 @@ html = '''<!DOCTYPE html>
             font-size: 0.75rem;
             padding: 16px;
             border-top: 1px solid var(--border-subtle);
-            transition: color 0.3s ease, border-color 0.3s ease;
+            transition: color 0.2s ease, border-color 0.2s ease;
+            will-change: color, border-color;
         }
 
         @media (max-width: 768px) {
@@ -1185,4 +1146,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 按钮动画：悬停放大 + 图标旋转 + 点击波纹 + 整体过渡")
+print("✨ 顺畅动画：0.1-0.2秒过渡 + will-change优化 + 轻量效果")
