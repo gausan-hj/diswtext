@@ -2,8 +2,9 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 · 学长团荣耀榜</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -43,10 +44,6 @@
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
-            
-            --change-up: #10b981;
-            --change-down: #ef4444;
-            --change-steady: #f59e0b;
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
@@ -114,6 +111,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .title-group {
@@ -130,6 +129,12 @@
             font-size: 1.3rem;
             font-weight: 600;
             color: var(--text-primary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         /* 深色模式按钮 */
@@ -151,6 +156,32 @@
         .theme-toggle:active {
             background: var(--border-light);
             transform: scale(0.98);
+        }
+
+        /* 下载按钮 */
+        .download-btn {
+            background: var(--star-primary);
+            border: none;
+            border-radius: 30px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: #1a2b3c;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .download-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        body.night-mode .download-btn {
+            color: #ffffff;
         }
 
         .moon-icon {
@@ -214,6 +245,97 @@
         #search:focus {
             outline: none;
             border-color: var(--text-tertiary);
+        }
+
+        /* 统计图卡片 */
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-subtle);
+            display: none;
+        }
+
+        .chart-card.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .close-chart {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-rank {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
         }
 
         /* 组排名卡片 */
@@ -281,16 +403,6 @@
             font-weight: 400;
             color: var(--text-tertiary);
         }
-
-        .rank-change {
-            font-size: 0.6rem;
-            margin-top: 2px;
-            font-weight: 500;
-        }
-
-        .change-up { color: var(--change-up); }
-        .change-down { color: var(--change-down); }
-        .change-steady { color: var(--change-steady); }
 
         /* 组卡片 */
         .groups {
@@ -533,10 +645,6 @@
             gap: 8px;
         }
 
-        .reward-item:active {
-            transform: scale(0.99);
-        }
-
         .reward-rank {
             display: flex;
             align-items: center;
@@ -551,12 +659,6 @@
         .rank-title {
             font-size: 0.9rem;
             font-weight: 600;
-        }
-
-        .reward-desc {
-            font-size: 0.7rem;
-            color: var(--text-tertiary);
-            margin-bottom: 4px;
         }
 
         .reward-condition {
@@ -609,6 +711,42 @@
             border-top: 1px solid var(--border-subtle);
         }
 
+        /* 下载提示 */
+        .download-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            font-size: 0.8rem;
+        }
+
+        .download-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--star-primary);
+            color: #1a2b3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
         @media (max-width: 360px) {
             .rank-name { font-size: 0.7rem; }
             .rank-score { font-size: 0.9rem; }
@@ -616,6 +754,7 @@
             .member-table { min-width: 500px; }
             .name-cn { max-width: 70px; }
             .name-en { max-width: 70px; }
+            .action-buttons { width: 100%; justify-content: flex-end; }
         }
     </style>
 </head>
@@ -627,14 +766,20 @@
                     <span class="school-icon">🏫</span>
                     <h1>学长团荣耀榜</h1>
                 </div>
-                <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
-                    <span class="moon-icon">🌓</span>
-                    <span>深色</span>
+                <div class="action-buttons">
+                    <button class="download-btn" id="downloadBtn">
+                        <span>📊</span>
+                        <span>下载统计</span>
+                    </button>
+                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                        <span class="moon-icon">🌓</span>
+                        <span>深色</span>
+                    </div>
                 </div>
             </div>
             <div class="meta-info">
                 <span>训育处 · 奖励机制</span>
-                <span class="date-badge">03/08 05:42</span>
+                <span class="date-badge">03/08 05:54</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -642,24 +787,37 @@
             </div>
         </div>
 
-        <!-- 组排名卡片 - 带变化显示 -->
+        <!-- 统计图卡片 -->
+        <div class="chart-card" id="chartCard">
+            <div class="chart-header">
+                <span class="chart-title">
+                    <span>📊</span>
+                    各组总分对比
+                </span>
+                <button class="close-chart" id="closeChart">关闭</button>
+            </div>
+            <div class="chart-container">
+                <canvas id="groupChart"></canvas>
+            </div>
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+        <!-- 组排名卡片 -->
         <div class="rank-grid">
 
-            <div class="rank-card" data-group="星穹组" onclick="document.getElementById('group-xingqiong').scrollIntoView({behavior: 'smooth'})">
+            <div class="rank-card" data-group="夜曜组" onclick="document.getElementById('group-yeyao').scrollIntoView({behavior: 'smooth'})">
                 <span class="rank-icon">🥇</span>
                 <div class="rank-info">
-                    <div class="rank-name">星穹组</div>
-                    <div class="rank-score">112<small>分</small></div>
-                    <div class="rank-change"><span class="change-steady">◆0</span></div>
+                    <div class="rank-name">夜曜组</div>
+                    <div class="rank-score">46<small>分</small></div>
                 </div>
             </div>
 
-            <div class="rank-card" data-group="夜曜组" onclick="document.getElementById('group-yeyao').scrollIntoView({behavior: 'smooth'})">
+            <div class="rank-card" data-group="星穹组" onclick="document.getElementById('group-xingqiong').scrollIntoView({behavior: 'smooth'})">
                 <span class="rank-icon">🥈</span>
                 <div class="rank-info">
-                    <div class="rank-name">夜曜组</div>
-                    <div class="rank-score">35<small>分</small></div>
-                    <div class="rank-change"><span class="change-steady">◆0</span></div>
+                    <div class="rank-name">星穹组</div>
+                    <div class="rank-score">21<small>分</small></div>
                 </div>
             </div>
 
@@ -667,8 +825,7 @@
                 <span class="rank-icon">🥉</span>
                 <div class="rank-info">
                     <div class="rank-name">沧澜组</div>
-                    <div class="rank-score">14<small>分</small></div>
-                    <div class="rank-change"><span class="change-steady">◆0</span></div>
+                    <div class="rank-score">20<small>分</small></div>
                 </div>
             </div>
 
@@ -684,8 +841,8 @@
                         <span class="group-title">星穹组</span>
                     </div>
                     <div class="group-stats">
-                        <span class="group-avg">平均11</span>
-                        <span class="group-badge">第1名</span>
+                        <span class="group-avg">平均2</span>
+                        <span class="group-badge">第2名</span>
                     </div>
                 </div>
                 <div class="table-container">
@@ -724,8 +881,8 @@
                             </td>
                             <td class="info-cell">S2Y</td>
                             <td class="info-cell">22100</td>
-                            <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td>0</td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span></div></td>
+                            <td>1</td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -739,7 +896,7 @@
                             <td class="info-cell">24076</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">3</span></span></div></td>
                             <td>3</td>
-                            <td><span class="reward-fail">❌</span></td>
+                            <td><span class="reward-pass">✅</span></td>
                         </tr>
 
                         <tr data-search="莎哈娜 SADHANA A/P SASU BAKIAN J3T 24078">
@@ -750,9 +907,9 @@
                             </td>
                             <td class="info-cell">J3T</td>
                             <td class="info-cell">24078</td>
-                            <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td>0</td>
-                            <td><span class="reward-fail">❌</span></td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">4</span></span></div></td>
+                            <td>4</td>
+                            <td><span class="reward-pass">✅</span></td>
                         </tr>
 
                         <tr data-search="李韡翰 LEE WEI HANN J3K 24068">
@@ -763,9 +920,9 @@
                             </td>
                             <td class="info-cell">J3K</td>
                             <td class="info-cell">24068</td>
-                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">100</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
-                            <td>101</td>
-                            <td><span class="reward-pass">✅</span></td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">2</span></span></div></td>
+                            <td>2</td>
+                            <td><span class="reward-fail">❌</span></td>
                         </tr>
 
                         <tr data-search="彭绍洋 PEH SHAO YANG J3T 24088">
@@ -789,9 +946,9 @@
                             </td>
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25035</td>
-                            <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td>0</td>
-                            <td><span class="reward-fail">❌</span></td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">3</span></span></div></td>
+                            <td>3</td>
+                            <td><span class="reward-pass">✅</span></td>
                         </tr>
 
                         <tr data-search="尤嘉乐 JUSTIN YEW JIA LE J2Y 25046">
@@ -845,8 +1002,8 @@
                         <span class="group-title">夜曜组</span>
                     </div>
                     <div class="group-stats">
-                        <span class="group-avg">平均3</span>
-                        <span class="group-badge">第2名</span>
+                        <span class="group-avg">平均4</span>
+                        <span class="group-badge">第1名</span>
                     </div>
                 </div>
                 <div class="table-container">
@@ -872,8 +1029,8 @@
                             </td>
                             <td class="info-cell">S2FA</td>
                             <td class="info-cell">22040</td>
-                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span></div></td>
-                            <td>1</td>
+                            <td><div class="score-tags"><span class="score-item">—</span></div></td>
+                            <td>0</td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -926,7 +1083,7 @@
                             <td class="info-cell">24083</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
                             <td>3</td>
-                            <td><span class="reward-fail">❌</span></td>
+                            <td><span class="reward-pass">✅</span></td>
                         </tr>
 
                         <tr data-search="林宜彤 LIM YEE TONG J2Y 25036">
@@ -937,9 +1094,9 @@
                             </td>
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25036</td>
-                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span></div></td>
-                            <td>3</td>
-                            <td><span class="reward-fail">❌</span></td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
+                            <td>5</td>
+                            <td><span class="reward-pass">✅</span></td>
                         </tr>
 
                         <tr data-search="潘宛瑜 TRACY PHUAH WANYU J2Y 25071">
@@ -952,7 +1109,7 @@
                             <td class="info-cell">25071</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">3</span></span></div></td>
                             <td>3</td>
-                            <td><span class="reward-fail">❌</span></td>
+                            <td><span class="reward-pass">✅</span></td>
                         </tr>
 
                         <tr data-search="符传吉 FOO CHUAN JI J2Y 25044">
@@ -976,8 +1133,8 @@
                             </td>
                             <td class="info-cell">J2F</td>
                             <td class="info-cell">25058</td>
-                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span></div></td>
-                            <td>6</td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
+                            <td>8</td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -989,8 +1146,8 @@
                             </td>
                             <td class="info-cell">J2F</td>
                             <td class="info-cell">25059</td>
-                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">6</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span></div></td>
-                            <td>12</td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">6</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">7</span></span></div></td>
+                            <td>20</td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1019,7 +1176,7 @@
                         <span class="group-title">沧澜组</span>
                     </div>
                     <div class="group-stats">
-                        <span class="group-avg">平均1</span>
+                        <span class="group-avg">平均2</span>
                         <span class="group-badge">第3名</span>
                     </div>
                 </div>
@@ -1111,8 +1268,8 @@
                             </td>
                             <td class="info-cell">S1T</td>
                             <td class="info-cell">23013</td>
-                            <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td>0</td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span></div></td>
+                            <td>1</td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1124,9 +1281,9 @@
                             </td>
                             <td class="info-cell">J3F</td>
                             <td class="info-cell">24039</td>
-                            <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td>0</td>
-                            <td><span class="reward-fail">❌</span></td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
+                            <td>2</td>
+                            <td><span class="reward-pass">✅</span></td>
                         </tr>
 
                         <tr data-search="许家绮 KOO JIA QI J2Y 25031">
@@ -1137,8 +1294,8 @@
                             </td>
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25031</td>
-                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">4</span></span></div></td>
-                            <td>6</td>
+                            <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">3</span></span></div></td>
+                            <td>9</td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1152,7 +1309,7 @@
                             <td class="info-cell">25070</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span></div></td>
                             <td>2</td>
-                            <td><span class="reward-pass">✅</span></td>
+                            <td><span class="reward-fail">❌</span></td>
                         </tr>
 
                         <tr data-search="施锦轩 SEE JIN XUAN J1T 26092">
@@ -1225,18 +1382,147 @@
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 显示较昨日变化 · 最近5次得分
+            👆 点击排名卡片跳转 · 🌓切换深色 · 📊下载统计 · 最近5次得分
         </div>
     </div>
 
+    <!-- 下载提示 -->
+    <div class="download-toast" id="downloadToast">
+        <span class="toast-icon">✓</span>
+        <span id="toastMessage">统计图已生成</span>
+    </div>
+
     <script>
+        // 检查系统主题偏好
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
         
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const chartCard = document.getElementById('chartCard');
+        const closeChart = document.getElementById('closeChart');
+        const downloadToast = document.getElementById('downloadToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const statsGrid = document.getElementById('statsGrid');
         
+        // 统计数据
+        const statsData = [
+            { group: "星穹组", total: 21, rank: 2, members: 10, avg: 2 },
+            { group: "夜曜组", total: 46, rank: 1, members: 11, avg: 4 },
+            { group: "沧澜组", total: 20, rank: 3, members: 10, avg: 2 },
+        ];
+
+        // 组数据
+        const groups = ['夜曜组', '星穹组', '沧澜组'];
+        const scores = [46, 21, 20];
+        const colors = ["#eab308", "#a855f7", "#3b82f6"];
+        
+        let chart = null;
+
+        // 显示提示
+        function showToast(message, isSuccess = true) {
+            toastMessage.textContent = message;
+            downloadToast.classList.add('show');
+            setTimeout(() => {
+                downloadToast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 生成统计图
+        function generateChart() {
+            const ctx = document.getElementById('groupChart').getContext('2d');
+            const isNightMode = document.body.classList.contains('night-mode');
+            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
+            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: groups,
+                    datasets: [{
+                        label: '总分',
+                        data: scores,
+                        backgroundColor: colors,
+                        borderRadius: 6,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const group = groups[context.dataIndex];
+                                    const stat = statsData.find(s => s.group === group);
+                                    return [
+                                        `总分: ${value}分`,
+                                        `排名: 第${stat.rank}名`,
+                                        `人数: ${stat.members}人`,
+                                        `平均: ${stat.avg}分`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 生成统计卡片
+        function generateStatsGrid() {
+            let html = '';
+            statsData.forEach(stat => {
+                html += `
+                    <div class="stat-item">
+                        <div class="stat-label">${stat.group}</div>
+                        <div class="stat-value">${stat.total}</div>
+                        <div class="stat-rank">第${stat.rank}名 · ${stat.members}人</div>
+                    </div>
+                `;
+            });
+            statsGrid.innerHTML = html;
+        }
+
+        // 下载按钮点击
+        downloadBtn.addEventListener('click', () => {
+            // 显示统计图卡片
+            chartCard.classList.add('show');
+            
+            // 生成图表和统计卡片
+            generateChart();
+            generateStatsGrid();
+            
+            // 显示提示
+            showToast('📊 统计图已生成');
+        });
+
+        // 关闭统计图
+        closeChart.addEventListener('click', () => {
+            chartCard.classList.remove('show');
+        });
+
+        // 搜索功能
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             allRows.forEach(row => {
@@ -1244,6 +1530,15 @@
                 row.style.display = searchText.includes(searchTerm) ? '' : 'none';
             });
         });
+
+        // 深色模式切换时更新图表颜色
+        const observer = new MutationObserver(() => {
+            if (chart && chartCard.classList.contains('show')) {
+                generateChart();
+            }
+        });
+        
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     </script>
 </body>
 </html>
