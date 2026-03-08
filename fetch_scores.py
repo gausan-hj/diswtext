@@ -221,12 +221,12 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 旋转月亮版
+# 生成HTML - 手机优化版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 · 学长团荣耀榜</title>
     <style>
         * {
@@ -246,8 +246,8 @@ html = '''<!DOCTYPE html>
             --border-light: #e1e8f0;
             --border-subtle: #eef2f6;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.04);
-            --shadow-lg: 0 8px 24px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.04);
+            --shadow-lg: 0 8px 20px rgba(0,0,0,0.06);
             
             --star-primary: #eab308;
             --star-light: #fef9c3;
@@ -267,6 +267,9 @@ html = '''<!DOCTYPE html>
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
+            
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         body.night-mode {
@@ -279,8 +282,8 @@ html = '''<!DOCTYPE html>
             --border-light: #2d3a4d;
             --border-subtle: #253141;
             --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
-            --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 20px rgba(0,0,0,0.5);
             
             --star-light: #423d2a;
             --star-bg: #2f2a1f;
@@ -303,89 +306,83 @@ html = '''<!DOCTYPE html>
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            padding: 20px;
+            padding: 12px;
+            padding-top: max(12px, var(--safe-top));
+            padding-bottom: max(12px, var(--safe-bottom));
             min-height: 100vh;
             transition: background 0.2s ease, color 0.2s ease;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
         }
 
-        /* 头部 */
+        /* 头部 - 手机优化 */
         .header {
             background: var(--card-bg);
-            border-radius: 32px;
-            padding: 24px;
-            margin-bottom: 24px;
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
-            transition: background 0.2s ease, border-color 0.2s ease;
         }
 
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .title-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         .school-icon {
-            font-size: 2rem;
+            font-size: 1.6rem;
         }
 
         h1 {
-            font-size: 1.6rem;
+            font-size: 1.3rem;
             font-weight: 600;
             color: var(--text-primary);
-            transition: color 0.2s ease;
         }
 
-        /* 深色模式按钮 - 旋转月亮 */
+        /* 深色模式按钮 - 手机优化 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
-            border-radius: 40px;
-            padding: 8px 18px;
+            border-radius: 30px;
+            padding: 6px 12px;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+            gap: 4px;
+            font-size: 0.8rem;
             color: var(--text-primary);
-            transition: background 0.15s ease, transform 0.15s ease;
-        }
-
-        .theme-toggle:hover {
-            background: var(--border-light);
-            transform: scale(1.02);
+            transition: background 0.15s ease;
+            white-space: nowrap;
         }
 
         .theme-toggle:active {
+            background: var(--border-light);
             transform: scale(0.98);
         }
 
-        /* 月亮图标 - 旋转实现黑白互换 */
         .moon-icon {
             display: inline-block;
-            font-size: 1.2rem;
+            font-size: 1rem;
             transition: transform 0.2s ease;
         }
 
-        /* 深色模式：黑色在左（不旋转） */
         body.night-mode .moon-icon {
             transform: rotate(0deg);
         }
 
-        /* 浅色模式：白色在左（旋转180度） */
         body:not(.night-mode) .moon-icon {
             transform: rotate(180deg);
         }
@@ -394,21 +391,20 @@ html = '''<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px dashed var(--border-subtle);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border-subtle);
             color: var(--text-tertiary);
-            font-size: 0.85rem;
-            transition: border-color 0.2s ease, color 0.2s ease;
+            font-size: 0.7rem;
         }
 
         .date-badge {
             background: var(--bg-primary);
-            padding: 4px 14px;
-            border-radius: 30px;
-            font-size: 0.8rem;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
             border: 1px solid var(--border-subtle);
-            transition: background 0.2s ease, border-color 0.2s ease;
+            white-space: nowrap;
         }
 
         .search-wrapper {
@@ -417,23 +413,22 @@ html = '''<!DOCTYPE html>
 
         .search-icon {
             position: absolute;
-            left: 16px;
+            left: 12px;
             top: 50%;
             transform: translateY(-50%);
             color: var(--text-tertiary);
-            font-size: 1rem;
-            transition: color 0.2s ease;
+            font-size: 0.9rem;
         }
 
         #search {
             width: 100%;
-            padding: 12px 16px 12px 44px;
+            padding: 10px 12px 10px 36px;
             border: 1px solid var(--border-subtle);
-            border-radius: 40px;
-            font-size: 0.95rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
             background: var(--bg-primary);
             color: var(--text-primary);
-            transition: border-color 0.2s ease, background 0.2s ease;
+            -webkit-appearance: none;
         }
 
         #search:focus {
@@ -441,35 +436,29 @@ html = '''<!DOCTYPE html>
             border-color: var(--text-tertiary);
         }
 
-        /* 组排名卡片 - 导航栏 */
+        /* 组排名卡片 - 手机网格优化 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 8px;
+            margin-bottom: 16px;
         }
 
         .rank-card {
             background: var(--card-bg);
-            border-radius: 24px;
-            padding: 18px;
-            box-shadow: var(--shadow-md);
+            border-radius: 18px;
+            padding: 10px 8px;
+            box-shadow: var(--shadow-sm);
             border: 1px solid var(--border-subtle);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-left: 4px solid;
-            transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
-        }
-
-        .rank-card:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-lg);
+            gap: 6px;
+            border-left: 3px solid;
         }
 
         .rank-card:active {
-            transform: scale(0.99);
+            transform: scale(0.98);
         }
 
         .rank-card[data-group="星穹组"] {
@@ -486,7 +475,7 @@ html = '''<!DOCTYPE html>
         }
 
         .rank-icon {
-            font-size: 1.8rem;
+            font-size: 1.4rem;
         }
 
         .rank-info {
@@ -495,31 +484,26 @@ html = '''<!DOCTYPE html>
 
         .rank-name {
             font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-            transition: color 0.2s ease;
+            font-size: 0.75rem;
+            margin-bottom: 2px;
         }
 
         .rank-score {
             font-weight: 700;
-            font-size: 1.3rem;
+            font-size: 1rem;
             display: flex;
             align-items: baseline;
-            gap: 4px;
-            color: var(--text-primary);
-            transition: color 0.2s ease;
+            gap: 2px;
         }
 
         .rank-score small {
-            font-size: 0.7rem;
+            font-size: 0.55rem;
             font-weight: 400;
             color: var(--text-tertiary);
-            transition: color 0.2s ease;
         }
 
         .rank-change {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
             margin-top: 2px;
         }
 
@@ -527,26 +511,21 @@ html = '''<!DOCTYPE html>
         .change-down { color: #ef4444; }
         .change-steady { color: #f59e0b; }
 
-        /* 组卡片 */
+        /* 组卡片 - 手机优化 */
         .groups {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 12px;
         }
 
         .group-card {
             background: var(--card-bg);
-            border-radius: 28px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 14px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
-            scroll-margin-top: 16px;
-            border-top: 4px solid;
-            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
-        }
-
-        .group-card:hover {
-            box-shadow: var(--shadow-lg);
+            scroll-margin-top: 12px;
+            border-top: 3px solid;
         }
 
         .group-card[data-group="星穹组"] { border-top-color: var(--star-primary); }
@@ -557,138 +536,140 @@ html = '''<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--border-subtle);
-            transition: border-color 0.2s ease;
         }
 
         .group-title-wrapper {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .group-emoji {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
         }
 
         .group-title {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            color: var(--text-primary);
-            transition: color 0.2s ease;
         }
 
         .group-stats {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             align-items: center;
         }
 
         .group-avg {
-            font-size: 0.8rem;
-            padding: 4px 12px;
+            font-size: 0.7rem;
+            padding: 3px 8px;
             background: var(--bg-primary);
-            border-radius: 30px;
+            border-radius: 20px;
             color: var(--text-secondary);
             border: 1px solid var(--border-subtle);
-            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+            white-space: nowrap;
         }
 
         .group-badge {
-            font-size: 0.8rem;
-            padding: 4px 12px;
-            border-radius: 30px;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
             color: white;
+            white-space: nowrap;
         }
 
         .group-card[data-group="星穹组"] .group-badge { background: var(--star-primary); }
         .group-card[data-group="夜曜组"] .group-badge { background: var(--night-primary); }
         .group-card[data-group="沧澜组"] .group-badge { background: var(--ocean-primary); }
 
-        /* 表格 */
+        /* 表格 - 手机横滑优化 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            margin: 0 -4px;
+            padding: 0 4px;
         }
 
         .member-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 700px;
-            font-size: 0.9rem;
+            min-width: 550px;
+            font-size: 0.8rem;
         }
 
         .member-table th {
             text-align: left;
-            padding: 12px 8px;
-            font-size: 0.75rem;
+            padding: 8px 4px;
+            font-size: 0.65rem;
             font-weight: 600;
             color: var(--text-tertiary);
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-subtle);
-            transition: color 0.2s ease, border-color 0.2s ease;
         }
 
         .member-table td {
-            padding: 12px 8px;
+            padding: 8px 4px;
             border-bottom: 1px solid var(--border-subtle);
-            transition: background 0.1s ease, border-color 0.2s ease, color 0.2s ease;
-        }
-
-        .member-table tr:hover td {
-            background: var(--bg-primary);
         }
 
         .member-table tr:last-child td {
             border-bottom: none;
         }
 
-        .member-table th:nth-child(6) { text-align: right; padding-right: 16px; }
-        .member-table td:nth-child(6) { text-align: right; padding-right: 16px; font-weight: 600; }
+        /* 手机端列宽调整 - 更紧凑 */
+        .member-table th:nth-child(1) { width: 30px; text-align: center; }
+        .member-table th:nth-child(2) { width: 90px; }
+        .member-table th:nth-child(3) { width: 45px; }
+        .member-table th:nth-child(4) { width: 60px; }
+        .member-table th:nth-child(5) { width: auto; }
+        .member-table th:nth-child(6) { width: 40px; text-align: right; }
+        .member-table th:nth-child(7) { width: 35px; text-align: center; }
+
+        .member-table td:nth-child(1) { text-align: center; }
+        .member-table td:nth-child(6) { text-align: right; font-weight: 600; }
         .member-table td:nth-child(7) { text-align: center; }
 
         .name-cn {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.8rem;
             margin-bottom: 2px;
-            color: var(--text-primary);
-            transition: color 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80px;
         }
 
         .name-en {
-            font-size: 0.65rem;
+            font-size: 0.55rem;
             color: var(--text-tertiary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 130px;
-            transition: color 0.2s ease;
+            max-width: 80px;
         }
 
         .info-cell {
-            font-size: 0.85rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
-            transition: color 0.2s ease;
         }
 
-        /* 分数标签 */
+        /* 分数标签 - 手机紧凑 */
         .score-tags {
             display: flex;
-            gap: 4px;
+            gap: 2px;
             flex-wrap: wrap;
         }
 
         .score-item {
-            padding: 3px 8px;
-            border-radius: 16px;
-            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 12px;
+            font-size: 0.55rem;
             font-weight: 500;
             background: var(--score-bg);
             color: var(--score-text);
             border: 1px solid var(--border-subtle);
-            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
 
         .score-item.has-score {
@@ -696,16 +677,16 @@ html = '''<!DOCTYPE html>
             color: var(--score-highlight-text);
         }
 
-        .score-date { opacity: 0.7; margin-right: 2px; }
+        .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
         .reward-pass, .reward-fail {
-            padding: 3px 8px;
-            border-radius: 16px;
-            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 12px;
+            font-size: 0.55rem;
             font-weight: 600;
             display: inline-block;
-            min-width: 40px;
+            min-width: 30px;
             text-align: center;
         }
 
@@ -719,165 +700,143 @@ html = '''<!DOCTYPE html>
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 */
+        /* 奖励机制卡片 - 手机优化 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
-            border-radius: 32px;
-            padding: 28px;
-            margin-top: 28px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 20px;
+            margin-bottom: 16px;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
-            border-left: 6px solid var(--star-primary);
-            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
+            border-left: 4px solid var(--star-primary);
         }
 
         .reward-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .reward-icon {
-            font-size: 2.4rem;
+            font-size: 1.6rem;
         }
 
         .reward-header h2 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            transition: color 0.2s ease;
+            font-size: 1.1rem;
+            font-weight: 600;
         }
 
         .reward-subtitle {
-            font-size: 0.95rem;
+            font-size: 0.7rem;
             color: var(--text-tertiary);
-            margin-bottom: 20px;
-            padding-left: 12px;
-            border-left: 3px solid var(--star-primary);
-            transition: color 0.2s ease, border-color 0.2s ease;
+            margin-bottom: 12px;
+            padding-left: 8px;
+            border-left: 2px solid var(--star-primary);
         }
 
         .reward-content {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .reward-item {
             background: var(--bg-primary);
-            border-radius: 24px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 10px;
             border: 1px solid var(--border-subtle);
-            transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .reward-item:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-lg);
+        .reward-item:active {
+            transform: scale(0.99);
         }
 
         .reward-rank {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 6px;
+            min-width: 60px;
         }
 
         .rank-medal {
-            font-size: 2rem;
+            font-size: 1.4rem;
         }
 
         .rank-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            transition: color 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
 
         .reward-desc {
-            font-size: 0.9rem;
+            font-size: 0.7rem;
             color: var(--text-tertiary);
-            margin-bottom: 12px;
-            line-height: 1.5;
-            transition: color 0.2s ease;
+            margin-bottom: 4px;
         }
 
         .reward-condition {
             background: var(--card-bg);
-            border-radius: 30px;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-primary);
+            border-radius: 16px;
+            padding: 3px 8px;
+            font-size: 0.65rem;
+            font-weight: 500;
             border: 1px solid var(--border-light);
-            margin-bottom: 10px;
-            transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            margin-bottom: 4px;
+            white-space: nowrap;
         }
 
         .reward-benefit {
             color: var(--star-primary);
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: color 0.2s ease;
+            font-weight: 500;
+            font-size: 0.65rem;
         }
 
         .reward-note {
             background: var(--bg-primary);
-            border-radius: 20px;
-            padding: 16px;
-            margin-top: 16px;
-            border: 2px dashed var(--border-light);
-            font-size: 0.9rem;
+            border-radius: 16px;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px dashed var(--border-light);
+            font-size: 0.7rem;
             color: var(--text-secondary);
             text-align: center;
-            transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
         }
 
         .reward-extra {
             color: var(--night-primary);
-            font-weight: 600;
-            transition: color 0.2s ease;
+            font-weight: 500;
         }
 
         .reward-footer {
-            margin-top: 20px;
+            margin-top: 12px;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.65rem;
             color: var(--text-tertiary);
             font-style: italic;
-            transition: color 0.2s ease;
         }
 
         .footer {
-            margin-top: 20px;
+            margin-top: 16px;
             text-align: center;
             color: var(--text-tertiary);
-            font-size: 0.75rem;
-            padding: 16px;
+            font-size: 0.6rem;
+            padding: 12px;
             border-top: 1px solid var(--border-subtle);
-            transition: color 0.2s ease, border-color 0.2s ease;
         }
 
-        @media (max-width: 768px) {
-            body { padding: 16px; }
-            h1 { font-size: 1.4rem; }
-            .reward-content { grid-template-columns: 1fr; }
-            .rank-grid { gap: 10px; }
-        }
-
-        @media (max-width: 640px) {
-            .header { padding: 18px; }
-            .rank-card { padding: 14px; }
-            .rank-icon { font-size: 1.5rem; }
-            .rank-score { font-size: 1.1rem; }
-            .group-card { padding: 16px; }
-            .group-title { font-size: 1.1rem; }
+        /* 小屏手机优化 */
+        @media (max-width: 360px) {
+            .rank-name { font-size: 0.7rem; }
+            .rank-score { font-size: 0.9rem; }
+            .group-title { font-size: 1rem; }
+            .member-table { min-width: 500px; }
+            .name-cn { max-width: 70px; }
+            .name-en { max-width: 70px; }
         }
     </style>
 </head>
@@ -887,24 +846,24 @@ html = '''<!DOCTYPE html>
             <div class="header-top">
                 <div class="title-group">
                     <span class="school-icon">🏫</span>
-                    <h1>学长团 · 荣耀榜</h1>
+                    <h1>学长团荣耀榜</h1>
                 </div>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                     <span class="moon-icon">🌓</span>
-                    <span>切换深色</span>
+                    <span>深色</span>
                 </div>
             </div>
             <div class="meta-info">
-                <span>训育处 · 奖励机制 · 公平公正</span>
-                <span class="date-badge">''' + datetime.now().strftime('%Y年%m月%d日 %H:%M') + '''</span>
+                <span>训育处 · 奖励机制</span>
+                <span class="date-badge">''' + datetime.now().strftime('%m/%d %H:%M') + '''</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="search" placeholder="搜索姓名、英文名、班级或学号...">
+                <input type="text" id="search" placeholder="搜姓名/班级/学号...">
             </div>
         </div>
 
-        <!-- 组排名卡片 - 导航栏 -->
+        <!-- 组排名卡片 -->
         <div class="rank-grid">
 '''
 
@@ -918,11 +877,11 @@ for i, (g, total) in enumerate(sorted_groups, 1):
     current_rank = group_rank[g]
     
     if change > 0:
-        change_text = f'<span class="change-up">▲ +{int(change)}</span>'
+        change_text = f'<span class="change-up">▲{int(change)}</span>'
     elif change < 0:
-        change_text = f'<span class="change-down">▼ {int(change)}</span>'
+        change_text = f'<span class="change-down">▼{int(change)}</span>'
     else:
-        change_text = '<span class="change-steady">◆ 0</span>'
+        change_text = '<span class="change-steady">◆0</span>'
     
     html += f'''
             <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
@@ -968,7 +927,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                             <tr>
                                 <th>#</th>
                                 <th>姓名</th>
-                                <th>班级</th>
+                                <th>班</th>
                                 <th>学号</th>
                                 <th>每日得分</th>
                                 <th>总分</th>
@@ -991,7 +950,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
             score_tags = '<span class="score-item">—</span>'
         
         # 截断英文名
-        name_en_short = member['name_en'][:15] + "…" if len(member['name_en']) > 15 else member['name_en']
+        name_en_short = member['name_en'][:10] + "…" if len(member['name_en']) > 10 else member['name_en']
         
         html += f'''
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
@@ -1025,68 +984,50 @@ html += '''
                 <h2>本轮奖励机制</h2>
             </div>
             <div class="reward-subtitle">
-                基于公平原则及不负任何一位有尽力及付出的学长
+                公平原则 · 不负每一位付出的学长
             </div>
             <div class="reward-content">
-                <!-- 第一名组别 -->
                 <div class="reward-item">
                     <div class="reward-rank">
                         <span class="rank-medal">🥇</span>
-                        <span class="rank-title">第一名组别</span>
+                        <span class="rank-title">第1名</span>
                     </div>
-                    <div class="reward-desc">
-                        凡个人分数达到该组总平均分一半或以上者
-                    </div>
-                    <div class="reward-condition">
-                        ✅ 达标条件：分数 ≥ 平均分 ÷ 2
-                    </div>
-                    <div class="reward-benefit">
-                        ✨ 免搬椅子 + 减免操步
+                    <div>
+                        <div class="reward-condition">分数 ≥ 平均分÷2</div>
+                        <div class="reward-benefit">✨免搬椅子+减免操步</div>
                     </div>
                 </div>
-                <!-- 第二名组别 -->
                 <div class="reward-item">
                     <div class="reward-rank">
                         <span class="rank-medal">🥈</span>
-                        <span class="rank-title">第二名组别</span>
+                        <span class="rank-title">第2名</span>
                     </div>
-                    <div class="reward-desc">
-                        凡个人分数达到该组总平均分或以上者
-                    </div>
-                    <div class="reward-condition">
-                        ✅ 达标条件：分数 ≥ 平均分
-                    </div>
-                    <div class="reward-benefit">
-                        ✨ 免搬椅子 + 减免操步
+                    <div>
+                        <div class="reward-condition">分数 ≥ 平均分</div>
+                        <div class="reward-benefit">✨免搬椅子+减免操步</div>
                     </div>
                 </div>
-                <!-- 第三名组别 -->
                 <div class="reward-item">
                     <div class="reward-rank">
                         <span class="rank-medal">🥉</span>
-                        <span class="rank-title">第三名组别</span>
+                        <span class="rank-title">第3名</span>
                     </div>
-                    <div class="reward-desc">
-                        该组个人分数前三名者
-                    </div>
-                    <div class="reward-condition">
-                        ✅ 达标条件：组内排名前三
-                    </div>
-                    <div class="reward-benefit">
-                        ✨ 免搬椅子 + 减免操步
+                    <div>
+                        <div class="reward-condition">组内前三名</div>
+                        <div class="reward-benefit">✨免搬椅子+减免操步</div>
                     </div>
                 </div>
             </div>
             <div class="reward-note">
-                <span class="reward-extra">🎁 额外奖励：第一名组别达标者额外获得一份奖励</span>
+                <span class="reward-extra">🎁 第1名达标者额外奖励一份</span>
             </div>
             <div class="reward-footer">
-                * 未达标者，工作照旧 *
+                * 未达标者工作照旧 *
             </div>
         </div>
 
         <div class="footer">
-            👆 点击排名卡片快速跳转 · 点击🌓切换深色模式 · 显示较昨日变化 · 最近5次得分
+            👆 点击排名卡片跳转 · 🌓切换深色 · 较昨日变化 · 最近5次得分
         </div>
     </div>
 
@@ -1123,4 +1064,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 旋转月亮：🌓 旋转180°实现黑白互换")
+print("✨ 手机优化：紧凑布局 + 横滑表格 + 精简文字")
