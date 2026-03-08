@@ -83,7 +83,6 @@
             min-height: 100vh;
             transition: background 0.2s ease, color 0.2s ease;
             line-height: 1.5;
-            will-change: background, color;
         }
 
         .container {
@@ -100,7 +99,6 @@
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, border-color 0.2s ease;
-            will-change: background, border-color;
         }
 
         .header-top {
@@ -125,10 +123,9 @@
             font-weight: 600;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
-        /* 深色模式按钮 - 月亮天平效果 */
+        /* 深色模式按钮 - 旋转月亮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -141,9 +138,6 @@
             font-size: 0.9rem;
             color: var(--text-primary);
             transition: background 0.15s ease, transform 0.15s ease;
-            will-change: transform, background;
-            overflow: hidden;
-            position: relative;
         }
 
         .theme-toggle:hover {
@@ -155,22 +149,21 @@
             transform: scale(0.98);
         }
 
-        /* 月亮图标 - 左右天平效果 */
+        /* 月亮图标 - 旋转实现黑白互换 */
         .moon-icon {
             display: inline-block;
             font-size: 1.2rem;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            will-change: transform;
+            transition: transform 0.2s ease;
         }
 
-        /* 深色模式时，月亮黑色部分在左边（旋转-90度） */
+        /* 深色模式：黑色在左（不旋转） */
         body.night-mode .moon-icon {
-            transform: rotate(-90deg);
+            transform: rotate(0deg);
         }
 
-        /* 浅色模式时，月亮白色部分在左边（旋转90度） */
+        /* 浅色模式：白色在左（旋转180度） */
         body:not(.night-mode) .moon-icon {
-            transform: rotate(90deg);
+            transform: rotate(180deg);
         }
 
         .meta-info {
@@ -183,7 +176,6 @@
             color: var(--text-tertiary);
             font-size: 0.85rem;
             transition: border-color 0.2s ease, color 0.2s ease;
-            will-change: border-color, color;
         }
 
         .date-badge {
@@ -193,7 +185,6 @@
             font-size: 0.8rem;
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, border-color 0.2s ease;
-            will-change: background, border-color;
         }
 
         .search-wrapper {
@@ -208,7 +199,6 @@
             color: var(--text-tertiary);
             font-size: 1rem;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         #search {
@@ -220,7 +210,6 @@
             background: var(--bg-primary);
             color: var(--text-primary);
             transition: border-color 0.2s ease, background 0.2s ease;
-            will-change: border-color, background;
         }
 
         #search:focus {
@@ -248,7 +237,6 @@
             gap: 12px;
             border-left: 4px solid;
             transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
-            will-change: transform, box-shadow, background, border-color;
         }
 
         .rank-card:hover {
@@ -287,7 +275,6 @@
             margin-bottom: 4px;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .rank-score {
@@ -298,7 +285,6 @@
             gap: 4px;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .rank-score small {
@@ -306,13 +292,16 @@
             font-weight: 400;
             color: var(--text-tertiary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .rank-change {
             font-size: 0.7rem;
             margin-top: 2px;
         }
+
+        .change-up { color: #10b981; }
+        .change-down { color: #ef4444; }
+        .change-steady { color: #f59e0b; }
 
         /* 组卡片 */
         .groups {
@@ -330,7 +319,6 @@
             scroll-margin-top: 16px;
             border-top: 4px solid;
             transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
-            will-change: background, border-color, box-shadow;
         }
 
         .group-card:hover {
@@ -349,7 +337,6 @@
             padding-bottom: 12px;
             border-bottom: 1px solid var(--border-subtle);
             transition: border-color 0.2s ease;
-            will-change: border-color;
         }
 
         .group-title-wrapper {
@@ -367,7 +354,6 @@
             font-weight: 600;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .group-stats {
@@ -384,7 +370,6 @@
             color: var(--text-secondary);
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-            will-change: background, border-color, color;
         }
 
         .group-badge {
@@ -420,14 +405,12 @@
             text-transform: uppercase;
             border-bottom: 1px solid var(--border-subtle);
             transition: color 0.2s ease, border-color 0.2s ease;
-            will-change: color, border-color;
         }
 
         .member-table td {
             padding: 12px 8px;
             border-bottom: 1px solid var(--border-subtle);
             transition: background 0.1s ease, border-color 0.2s ease, color 0.2s ease;
-            will-change: background, border-color, color;
         }
 
         .member-table tr:hover td {
@@ -448,7 +431,6 @@
             margin-bottom: 2px;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .name-en {
@@ -459,14 +441,12 @@
             text-overflow: ellipsis;
             max-width: 130px;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .info-cell {
             font-size: 0.85rem;
             color: var(--text-secondary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         /* 分数标签 */
@@ -485,7 +465,6 @@
             color: var(--score-text);
             border: 1px solid var(--border-subtle);
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-            will-change: background, color, border-color;
         }
 
         .score-item.has-score {
@@ -527,7 +506,6 @@
             border: 1px solid var(--border-light);
             border-left: 6px solid var(--star-primary);
             transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.1s ease;
-            will-change: background, border-color, box-shadow;
         }
 
         .reward-header {
@@ -546,7 +524,6 @@
             font-weight: 700;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-subtitle {
@@ -556,7 +533,6 @@
             padding-left: 12px;
             border-left: 3px solid var(--star-primary);
             transition: color 0.2s ease, border-color 0.2s ease;
-            will-change: color, border-color;
         }
 
         .reward-content {
@@ -572,7 +548,6 @@
             padding: 20px;
             border: 1px solid var(--border-subtle);
             transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.2s ease, border-color 0.2s ease;
-            will-change: transform, box-shadow, background, border-color;
         }
 
         .reward-item:hover {
@@ -596,7 +571,6 @@
             font-weight: 700;
             color: var(--text-primary);
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-desc {
@@ -605,7 +579,6 @@
             margin-bottom: 12px;
             line-height: 1.5;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-condition {
@@ -618,7 +591,6 @@
             border: 1px solid var(--border-light);
             margin-bottom: 10px;
             transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-            will-change: background, color, border-color;
         }
 
         .reward-benefit {
@@ -629,7 +601,6 @@
             align-items: center;
             gap: 5px;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-note {
@@ -642,14 +613,12 @@
             color: var(--text-secondary);
             text-align: center;
             transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-            will-change: background, border-color, color;
         }
 
         .reward-extra {
             color: var(--night-primary);
             font-weight: 600;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .reward-footer {
@@ -659,7 +628,6 @@
             color: var(--text-tertiary);
             font-style: italic;
             transition: color 0.2s ease;
-            will-change: color;
         }
 
         .footer {
@@ -670,7 +638,6 @@
             padding: 16px;
             border-top: 1px solid var(--border-subtle);
             transition: color 0.2s ease, border-color 0.2s ease;
-            will-change: color, border-color;
         }
 
         @media (max-width: 768px) {
@@ -699,13 +666,13 @@
                     <h1>学长团 · 荣耀榜</h1>
                 </div>
                 <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
-                    <span class="moon-icon">🌙</span>
+                    <span class="moon-icon">🌓</span>
                     <span>切换深色</span>
                 </div>
             </div>
             <div class="meta-info">
                 <span>训育处 · 奖励机制 · 公平公正</span>
-                <span class="date-badge">2026年03月08日 02:39</span>
+                <span class="date-badge">2026年03月08日 02:48</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -721,7 +688,7 @@
                 <div class="rank-info">
                     <div class="rank-name">夜曜组</div>
                     <div class="rank-score">46<small>分</small></div>
-                    <div class="rank-change"><span style="color:#f59e0b">◆ 0</span></div>
+                    <div class="rank-change"><span class="change-steady">◆ 0</span></div>
                 </div>
             </div>
 
@@ -730,7 +697,7 @@
                 <div class="rank-info">
                     <div class="rank-name">星穹组</div>
                     <div class="rank-score">21<small>分</small></div>
-                    <div class="rank-change"><span style="color:#f59e0b">◆ 0</span></div>
+                    <div class="rank-change"><span class="change-steady">◆ 0</span></div>
                 </div>
             </div>
 
@@ -739,7 +706,7 @@
                 <div class="rank-info">
                     <div class="rank-name">沧澜组</div>
                     <div class="rank-score">20<small>分</small></div>
-                    <div class="rank-change"><span style="color:#f59e0b">◆ 0</span></div>
+                    <div class="rank-change"><span class="change-steady">◆ 0</span></div>
                 </div>
             </div>
 
