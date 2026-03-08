@@ -1,5 +1,5 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # ===== 你要修改的地方 =====
 SHEET_ID = "1MH2Ew4Q0fQFYPzynXulOAUC7z35O__c2"
@@ -26,6 +26,11 @@ dates = []
 date_objects = []
 if len(df) > 0:
     first_row = df.iloc[0].tolist()
+    print("\n📅 第一行日期数据:")
+    for j in range(7, min(15, len(first_row))):  # 只显示前几个
+        if pd.notna(first_row[j]):
+            print(f"  列{j}: {first_row[j]}")
+    
     for j in range(7, len(first_row)):
         if pd.notna(first_row[j]):
             date_str = str(first_row[j])
@@ -44,7 +49,16 @@ if len(df) > 0:
             dates.append("")
             date_objects.append(None)
 
-print(f"找到 {len(dates)} 个日期")
+print(f"\n找到 {len(dates)} 个日期")
+print(f"日期列表: {dates[:10]}")
+
+# 确定昨天和今天的日期索引
+today_idx = len(dates) - 1  # 最后一列是今天
+yesterday_idx = max(0, len(dates) - 2)  # 倒数第二列是昨天
+
+print(f"\n📊 日期索引:")
+print(f"  今日索引: {today_idx} ({dates[today_idx] if today_idx < len(dates) else '无'})")
+print(f"  昨日索引: {yesterday_idx} ({dates[yesterday_idx] if yesterday_idx < len(dates) else '无'})")
 
 # ===== 成员名单 =====
 members_list = [
@@ -95,9 +109,6 @@ previous_rank = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 
 print("\n开始匹配成员...")
 
-today_idx = len(dates) - 1
-yesterday_idx = max(0, len(dates) - 2)
-
 for member in members_list:
     found = False
     
@@ -116,6 +127,7 @@ for member in members_list:
                 today_score = 0
                 yesterday_score = 0
                 
+                # 提取分数
                 for j in range(7, len(row)):
                     if j-7 < len(dates):
                         date = dates[j-7]
@@ -126,10 +138,14 @@ for member in members_list:
                                 total += num
                                 if num > 0:
                                     score_dict[date] = num
+                                
+                                # 记录今日得分（最后一列）
                                 if j-7 == today_idx:
                                     today_score = num
+                                # 记录昨日得分（倒数第二列）
                                 elif j-7 == yesterday_idx:
                                     yesterday_score = num
+                                    
                             except (ValueError, TypeError):
                                 pass
                 
@@ -145,7 +161,13 @@ for member in members_list:
                     "today": today_score,
                     "yesterday": yesterday_score
                 })
-                print(f"✓ 找到 {member['name_cn']} (总分: {total})")
+                
+                # 调试信息
+                if today_score > 0 or yesterday_score > 0:
+                    print(f"✓ 找到 {member['name_cn']} (总分: {total}, 今日: {today_score}, 昨日: {yesterday_score})")
+                else:
+                    print(f"✓ 找到 {member['name_cn']} (总分: {total})")
+                    
                 found = True
                 break
     
@@ -153,13 +175,6 @@ for member in members_list:
         print(f"✗ 找不到 {member['name_cn']}")
 
 print(f"\n总共找到 {len(people)} 人")
-
-if len(people) == 0:
-    print("❌ 没有找到任何人！请检查：")
-    print("1. Google Sheets 权限是否设置为 '任何知道链接的人可查看'")
-    print("2. Sheet 名字是否正确（当前是 Sheet3）")
-    print("3. 数据格式是否和 Excel 一致")
-    exit(1)
 
 # 按组别整理
 group_data = {g: [] for g in ["星穹组", "夜曜组", "沧澜组"]}
@@ -175,6 +190,10 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_today_totals[g] - group_yesterday_totals[g]
     group_changes[g] = change
 
+print("\n📊 组别总分变化:")
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    print(f"  {g}: 今日 {int(group_today_totals[g])} 分, 昨日 {int(group_yesterday_totals[g])} 分, 变化 {int(group_changes[g])} 分")
+
 # 每个组内按order排序
 for g in group_data:
     group_data[g].sort(key=lambda x: x["order"])
@@ -185,7 +204,7 @@ group_rank = {}
 for i, (g, _) in enumerate(sorted_groups, 1):
     group_rank[g] = i
 
-# 模拟上次排名
+# 模拟上次排名（用于动画）
 previous_rank["星穹组"] = max(1, group_rank["星穹组"] - 1) if group_rank["星穹组"] > 1 else 2
 previous_rank["夜曜组"] = max(1, group_rank["夜曜组"] - 1) if group_rank["夜曜组"] > 1 else 2
 previous_rank["沧澜组"] = max(1, group_rank["沧澜组"] - 1) if group_rank["沧澜组"] > 1 else 2
@@ -221,12 +240,12 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 手机优化版
+# 生成HTML - 完整版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>训育处 · 学长团荣耀榜</title>
     <style>
         * {
@@ -267,6 +286,10 @@ html = '''<!DOCTYPE html>
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
+            
+            --change-up: #10b981;
+            --change-down: #ef4444;
+            --change-steady: #f59e0b;
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
@@ -319,7 +342,7 @@ html = '''<!DOCTYPE html>
             margin: 0 auto;
         }
 
-        /* 头部 - 手机优化 */
+        /* 头部 */
         .header {
             background: var(--card-bg);
             border-radius: 24px;
@@ -352,7 +375,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
         }
 
-        /* 深色模式按钮 - 手机优化 */
+        /* 深色模式按钮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -436,7 +459,7 @@ html = '''<!DOCTYPE html>
             border-color: var(--text-tertiary);
         }
 
-        /* 组排名卡片 - 手机网格优化 */
+        /* 组排名卡片 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -505,13 +528,14 @@ html = '''<!DOCTYPE html>
         .rank-change {
             font-size: 0.6rem;
             margin-top: 2px;
+            font-weight: 500;
         }
 
-        .change-up { color: #10b981; }
-        .change-down { color: #ef4444; }
-        .change-steady { color: #f59e0b; }
+        .change-up { color: var(--change-up); }
+        .change-down { color: var(--change-down); }
+        .change-steady { color: var(--change-steady); }
 
-        /* 组卡片 - 手机优化 */
+        /* 组卡片 */
         .groups {
             display: flex;
             flex-direction: column;
@@ -584,7 +608,7 @@ html = '''<!DOCTYPE html>
         .group-card[data-group="夜曜组"] .group-badge { background: var(--night-primary); }
         .group-card[data-group="沧澜组"] .group-badge { background: var(--ocean-primary); }
 
-        /* 表格 - 手机横滑优化 */
+        /* 表格 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -618,7 +642,6 @@ html = '''<!DOCTYPE html>
             border-bottom: none;
         }
 
-        /* 手机端列宽调整 - 更紧凑 */
         .member-table th:nth-child(1) { width: 30px; text-align: center; }
         .member-table th:nth-child(2) { width: 90px; }
         .member-table th:nth-child(3) { width: 45px; }
@@ -655,7 +678,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-secondary);
         }
 
-        /* 分数标签 - 手机紧凑 */
+        /* 分数标签 */
         .score-tags {
             display: flex;
             gap: 2px;
@@ -700,7 +723,7 @@ html = '''<!DOCTYPE html>
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 - 手机优化 */
+        /* 奖励机制卡片 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
             border-radius: 20px;
@@ -829,7 +852,6 @@ html = '''<!DOCTYPE html>
             border-top: 1px solid var(--border-subtle);
         }
 
-        /* 小屏手机优化 */
         @media (max-width: 360px) {
             .rank-name { font-size: 0.7rem; }
             .rank-score { font-size: 0.9rem; }
@@ -863,7 +885,7 @@ html = '''<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 组排名卡片 -->
+        <!-- 组排名卡片 - 带变化显示 -->
         <div class="rank-grid">
 '''
 
@@ -873,8 +895,6 @@ group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜
 for i, (g, total) in enumerate(sorted_groups, 1):
     group_id = group_ids[g]
     change = group_changes[g]
-    prev_rank = previous_rank[g]
-    current_rank = group_rank[g]
     
     if change > 0:
         change_text = f'<span class="change-up">▲{int(change)}</span>'
@@ -1027,7 +1047,7 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 较昨日变化 · 最近5次得分
+            👆 点击排名卡片跳转 · 🌓切换深色 · 显示较昨日变化 · 最近5次得分
         </div>
     </div>
 
@@ -1064,4 +1084,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
     change = group_changes[g]
     change_symbol = "▲" if change > 0 else "▼" if change < 0 else "◆"
     print(f"  总分: {int(group_totals[g])}分, 第{group_rank[g]}名 {change_symbol} {int(change)}")
-print("✨ 手机优化：紧凑布局 + 横滑表格 + 精简文字")
+print("✨ 较昨日变化功能已启用")
