@@ -202,7 +202,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 添加弹跳动画
+# 生成HTML - 太阳月亮升降动画
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -268,7 +268,7 @@ html = '''<!DOCTYPE html>
             --safe-bottom: env(safe-area-inset-bottom);
             
             /* 提示颜色 */
-            --toast-bg: #1e293b;
+            --toast-bg: rgba(30, 41, 59, 0.9);
             --toast-text: #ffffff;
         }
 
@@ -311,7 +311,7 @@ html = '''<!DOCTYPE html>
             --heat-9: #5a9aca;
             
             /* 提示颜色 */
-            --toast-bg: #ffffff;
+            --toast-bg: rgba(255, 255, 255, 0.9);
             --toast-text: #1a1e2a;
         }
 
@@ -332,125 +332,115 @@ html = '''<!DOCTYPE html>
             margin: 0 auto;
         }
 
-        /* ===== 大型提示浮层 ===== */
+        /* ===== 太阳月亮升降提示 ===== */
         .mode-toast {
             position: fixed;
             top: 30%;
             left: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
+            transform: translate(-50%, -50%);
             background: var(--toast-bg);
-            color: var(--toast-text);
-            padding: 20px 40px;
-            border-radius: 60px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            z-index: 10000;
-            opacity: 0;
-            pointer-events: none;
-            white-space: nowrap;
-            border: 2px solid rgba(255,255,255,0.2);
             backdrop-filter: blur(10px);
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            color: var(--toast-text);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            pointer-events: none;
+            opacity: 0;
         }
 
         .mode-toast.show {
-            animation: toastPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: toastFadeIn 0.3s ease forwards;
         }
 
         .mode-toast.hide {
             animation: toastFadeOut 0.3s ease forwards;
         }
 
-        @keyframes toastPop {
-            0% {
+        @keyframes toastFadeIn {
+            from {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.3);
+                transform: translate(-50%, -30%);
             }
-            50% {
+            to {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1.1);
-            }
-            100% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate(-50%, -50%);
             }
         }
 
         @keyframes toastFadeOut {
-            0% {
+            from {
                 opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
+                transform: translate(-50%, -50%);
             }
-            100% {
+            to {
                 opacity: 0;
-                transform: translate(-50%, -50%) scale(0.8);
+                transform: translate(-50%, -70%);
             }
         }
 
-        /* 日间模式图标 */
-        .mode-toast .sun {
+        /* 太阳动画 - 从左边升起 */
+        .sun-icon {
             display: inline-block;
-            margin-right: 10px;
-            animation: sunRotate 0.5s ease;
+            font-size: 1.8rem;
+            animation: sunRise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .mode-toast .moon {
+        @keyframes sunRise {
+            0% {
+                transform: translateX(-100px) translateY(50px) rotate(0deg);
+                opacity: 0;
+            }
+            60% {
+                transform: translateX(10px) translateY(-5px) rotate(180deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(0) translateY(0) rotate(360deg);
+                opacity: 1;
+            }
+        }
+
+        /* 月亮动画 - 从右边落下 */
+        .moon-icon {
             display: inline-block;
-            margin-right: 10px;
-            animation: moonFloat 0.5s ease;
+            font-size: 1.8rem;
+            animation: moonSet 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        @keyframes sunRotate {
-            from { transform: rotate(0deg) scale(0); }
-            to { transform: rotate(360deg) scale(1); }
-        }
-
-        @keyframes moonFloat {
-            0% { transform: translateY(20px) scale(0); }
-            60% { transform: translateY(-5px) scale(1.1); }
-            100% { transform: translateY(0) scale(1); }
-        }
-
-        /* ===== 统计图卡片动画 ===== */
-        .chart-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-subtle);
-            display: none;
-        }
-
-        .chart-card.show {
-            display: block;
-            animation: chartSlideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .chart-card.hide {
-            animation: chartSlideUp 0.3s ease forwards;
-        }
-
-        @keyframes chartSlideDown {
+        @keyframes moonSet {
             0% {
+                transform: translateX(100px) translateY(-50px) rotate(0deg);
                 opacity: 0;
-                transform: translateY(-30px) scale(0.9);
+            }
+            60% {
+                transform: translateX(-10px) translateY(5px) rotate(-180deg);
+                opacity: 1;
             }
             100% {
+                transform: translateX(0) translateY(0) rotate(-360deg);
                 opacity: 1;
-                transform: translateY(0) scale(1);
             }
         }
 
-        @keyframes chartSlideUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
+        .toast-text {
+            animation: textFade 0.3s ease;
+        }
+
+        @keyframes textFade {
+            from {
                 opacity: 0;
-                transform: translateY(-30px) scale(0.9);
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
 
@@ -636,6 +626,47 @@ html = '''<!DOCTYPE html>
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
 
         /* 统计图卡片 */
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-subtle);
+            display: none;
+        }
+
+        .chart-card.show {
+            display: block;
+            animation: chartSlideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .chart-card.hide {
+            animation: chartSlideUp 0.3s ease forwards;
+        }
+
+        @keyframes chartSlideDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes chartSlideUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+        }
+
         .chart-header {
             display: flex;
             justify-content: space-between;
@@ -1171,16 +1202,17 @@ html = '''<!DOCTYPE html>
             .member-table { min-width: 650px; }
             .name-en { font-size: 0.6rem; }
             .action-buttons { width: 100%; justify-content: flex-end; }
-            .mode-toast { font-size: 1.2rem; padding: 15px 30px; }
+            .mode-toast { padding: 8px 16px; font-size: 1rem; }
+            .sun-icon, .moon-icon { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
-    <!-- 大型提示浮层 -->
+    <!-- 太阳月亮升降提示 -->
     <div class="mode-toast" id="modeToast">
-        <span class="sun" id="toastSun">☀️</span>
-        <span class="moon" id="toastMoon" style="display: none;">🌙</span>
-        <span id="toastText">已开启日间模式</span>
+        <span class="sun-icon" id="toastSun">☀️</span>
+        <span class="moon-icon" id="toastMoon" style="display: none;">🌙</span>
+        <span class="toast-text" id="toastText">已开启日间模式</span>
     </div>
 
     <div class="container">
@@ -1472,35 +1504,40 @@ html += '''
         let toastTimeout;
         let isToastHiding = false;
 
-        // ===== 显示大型提示 =====
+        // ===== 显示太阳月亮升降提示 =====
         function showModeToast(isNight) {
             // 清除之前的定时器和动画
             clearTimeout(toastTimeout);
-            if (modeToast.classList.contains('hide')) {
-                modeToast.classList.remove('hide');
-            }
+            
+            // 重置动画
+            toastSun.style.animation = 'none';
+            toastMoon.style.animation = 'none';
+            void toastSun.offsetWidth; // 强制重绘
+            void toastMoon.offsetWidth;
             
             // 设置图标和文字
             if (isNight) {
                 toastSun.style.display = 'none';
                 toastMoon.style.display = 'inline-block';
                 toastText.textContent = '已开启夜间模式';
+                toastMoon.style.animation = 'moonSet 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
             } else {
                 toastSun.style.display = 'inline-block';
                 toastMoon.style.display = 'none';
                 toastText.textContent = '已开启日间模式';
+                toastSun.style.animation = 'sunRise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
             }
             
-            // 显示提示（先移除所有class，再添加show）
+            // 显示提示
             modeToast.classList.remove('hide', 'show');
-            void modeToast.offsetWidth; // 强制重绘
+            void modeToast.offsetWidth;
             modeToast.classList.add('show');
             
-            // 2秒后淡出
+            // 1.5秒后淡出
             toastTimeout = setTimeout(() => {
                 modeToast.classList.remove('show');
                 modeToast.classList.add('hide');
-            }, 2000);
+            }, 1500);
         }
 
         // ===== 切换深色模式 =====
@@ -1691,9 +1728,8 @@ html += '''        ];
 
         // 下载按钮点击 - 显示统计图
         downloadBtn.addEventListener('click', () => {
-            // 先移除所有class
             chartCard.classList.remove('hide', 'show');
-            void chartCard.offsetWidth; // 强制重绘
+            void chartCard.offsetWidth;
             chartCard.classList.add('show');
             
             generateChart();
@@ -1708,15 +1744,13 @@ html += '''        ];
 
         // 关闭统计图 - 带动画
         closeChart.addEventListener('click', () => {
-            // 添加隐藏动画
             chartCard.classList.remove('show');
             chartCard.classList.add('hide');
             
-            // 动画结束后完全隐藏
             setTimeout(() => {
                 chartCard.classList.remove('hide');
                 chartCard.style.display = 'none';
-            }, 300); // 与动画时长一致
+            }, 300);
         });
 
         // 搜索功能
@@ -1751,4 +1785,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 新增：弹跳提示 + 统计图弹跳关闭")
+print("✨ 新增：太阳月亮升降动画 + 缩小版提示")
