@@ -191,7 +191,7 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 修复统计图下载和移除白光
+# 生成HTML - 真正全黑深色模式
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -208,20 +208,21 @@ html = '''<!DOCTYPE html>
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* ===== 日间模式 - 明亮清新 ===== */
         :root {
-            --bg-primary: #f5f7fc;
+            --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
             --card-bg: #ffffff;
-            --text-primary: #1a2b3c;
-            --text-secondary: #2c3e50;
-            --text-tertiary: #5a6b7a;
-            --border-light: #e1e8f0;
-            --border-subtle: #eef2f6;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.02);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.04);
-            --shadow-lg: 0 8px 20px rgba(0,0,0,0.06);
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-light: #e2e8f0;
+            --border-subtle: #f1f5f9;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05);
             
-            /* 组颜色 - 明确定义 */
+            /* 组颜色 - 保持不变 */
             --star-primary: #eab308;
             --star-light: #fef9c3;
             --star-bg: #fefae8;
@@ -234,8 +235,8 @@ html = '''<!DOCTYPE html>
             
             --score-bg: #f1f5f9;
             --score-text: #475569;
-            --score-highlight: #e6f0ff;
-            --score-highlight-text: #2563eb;
+            --score-highlight: #dbeafe;
+            --score-highlight-text: #1e40af;
             --reward-pass: #dcfce7;
             --reward-pass-text: #166534;
             --reward-fail: #fee2e2;
@@ -245,34 +246,33 @@ html = '''<!DOCTYPE html>
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
+        /* ===== 真正全黑深色模式 ===== */
         body.night-mode {
-            --bg-primary: #0f1825;
-            --bg-secondary: #1e2a3a;
-            --card-bg: #1f2c3d;
-            --text-primary: #e6edf5;
-            --text-secondary: #cbd5e1;
-            --text-tertiary: #94a3b8;
-            --border-light: #2d3a4d;
-            --border-subtle: #253141;
-            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
-            --shadow-lg: 0 8px 20px rgba(0,0,0,0.5);
+            --bg-primary: #000000 !important;
+            --bg-secondary: #0a0a0a !important;
+            --card-bg: #111111 !important;
+            --text-primary: #ffffff !important;
+            --text-secondary: #e0e0e0 !important;
+            --text-tertiary: #a0a0a0 !important;
+            --border-light: #222222 !important;
+            --border-subtle: #1a1a1a !important;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5) !important;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5) !important;
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5) !important;
             
-            --star-light: #423d2a;
-            --star-bg: #2f2a1f;
-            --night-light: #2f2740;
-            --night-bg: #252033;
-            --ocean-light: #1f3045;
-            --ocean-bg: #1c2638;
+            /* 组背景色在深色模式下调暗 */
+            --star-bg: #1a1500 !important;
+            --night-bg: #1a002a !important;
+            --ocean-bg: #001a2a !important;
             
-            --score-bg: #2d3a4f;
-            --score-text: #cbd5e1;
-            --score-highlight: #1e3a6f;
-            --score-highlight-text: #9ac7ff;
-            --reward-pass: #1f4a3a;
-            --reward-pass-text: #bbf7d0;
-            --reward-fail: #562b2b;
-            --reward-fail-text: #fecaca;
+            --score-bg: #1a1a1a !important;
+            --score-text: #e0e0e0 !important;
+            --score-highlight: #002a5a !important;
+            --score-highlight-text: #90d0ff !important;
+            --reward-pass: #003300 !important;
+            --reward-pass-text: #90ff90 !important;
+            --reward-fail: #330000 !important;
+            --reward-fail-text: #ff9090 !important;
         }
 
         body {
@@ -333,7 +333,7 @@ html = '''<!DOCTYPE html>
             align-items: center;
         }
 
-        /* 深色模式按钮 - 无白光 */
+        /* 深色模式按钮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -345,12 +345,11 @@ html = '''<!DOCTYPE html>
             gap: 4px;
             font-size: 0.8rem;
             color: var(--text-primary);
-            transition: background 0.15s ease;
+            transition: all 0.15s ease;
             white-space: nowrap;
         }
 
         .theme-toggle:active {
-            background: var(--border-light);
             transform: scale(0.98);
         }
 
@@ -369,11 +368,6 @@ html = '''<!DOCTYPE html>
             font-weight: 500;
             transition: all 0.15s ease;
             white-space: nowrap;
-        }
-
-        .download-btn:active {
-            transform: scale(0.98);
-            opacity: 0.9;
         }
 
         body.night-mode .download-btn {
@@ -504,6 +498,10 @@ html = '''<!DOCTYPE html>
             gap: 4px;
         }
 
+        body.night-mode .save-chart-btn {
+            color: #ffffff;
+        }
+
         .close-chart {
             background: var(--bg-primary);
             border: 1px solid var(--border-subtle);
@@ -553,7 +551,7 @@ html = '''<!DOCTYPE html>
             margin-top: 2px;
         }
 
-        /* 组排名卡片 - 移除所有白光效果 */
+        /* 组排名卡片 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -573,7 +571,6 @@ html = '''<!DOCTYPE html>
             gap: 6px;
             border-left: 3px solid;
             transition: transform 0.1s ease;
-            /* 移除所有伪元素和光效 */
         }
 
         .rank-card:active {
@@ -582,15 +579,15 @@ html = '''<!DOCTYPE html>
 
         .rank-card[data-group="星穹组"] {
             border-left-color: #eab308 !important;
-            background: linear-gradient(to right, #fefae8, var(--card-bg));
+            background: linear-gradient(to right, var(--star-bg), var(--card-bg));
         }
         .rank-card[data-group="夜曜组"] {
             border-left-color: #a855f7 !important;
-            background: linear-gradient(to right, #faf5ff, var(--card-bg));
+            background: linear-gradient(to right, var(--night-bg), var(--card-bg));
         }
         .rank-card[data-group="沧澜组"] {
             border-left-color: #3b82f6 !important;
-            background: linear-gradient(to right, #f0f7ff, var(--card-bg));
+            background: linear-gradient(to right, var(--ocean-bg), var(--card-bg));
         }
 
         .rank-icon {
@@ -621,7 +618,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 - 移除所有白光效果 */
+        /* 组卡片 */
         .group-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -630,7 +627,6 @@ html = '''<!DOCTYPE html>
             border: 1px solid var(--border-subtle);
             scroll-margin-top: 12px;
             border-top: 3px solid;
-            /* 移除所有伪元素和光效 */
         }
 
         .group-card[data-group="星穹组"] { border-top-color: #eab308 !important; }
@@ -804,7 +800,7 @@ html = '''<!DOCTYPE html>
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 - 移除所有光效 */
+        /* 奖励机制卡片 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
             border-radius: 20px;
@@ -957,6 +953,10 @@ html = '''<!DOCTYPE html>
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
+        }
+
+        body.night-mode .toast-icon {
+            color: #ffffff;
         }
 
         @media (max-width: 360px) {
@@ -1253,8 +1253,8 @@ html += '''        ];
         function generateChart() {
             const ctx = document.getElementById('groupChart').getContext('2d');
             const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
-            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
+            const textColor = isNightMode ? '#a0a0a0' : '#5a6b7a';
+            const gridColor = isNightMode ? '#222222' : '#e1e8f0';
             
             if (chart) {
                 chart.destroy();
@@ -1415,4 +1415,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 修复：统计图下载 + 移除所有白光")
+print("✨ 真正全黑深色模式 + 统计图下载")
