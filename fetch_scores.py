@@ -191,13 +191,24 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
-# 生成HTML - 真正全黑深色模式
+# 计算每组最高分和最低分，用于热力图
+group_max_scores = {}
+group_min_scores = {}
+for g in group_data:
+    if group_data[g]:
+        group_max_scores[g] = max(m["total"] for m in group_data[g])
+        group_min_scores[g] = min(m["total"] for m in group_data[g])
+    else:
+        group_max_scores[g] = 0
+        group_min_scores[g] = 0
+
+# 生成HTML - 添加热力图
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>训育处 - 学长团分数板</title>
+    <title>训育处 - 学长团分数板 · 热力图</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -208,7 +219,7 @@ html = '''<!DOCTYPE html>
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== 日间模式 - 明亮清新 ===== */
+        /* ===== 日间模式 ===== */
         :root {
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -222,7 +233,7 @@ html = '''<!DOCTYPE html>
             --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05);
             
-            /* 组颜色 - 保持不变 */
+            /* 组颜色 */
             --star-primary: #eab308;
             --star-light: #fef9c3;
             --star-bg: #fefae8;
@@ -242,37 +253,58 @@ html = '''<!DOCTYPE html>
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
             
+            /* 热力图颜色 - 从浅蓝到深蓝 */
+            --heat-1: #f0f9ff;
+            --heat-2: #e0f2fe;
+            --heat-3: #bae6fd;
+            --heat-4: #7dd3fc;
+            --heat-5: #38bdf8;
+            --heat-6: #0ea5e9;
+            --heat-7: #0284c7;
+            --heat-8: #0369a1;
+            --heat-9: #075985;
+            
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== 真正全黑深色模式 ===== */
+        /* ===== 全黑深色模式 ===== */
         body.night-mode {
-            --bg-primary: #000000 !important;
-            --bg-secondary: #0a0a0a !important;
-            --card-bg: #111111 !important;
-            --text-primary: #ffffff !important;
-            --text-secondary: #e0e0e0 !important;
-            --text-tertiary: #a0a0a0 !important;
-            --border-light: #222222 !important;
-            --border-subtle: #1a1a1a !important;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5) !important;
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5) !important;
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5) !important;
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --card-bg: #111111;
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --text-tertiary: #a0a0a0;
+            --border-light: #222222;
+            --border-subtle: #1a1a1a;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
             
-            /* 组背景色在深色模式下调暗 */
-            --star-bg: #1a1500 !important;
-            --night-bg: #1a002a !important;
-            --ocean-bg: #001a2a !important;
+            --star-bg: #1a1500;
+            --night-bg: #1a002a;
+            --ocean-bg: #001a2a;
             
-            --score-bg: #1a1a1a !important;
-            --score-text: #e0e0e0 !important;
-            --score-highlight: #002a5a !important;
-            --score-highlight-text: #90d0ff !important;
-            --reward-pass: #003300 !important;
-            --reward-pass-text: #90ff90 !important;
-            --reward-fail: #330000 !important;
-            --reward-fail-text: #ff9090 !important;
+            --score-bg: #1a1a1a;
+            --score-text: #e0e0e0;
+            --score-highlight: #002a5a;
+            --score-highlight-text: #90d0ff;
+            --reward-pass: #003300;
+            --reward-pass-text: #90ff90;
+            --reward-fail: #330000;
+            --reward-fail-text: #ff9090;
+            
+            /* 热力图颜色 - 深色模式用亮色 */
+            --heat-1: #001a2a;
+            --heat-2: #002a3a;
+            --heat-3: #003a4a;
+            --heat-4: #004a5a;
+            --heat-5: #005a7a;
+            --heat-6: #0a6a8a;
+            --heat-7: #1a7a9a;
+            --heat-8: #2a8aaa;
+            --heat-9: #3a9aba;
         }
 
         body {
@@ -436,6 +468,34 @@ html = '''<!DOCTYPE html>
             outline: none;
             border-color: var(--text-tertiary);
         }
+
+        /* 热力图说明 */
+        .heatmap-legend {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+        }
+
+        .legend-colors {
+            display: flex;
+            gap: 2px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.low { background: var(--heat-1); }
+        .legend-color.mid-low { background: var(--heat-3); }
+        .legend-color.mid { background: var(--heat-5); }
+        .legend-color.mid-high { background: var(--heat-7); }
+        .legend-color.high { background: var(--heat-9); }
 
         /* 统计图卡片 */
         .chart-card {
@@ -619,6 +679,12 @@ html = '''<!DOCTYPE html>
         }
 
         /* 组卡片 */
+        .groups {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
         .group-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -685,7 +751,7 @@ html = '''<!DOCTYPE html>
         .group-card[data-group="夜曜组"] .group-badge { background: #a855f7; }
         .group-card[data-group="沧澜组"] .group-badge { background: #3b82f6; }
 
-        /* 表格 */
+        /* 表格 - 热力图样式 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -755,7 +821,7 @@ html = '''<!DOCTYPE html>
             color: var(--text-secondary);
         }
 
-        /* 分数标签 */
+        /* 热力图分数标签 */
         .score-tags {
             display: flex;
             gap: 2px;
@@ -770,6 +836,12 @@ html = '''<!DOCTYPE html>
             background: var(--score-bg);
             color: var(--score-text);
             border: 1px solid var(--border-subtle);
+            transition: transform 0.1s ease;
+        }
+
+        .score-item:hover {
+            transform: scale(1.1);
+            z-index: 10;
         }
 
         .score-item.has-score {
@@ -780,6 +852,18 @@ html = '''<!DOCTYPE html>
         .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
+        /* 总分热力图 - 根据分数高低显示不同颜色 */
+        .total-heat {
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 2px 6px;
+            border-radius: 12px;
+            display: inline-block;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        /* 奖励标记 */
         .reward-pass, .reward-fail {
             padding: 2px 5px;
             border-radius: 12px;
@@ -976,7 +1060,7 @@ html = '''<!DOCTYPE html>
             <div class="header-top">
                 <div class="title-group">
                     <span class="school-icon">🏫</span>
-                    <h1>学长团分数板</h1>
+                    <h1>学长团分数板 · 热力图</h1>
                 </div>
                 <div class="action-buttons">
                     <button class="download-btn" id="downloadBtn">
@@ -990,12 +1074,24 @@ html = '''<!DOCTYPE html>
                 </div>
             </div>
             <div class="meta-info">
-                <span>Prefects' Scoreboard</span>
+                <span>Prefects' Scoreboard · 颜色越深分数越高</span>
                 <span class="date-badge">''' + datetime.now().strftime('%m/%d %H:%M') + '''</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="search" placeholder="搜姓名/班级/学号...">
+            </div>
+        </div>
+
+        <!-- 热力图图例 -->
+        <div class="heatmap-legend">
+            <span>分数热力图:</span>
+            <div class="legend-colors">
+                <div class="legend-color low" title="低分"></div>
+                <div class="legend-color mid-low" title="中低分"></div>
+                <div class="legend-color mid" title="中分"></div>
+                <div class="legend-color mid-high" title="中高分"></div>
+                <div class="legend-color high" title="高分"></div>
             </div>
         </div>
 
@@ -1073,6 +1169,11 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     group_id = group_ids[group_name]
     avg_score = group_averages[group_name]
     
+    # 获取该组的最高分和最低分
+    group_max = group_max_scores[group_name]
+    group_min = group_min_scores[group_name]
+    score_range = group_max - group_min if group_max > group_min else 1
+    
     html += f'''
             <div class="group-card" data-group="{group_name}" id="{group_id}">
                 <div class="group-header">
@@ -1116,6 +1217,19 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         # 截断英文名
         name_en_short = member['name_en'][:10] + "…" if len(member['name_en']) > 10 else member['name_en']
         
+        # 计算热力图颜色 - 根据总分在组内的相对位置
+        total_score = member['total']
+        if group_max > group_min:
+            # 计算相对位置 (0-1)
+            relative_score = (total_score - group_min) / (group_max - group_min)
+            # 映射到9个颜色等级
+            heat_level = min(9, max(1, int(relative_score * 9) + 1))
+        else:
+            heat_level = 5  # 如果所有人分数相同
+        
+        # 添加热力图样式
+        total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level}); color: {"#000" if heat_level < 6 else "#fff"};">{int(total_score)}</span>'
+        
         html += f'''
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
                             <td>{member['order']}</td>
@@ -1126,7 +1240,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                             <td class="info-cell">{member['class']}</td>
                             <td class="info-cell">{member['student_id']}</td>
                             <td><div class="score-tags">{score_tags}</div></td>
-                            <td>{int(member['total'])}</td>
+                            <td>{total_cell}</td>
                             <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
                         </tr>
 '''
@@ -1191,7 +1305,7 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 📊下载统计 · 最近5次得分
+            👆 点击排名卡片跳转 · 🌓切换深色 · 📊下载统计 · 颜色越深分数越高
         </div>
     </div>
 
@@ -1415,4 +1529,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 真正全黑深色模式 + 统计图下载")
+print("✨ 新增：分数热力图 + 全黑深色模式")
