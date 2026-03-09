@@ -14,7 +14,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== 日间模式 ===== */
+        /* ===== 日间模式 - 明亮清新 ===== */
         :root {
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -63,43 +63,43 @@
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== 全黑深色模式 ===== */
+        /* ===== 柔和深色模式 - 不那么黑，数字更亮 ===== */
         body.night-mode {
-            --bg-primary: #000000;
-            --bg-secondary: #0a0a0a;
-            --card-bg: #111111;
+            --bg-primary: #1a1e2a;
+            --bg-secondary: #242836;
+            --card-bg: #2d313e;
             --text-primary: #ffffff;
             --text-secondary: #e0e0e0;
-            --text-tertiary: #a0a0a0;
-            --border-light: #222222;
-            --border-subtle: #1a1a1a;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
+            --text-tertiary: #b0b0b0;
+            --border-light: #3a3f4d;
+            --border-subtle: #323644;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
             
-            --star-bg: #1a1500;
-            --night-bg: #1a002a;
-            --ocean-bg: #001a2a;
+            --star-bg: #2f2a1f;
+            --night-bg: #2a1f3a;
+            --ocean-bg: #1f2a3a;
             
-            --score-bg: #1a1a1a;
-            --score-text: #e0e0e0;
-            --score-highlight: #002a5a;
-            --score-highlight-text: #90d0ff;
-            --reward-pass: #003300;
-            --reward-pass-text: #90ff90;
-            --reward-fail: #330000;
-            --reward-fail-text: #ff9090;
+            --score-bg: #2d3240;
+            --score-text: #ffffff;
+            --score-highlight: #1e3a6a;
+            --score-highlight-text: #b0d0ff;
+            --reward-pass: #1a3a1a;
+            --reward-pass-text: #a0ffa0;
+            --reward-fail: #3a1a1a;
+            --reward-fail-text: #ffa0a0;
             
             /* 热力图颜色 - 深色模式用亮色 */
-            --heat-1: #001a2a;
-            --heat-2: #002a3a;
-            --heat-3: #003a4a;
-            --heat-4: #004a5a;
-            --heat-5: #005a7a;
-            --heat-6: #0a6a8a;
-            --heat-7: #1a7a9a;
-            --heat-8: #2a8aaa;
-            --heat-9: #3a9aba;
+            --heat-1: #1a2a3a;
+            --heat-2: #1e3650;
+            --heat-3: #22426a;
+            --heat-4: #2a4e7a;
+            --heat-5: #325a8a;
+            --heat-6: #3a669a;
+            --heat-7: #4272aa;
+            --heat-8: #4a7eba;
+            --heat-9: #528aca;
         }
 
         body {
@@ -647,7 +647,7 @@
         .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
-        /* 总分热力图 - 根据分数高低显示不同颜色 */
+        /* 总分热力图 - 根据分数高低显示不同颜色，确保数字亮眼 */
         .total-heat {
             font-weight: 700;
             font-size: 0.9rem;
@@ -656,6 +656,14 @@
             display: inline-block;
             min-width: 35px;
             text-align: center;
+            color: #ffffff !important;  /* 强制白色文字，确保在任何背景下都清晰 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);  /* 添加文字阴影，更清晰 */
+        }
+
+        /* 深色模式下，热力图数字也保持白色 */
+        body.night-mode .total-heat {
+            color: #ffffff !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
         /* 奖励标记 */
@@ -870,7 +878,7 @@
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越深分数越高</span>
-                <span class="date-badge">03/09 11:07</span>
+                <span class="date-badge">03/09 11:16</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -978,7 +986,7 @@
                             <td class="info-cell">S2FA</td>
                             <td class="info-cell">22038</td>
                             <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">0</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">0</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -991,7 +999,7 @@
                             <td class="info-cell">S2Y</td>
                             <td class="info-cell">22100</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1004,7 +1012,7 @@
                             <td class="info-cell">J3T</td>
                             <td class="info-cell">24076</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">3</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-2); color: #000;">3</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-2);">3</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1017,7 +1025,7 @@
                             <td class="info-cell">J3T</td>
                             <td class="info-cell">24078</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">4</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-3); color: #000;">4</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-3);">4</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1030,7 +1038,7 @@
                             <td class="info-cell">J3K</td>
                             <td class="info-cell">24068</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-2); color: #000;">3</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-2);">3</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1043,7 +1051,7 @@
                             <td class="info-cell">J3T</td>
                             <td class="info-cell">24088</td>
                             <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">0</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">0</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1056,7 +1064,7 @@
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25035</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">2</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-3); color: #000;">5</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-3);">5</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1069,7 +1077,7 @@
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25046</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">9</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">3</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-9); color: #fff;">16</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-9);">16</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1082,7 +1090,7 @@
                             <td class="info-cell">J1Y</td>
                             <td class="info-cell">26018</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1095,7 +1103,7 @@
                             <td class="info-cell">J1Y</td>
                             <td class="info-cell">26032</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1139,7 +1147,7 @@
                             <td class="info-cell">S2FA</td>
                             <td class="info-cell">22040</td>
                             <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">0</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">0</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1152,7 +1160,7 @@
                             <td class="info-cell">S2Y</td>
                             <td class="info-cell">22029</td>
                             <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">0</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">0</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1165,7 +1173,7 @@
                             <td class="info-cell">S2Y</td>
                             <td class="info-cell">22083</td>
                             <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">0</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">0</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1178,7 +1186,7 @@
                             <td class="info-cell">S2K</td>
                             <td class="info-cell">22051</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1191,7 +1199,7 @@
                             <td class="info-cell">J3T</td>
                             <td class="info-cell">24083</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-2); color: #000;">4</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-2);">4</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1204,7 +1212,7 @@
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25036</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-3); color: #000;">5</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-3);">5</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1217,7 +1225,7 @@
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25071</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">2</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-3); color: #000;">5</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-3);">5</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1230,7 +1238,7 @@
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25044</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">6</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-5); color: #000;">11</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-5);">11</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1243,7 +1251,7 @@
                             <td class="info-cell">J2F</td>
                             <td class="info-cell">25058</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">4</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-6); color: #fff;">12</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-6);">12</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1256,7 +1264,7 @@
                             <td class="info-cell">J2F</td>
                             <td class="info-cell">25059</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">2/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">6</span></span><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">7</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-9); color: #fff;">20</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-9);">20</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1269,7 +1277,7 @@
                             <td class="info-cell">J1Y</td>
                             <td class="info-cell">26024</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1313,7 +1321,7 @@
                             <td class="info-cell">S2Y</td>
                             <td class="info-cell">22044</td>
                             <td><div class="score-tags"><span class="score-item">—</span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-1); color: #000;">0</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-1);">0</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1326,7 +1334,7 @@
                             <td class="info-cell">S2Y</td>
                             <td class="info-cell">22021</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-2); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-2);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1339,7 +1347,7 @@
                             <td class="info-cell">S2Y</td>
                             <td class="info-cell">22030</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-2); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-2);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1352,7 +1360,7 @@
                             <td class="info-cell">S2FA</td>
                             <td class="info-cell">22017</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">3</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-5); color: #000;">4</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-5);">4</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1365,7 +1373,7 @@
                             <td class="info-cell">S1Y</td>
                             <td class="info-cell">23065</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-2); color: #000;">1</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-2);">1</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1378,7 +1386,7 @@
                             <td class="info-cell">S1T</td>
                             <td class="info-cell">23013</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">1</span></span><span class="score-item has-score"><span class="score-date">9/3</span><span class="score-value">1</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-3); color: #000;">2</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-3);">2</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1391,7 +1399,7 @@
                             <td class="info-cell">J3F</td>
                             <td class="info-cell">24039</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">2</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-3); color: #000;">2</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-3);">2</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1404,7 +1412,7 @@
                             <td class="info-cell">J2Y</td>
                             <td class="info-cell">25031</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">3/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">4</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">3</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-9); color: #fff;">9</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-9);">9</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1417,7 +1425,7 @@
                             <td class="info-cell">J2F</td>
                             <td class="info-cell">25070</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">4/3</span><span class="score-value">2</span></span><span class="score-item has-score"><span class="score-date">6/3</span><span class="score-value">3</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-6); color: #fff;">5</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-6);">5</span></td>
                             <td><span class="reward-pass">✅</span></td>
                         </tr>
 
@@ -1430,7 +1438,7 @@
                             <td class="info-cell">J1T</td>
                             <td class="info-cell">26092</td>
                             <td><div class="score-tags"><span class="score-item has-score"><span class="score-date">5/3</span><span class="score-value">2</span></span></div></td>
-                            <td><span class="total-heat" style="background-color: var(--heat-3); color: #000;">2</span></td>
+                            <td><span class="total-heat" style="background-color: var(--heat-3);">2</span></td>
                             <td><span class="reward-fail">❌</span></td>
                         </tr>
 
@@ -1548,8 +1556,8 @@
         function generateChart() {
             const ctx = document.getElementById('groupChart').getContext('2d');
             const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#a0a0a0' : '#5a6b7a';
-            const gridColor = isNightMode ? '#222222' : '#e1e8f0';
+            const textColor = isNightMode ? '#b0b0b0' : '#5a6b7a';
+            const gridColor = isNightMode ? '#3a3f4d' : '#e1e8f0';
             
             if (chart) {
                 chart.destroy();
