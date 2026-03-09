@@ -197,7 +197,7 @@ html = '''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>训育处 · 学长团荣耀榜</title>
+    <title>训育处 - 学长团分数板</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
@@ -976,7 +976,7 @@ html = '''<!DOCTYPE html>
             <div class="header-top">
                 <div class="title-group">
                     <span class="school-icon">🏫</span>
-                    <h1>学长团荣耀榜</h1>
+                    <h1>🏫 学长团分数板</h1>
                 </div>
                 <div class="action-buttons">
                     <button class="download-btn" id="downloadBtn">
