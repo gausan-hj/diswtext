@@ -202,7 +202,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 调整深色模式亮度
+# 生成HTML - 修正热力图颜色（越浅越高分）
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -219,7 +219,7 @@ html = '''<!DOCTYPE html>
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== 日间模式 - 明亮清新 ===== */
+        /* ===== 日间模式 ===== */
         :root {
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -253,22 +253,22 @@ html = '''<!DOCTYPE html>
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
             
-            /* 热力图颜色 - 从浅蓝到深蓝 */
-            --heat-1: #f0f9ff;
-            --heat-2: #e0f2fe;
-            --heat-3: #bae6fd;
-            --heat-4: #7dd3fc;
-            --heat-5: #38bdf8;
-            --heat-6: #0ea5e9;
-            --heat-7: #0284c7;
-            --heat-8: #0369a1;
-            --heat-9: #075985;
+            /* 热力图颜色 - 越浅越高分（高分用浅色，低分用深色） */
+            --heat-1: #083344;  /* 最低分 - 最深 */
+            --heat-2: #164e63;
+            --heat-3: #155e75;
+            --heat-4: #0369a1;
+            --heat-5: #0284c7;
+            --heat-6: #38bdf8;
+            --heat-7: #7dd3fc;
+            --heat-8: #bae6fd;
+            --heat-9: #e0f2fe;  /* 最高分 - 最浅 */
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== 柔和深色模式 - 不那么黑，数字更亮 ===== */
+        /* ===== 深色模式 ===== */
         body.night-mode {
             --bg-primary: #1a1e2a;
             --bg-secondary: #242836;
@@ -295,16 +295,16 @@ html = '''<!DOCTYPE html>
             --reward-fail: #3a1a1a;
             --reward-fail-text: #ffa0a0;
             
-            /* 热力图颜色 - 深色模式用亮色 */
-            --heat-1: #1a2a3a;
-            --heat-2: #1e3650;
-            --heat-3: #22426a;
-            --heat-4: #2a4e7a;
-            --heat-5: #325a8a;
-            --heat-6: #3a669a;
-            --heat-7: #4272aa;
-            --heat-8: #4a7eba;
-            --heat-9: #528aca;
+            /* 深色模式热力图 - 同样越浅越高分 */
+            --heat-1: #000814;
+            --heat-2: #001d3d;
+            --heat-3: #003566;
+            --heat-4: #0a4a7a;
+            --heat-5: #1a5a8a;
+            --heat-6: #2a6a9a;
+            --heat-7: #3a7aaa;
+            --heat-8: #4a8aba;
+            --heat-9: #5a9aca;
         }
 
         body {
@@ -469,7 +469,7 @@ html = '''<!DOCTYPE html>
             border-color: var(--text-tertiary);
         }
 
-        /* 热力图说明 */
+        /* 热力图说明 - 修正文字 */
         .heatmap-legend {
             display: flex;
             align-items: center;
@@ -496,6 +496,14 @@ html = '''<!DOCTYPE html>
         .legend-color.mid { background: var(--heat-5); }
         .legend-color.mid-high { background: var(--heat-7); }
         .legend-color.high { background: var(--heat-9); }
+
+        .legend-label {
+            display: flex;
+            gap: 8px;
+        }
+
+        .legend-label span.low { color: var(--heat-1); font-weight: bold; }
+        .legend-label span.high { color: var(--heat-9); font-weight: bold; }
 
         /* 统计图卡片 */
         .chart-card {
@@ -751,7 +759,7 @@ html = '''<!DOCTYPE html>
         .group-card[data-group="夜曜组"] .group-badge { background: #a855f7; }
         .group-card[data-group="沧澜组"] .group-badge { background: #3b82f6; }
 
-        /* 表格 - 热力图样式 */
+        /* 表格 - 完整显示英文名 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -762,7 +770,7 @@ html = '''<!DOCTYPE html>
         .member-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 550px;
+            min-width: 750px;  /* 增加宽度以容纳完整英文名 */
             font-size: 0.8rem;
         }
 
@@ -786,7 +794,7 @@ html = '''<!DOCTYPE html>
         }
 
         .member-table th:nth-child(1) { width: 30px; text-align: center; }
-        .member-table th:nth-child(2) { width: 90px; }
+        .member-table th:nth-child(2) { width: 180px; }  /* 增加姓名列宽度 */
         .member-table th:nth-child(3) { width: 45px; }
         .member-table th:nth-child(4) { width: 60px; }
         .member-table th:nth-child(5) { width: auto; }
@@ -797,6 +805,10 @@ html = '''<!DOCTYPE html>
         .member-table td:nth-child(6) { text-align: right; font-weight: 600; }
         .member-table td:nth-child(7) { text-align: center; }
 
+        .name-cell {
+            max-width: 180px;
+        }
+
         .name-cn {
             font-weight: 600;
             font-size: 0.8rem;
@@ -804,16 +816,14 @@ html = '''<!DOCTYPE html>
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 80px;
         }
 
         .name-en {
-            font-size: 0.55rem;
+            font-size: 0.65rem;
             color: var(--text-tertiary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 80px;
+            white-space: normal;  /* 允许换行 */
+            line-height: 1.3;
+            word-break: break-word;  /* 长单词换行 */
         }
 
         .info-cell {
@@ -852,7 +862,7 @@ html = '''<!DOCTYPE html>
         .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
-        /* 总分热力图 - 根据分数高低显示不同颜色，确保数字亮眼 */
+        /* 总分热力图 - 越浅越高分 */
         .total-heat {
             font-weight: 700;
             font-size: 0.9rem;
@@ -861,11 +871,10 @@ html = '''<!DOCTYPE html>
             display: inline-block;
             min-width: 35px;
             text-align: center;
-            color: #ffffff !important;  /* 强制白色文字，确保在任何背景下都清晰 */
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);  /* 添加文字阴影，更清晰 */
+            color: #ffffff !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
 
-        /* 深色模式下，热力图数字也保持白色 */
         body.night-mode .total-heat {
             color: #ffffff !important;
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
@@ -1055,9 +1064,8 @@ html = '''<!DOCTYPE html>
             .rank-name { font-size: 0.7rem; }
             .rank-score { font-size: 0.9rem; }
             .group-title { font-size: 1rem; }
-            .member-table { min-width: 500px; }
-            .name-cn { max-width: 70px; }
-            .name-en { max-width: 70px; }
+            .member-table { min-width: 650px; }
+            .name-en { font-size: 0.6rem; }
             .action-buttons { width: 100%; justify-content: flex-end; }
         }
     </style>
@@ -1082,7 +1090,7 @@ html = '''<!DOCTYPE html>
                 </div>
             </div>
             <div class="meta-info">
-                <span>Prefects' Scoreboard · 颜色越深分数越高</span>
+                <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
                 <span class="date-badge">''' + datetime.now().strftime('%m/%d %H:%M') + '''</span>
             </div>
             <div class="search-wrapper">
@@ -1091,15 +1099,19 @@ html = '''<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 热力图图例 -->
+        <!-- 热力图图例 - 修正说明 -->
         <div class="heatmap-legend">
-            <span>分数热力图:</span>
+            <div class="legend-label">
+                <span class="low">低分 █</span>
+                <span> → </span>
+                <span class="high">高分 █</span>
+            </div>
             <div class="legend-colors">
-                <div class="legend-color low" title="低分"></div>
+                <div class="legend-color low" title="低分（深色）"></div>
                 <div class="legend-color mid-low" title="中低分"></div>
                 <div class="legend-color mid" title="中分"></div>
                 <div class="legend-color mid-high" title="中高分"></div>
-                <div class="legend-color high" title="高分"></div>
+                <div class="legend-color high" title="高分（浅色）"></div>
             </div>
         </div>
 
@@ -1222,28 +1234,28 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         if not score_tags:
             score_tags = '<span class="score-item">—</span>'
         
-        # 截断英文名
-        name_en_short = member['name_en'][:10] + "…" if len(member['name_en']) > 10 else member['name_en']
+        # 完整显示英文名，不截断
+        name_en_full = member['name_en']
         
-        # 计算热力图颜色 - 根据总分在组内的相对位置
+        # 计算热力图颜色 - 越浅越高分
         total_score = member['total']
         if group_max > group_min:
-            # 计算相对位置 (0-1)
+            # 计算相对位置 (0-1)，高分对应浅色 (heat level 9)
             relative_score = (total_score - group_min) / (group_max - group_min)
-            # 映射到9个颜色等级
+            # 映射到9个颜色等级：分数越高，heat_level越大（颜色越浅）
             heat_level = min(9, max(1, int(relative_score * 9) + 1))
         else:
             heat_level = 5  # 如果所有人分数相同
         
-        # 添加热力图样式 - 数字强制白色
+        # 添加热力图样式 - 数字白色
         total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level});">{int(total_score)}</span>'
         
         html += f'''
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
                             <td>{member['order']}</td>
-                            <td>
+                            <td class="name-cell">
                                 <div class="name-cn">{member['name_cn']}</div>
-                                <div class="name-en">{name_en_short}</div>
+                                <div class="name-en">{name_en_full}</div>
                             </td>
                             <td class="info-cell">{member['class']}</td>
                             <td class="info-cell">{member['student_id']}</td>
@@ -1313,7 +1325,7 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 📊下载统计 · 颜色越深分数越高
+            👆 点击排名卡片跳转 · 🌓切换深色 · 📊下载统计 · 颜色越浅分数越高
         </div>
     </div>
 
@@ -1537,4 +1549,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 优化：深色模式变亮 + 数字强制白色")
+print("✨ 修正：热力图颜色越浅分数越高 + 完整英文名")
