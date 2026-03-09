@@ -202,7 +202,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 添加热力图
+# 生成HTML - 调整深色模式亮度
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -219,7 +219,7 @@ html = '''<!DOCTYPE html>
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== 日间模式 ===== */
+        /* ===== 日间模式 - 明亮清新 ===== */
         :root {
             --bg-primary: #f8fafc;
             --bg-secondary: #ffffff;
@@ -268,43 +268,43 @@ html = '''<!DOCTYPE html>
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== 全黑深色模式 ===== */
+        /* ===== 柔和深色模式 - 不那么黑，数字更亮 ===== */
         body.night-mode {
-            --bg-primary: #000000;
-            --bg-secondary: #0a0a0a;
-            --card-bg: #111111;
+            --bg-primary: #1a1e2a;
+            --bg-secondary: #242836;
+            --card-bg: #2d313e;
             --text-primary: #ffffff;
             --text-secondary: #e0e0e0;
-            --text-tertiary: #a0a0a0;
-            --border-light: #222222;
-            --border-subtle: #1a1a1a;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.5);
+            --text-tertiary: #b0b0b0;
+            --border-light: #3a3f4d;
+            --border-subtle: #323644;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
             --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
             
-            --star-bg: #1a1500;
-            --night-bg: #1a002a;
-            --ocean-bg: #001a2a;
+            --star-bg: #2f2a1f;
+            --night-bg: #2a1f3a;
+            --ocean-bg: #1f2a3a;
             
-            --score-bg: #1a1a1a;
-            --score-text: #e0e0e0;
-            --score-highlight: #002a5a;
-            --score-highlight-text: #90d0ff;
-            --reward-pass: #003300;
-            --reward-pass-text: #90ff90;
-            --reward-fail: #330000;
-            --reward-fail-text: #ff9090;
+            --score-bg: #2d3240;
+            --score-text: #ffffff;
+            --score-highlight: #1e3a6a;
+            --score-highlight-text: #b0d0ff;
+            --reward-pass: #1a3a1a;
+            --reward-pass-text: #a0ffa0;
+            --reward-fail: #3a1a1a;
+            --reward-fail-text: #ffa0a0;
             
             /* 热力图颜色 - 深色模式用亮色 */
-            --heat-1: #001a2a;
-            --heat-2: #002a3a;
-            --heat-3: #003a4a;
-            --heat-4: #004a5a;
-            --heat-5: #005a7a;
-            --heat-6: #0a6a8a;
-            --heat-7: #1a7a9a;
-            --heat-8: #2a8aaa;
-            --heat-9: #3a9aba;
+            --heat-1: #1a2a3a;
+            --heat-2: #1e3650;
+            --heat-3: #22426a;
+            --heat-4: #2a4e7a;
+            --heat-5: #325a8a;
+            --heat-6: #3a669a;
+            --heat-7: #4272aa;
+            --heat-8: #4a7eba;
+            --heat-9: #528aca;
         }
 
         body {
@@ -852,7 +852,7 @@ html = '''<!DOCTYPE html>
         .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
-        /* 总分热力图 - 根据分数高低显示不同颜色 */
+        /* 总分热力图 - 根据分数高低显示不同颜色，确保数字亮眼 */
         .total-heat {
             font-weight: 700;
             font-size: 0.9rem;
@@ -861,6 +861,14 @@ html = '''<!DOCTYPE html>
             display: inline-block;
             min-width: 35px;
             text-align: center;
+            color: #ffffff !important;  /* 强制白色文字，确保在任何背景下都清晰 */
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);  /* 添加文字阴影，更清晰 */
+        }
+
+        /* 深色模式下，热力图数字也保持白色 */
+        body.night-mode .total-heat {
+            color: #ffffff !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
         /* 奖励标记 */
@@ -1227,8 +1235,8 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         else:
             heat_level = 5  # 如果所有人分数相同
         
-        # 添加热力图样式
-        total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level}); color: {"#000" if heat_level < 6 else "#fff"};">{int(total_score)}</span>'
+        # 添加热力图样式 - 数字强制白色
+        total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level});">{int(total_score)}</span>'
         
         html += f'''
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
@@ -1367,8 +1375,8 @@ html += '''        ];
         function generateChart() {
             const ctx = document.getElementById('groupChart').getContext('2d');
             const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#a0a0a0' : '#5a6b7a';
-            const gridColor = isNightMode ? '#222222' : '#e1e8f0';
+            const textColor = isNightMode ? '#b0b0b0' : '#5a6b7a';
+            const gridColor = isNightMode ? '#3a3f4d' : '#e1e8f0';
             
             if (chart) {
                 chart.destroy();
@@ -1529,4 +1537,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 新增：分数热力图 + 全黑深色模式")
+print("✨ 优化：深色模式变亮 + 数字强制白色")
