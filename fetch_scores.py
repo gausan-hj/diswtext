@@ -202,7 +202,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 太阳月亮升降动画
+# 生成HTML - 添加双击/双空格切换深色模式
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -253,8 +253,8 @@ html = '''<!DOCTYPE html>
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
             
-            /* 热力图颜色 - 越浅越高分 */
-            --heat-1: #083344;
+            /* 热力图颜色 - 越浅越高分（高分用浅色，低分用深色） */
+            --heat-1: #083344;  /* 最低分 - 最深 */
             --heat-2: #164e63;
             --heat-3: #155e75;
             --heat-4: #0369a1;
@@ -262,14 +262,10 @@ html = '''<!DOCTYPE html>
             --heat-6: #38bdf8;
             --heat-7: #7dd3fc;
             --heat-8: #bae6fd;
-            --heat-9: #e0f2fe;
+            --heat-9: #e0f2fe;  /* 最高分 - 最浅 */
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
-            
-            /* 提示颜色 */
-            --toast-bg: rgba(30, 41, 59, 0.9);
-            --toast-text: #ffffff;
         }
 
         /* ===== 深色模式 ===== */
@@ -299,7 +295,7 @@ html = '''<!DOCTYPE html>
             --reward-fail: #3a1a1a;
             --reward-fail-text: #ffa0a0;
             
-            /* 深色模式热力图 */
+            /* 深色模式热力图 - 同样越浅越高分 */
             --heat-1: #000814;
             --heat-2: #001d3d;
             --heat-3: #003566;
@@ -309,10 +305,6 @@ html = '''<!DOCTYPE html>
             --heat-7: #3a7aaa;
             --heat-8: #4a8aba;
             --heat-9: #5a9aca;
-            
-            /* 提示颜色 */
-            --toast-bg: rgba(255, 255, 255, 0.9);
-            --toast-text: #1a1e2a;
         }
 
         body {
@@ -332,116 +324,33 @@ html = '''<!DOCTYPE html>
             margin: 0 auto;
         }
 
-        /* ===== 太阳月亮升降提示 ===== */
-        .mode-toast {
+        /* 双击提示 */
+        .double-tap-hint {
             position: fixed;
-            top: 30%;
+            bottom: 80px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--toast-bg);
-            backdrop-filter: blur(10px);
-            color: var(--toast-text);
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            pointer-events: none;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            z-index: 999;
             opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
         }
 
-        .mode-toast.show {
-            animation: toastFadeIn 0.3s ease forwards;
+        .double-tap-hint.show {
+            opacity: 0.9;
         }
 
-        .mode-toast.hide {
-            animation: toastFadeOut 0.3s ease forwards;
-        }
-
-        @keyframes toastFadeIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -30%);
-            }
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-        }
-
-        @keyframes toastFadeOut {
-            from {
-                opacity: 1;
-                transform: translate(-50%, -50%);
-            }
-            to {
-                opacity: 0;
-                transform: translate(-50%, -70%);
-            }
-        }
-
-        /* 太阳动画 - 从左边升起 */
-        .sun-icon {
-            display: inline-block;
-            font-size: 1.8rem;
-            animation: sunRise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes sunRise {
-            0% {
-                transform: translateX(-100px) translateY(50px) rotate(0deg);
-                opacity: 0;
-            }
-            60% {
-                transform: translateX(10px) translateY(-5px) rotate(180deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(0) translateY(0) rotate(360deg);
-                opacity: 1;
-            }
-        }
-
-        /* 月亮动画 - 从右边落下 */
-        .moon-icon {
-            display: inline-block;
-            font-size: 1.8rem;
-            animation: moonSet 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes moonSet {
-            0% {
-                transform: translateX(100px) translateY(-50px) rotate(0deg);
-                opacity: 0;
-            }
-            60% {
-                transform: translateX(-10px) translateY(5px) rotate(-180deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateX(0) translateY(0) rotate(-360deg);
-                opacity: 1;
-            }
-        }
-
-        .toast-text {
-            animation: textFade 0.3s ease;
-        }
-
-        @keyframes textFade {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        body.night-mode .double-tap-hint {
+            background: #2d313e;
+            color: white;
         }
 
         /* 头部 */
@@ -485,7 +394,7 @@ html = '''<!DOCTYPE html>
             align-items: center;
         }
 
-        /* 深色模式按钮 */
+        /* 深色模式按钮 - 备用 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -638,32 +547,17 @@ html = '''<!DOCTYPE html>
 
         .chart-card.show {
             display: block;
-            animation: chartSlideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: slideDown 0.3s ease;
         }
 
-        .chart-card.hide {
-            animation: chartSlideUp 0.3s ease forwards;
-        }
-
-        @keyframes chartSlideDown {
-            0% {
+        @keyframes slideDown {
+            from {
                 opacity: 0;
-                transform: translateY(-30px) scale(0.9);
+                transform: translateY(-10px);
             }
-            100% {
+            to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes chartSlideUp {
-            0% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(-30px) scale(0.9);
+                transform: translateY(0);
             }
         }
 
@@ -1202,20 +1096,16 @@ html = '''<!DOCTYPE html>
             .member-table { min-width: 650px; }
             .name-en { font-size: 0.6rem; }
             .action-buttons { width: 100%; justify-content: flex-end; }
-            .mode-toast { padding: 8px 16px; font-size: 1rem; }
-            .sun-icon, .moon-icon { font-size: 1.4rem; }
         }
     </style>
 </head>
 <body>
-    <!-- 太阳月亮升降提示 -->
-    <div class="mode-toast" id="modeToast">
-        <span class="sun-icon" id="toastSun">☀️</span>
-        <span class="moon-icon" id="toastMoon" style="display: none;">🌙</span>
-        <span class="toast-text" id="toastText">已开启日间模式</span>
-    </div>
-
     <div class="container">
+        <!-- 双击提示 -->
+        <div class="double-tap-hint" id="doubleTapHint">
+            <span id="hintText">👆 双击屏幕 / 按两次空格 切换深色模式</span>
+        </div>
+
         <div class="header">
             <div class="header-top">
                 <div class="title-group">
@@ -1227,7 +1117,7 @@ html = '''<!DOCTYPE html>
                         <span>📊</span>
                         <span>下载统计</span>
                     </button>
-                    <div class="theme-toggle" onclick="toggleNightMode()">
+                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
                     </div>
@@ -1491,67 +1381,36 @@ html += '''
         const downloadToast = document.getElementById('downloadToast');
         const toastMessage = document.getElementById('toastMessage');
         const statsGrid = document.getElementById('statsGrid');
+        const doubleTapHint = document.getElementById('doubleTapHint');
+        const hintText = document.getElementById('hintText');
         
-        // 提示元素
-        const modeToast = document.getElementById('modeToast');
-        const toastSun = document.getElementById('toastSun');
-        const toastMoon = document.getElementById('toastMoon');
-        const toastText = document.getElementById('toastText');
-        
+        // ===== 双击/双空格切换深色模式 =====
         let lastTap = 0;
         let lastSpaceTime = 0;
         let spaceCount = 0;
-        let toastTimeout;
-        let isToastHiding = false;
+        let hintTimeout;
 
-        // ===== 显示太阳月亮升降提示 =====
-        function showModeToast(isNight) {
-            // 清除之前的定时器和动画
-            clearTimeout(toastTimeout);
+        // 显示提示
+        function showHint(message) {
+            hintText.textContent = message;
+            doubleTapHint.classList.add('show');
             
-            // 重置动画
-            toastSun.style.animation = 'none';
-            toastMoon.style.animation = 'none';
-            void toastSun.offsetWidth; // 强制重绘
-            void toastMoon.offsetWidth;
-            
-            // 设置图标和文字
-            if (isNight) {
-                toastSun.style.display = 'none';
-                toastMoon.style.display = 'inline-block';
-                toastText.textContent = '已开启夜间模式';
-                toastMoon.style.animation = 'moonSet 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            } else {
-                toastSun.style.display = 'inline-block';
-                toastMoon.style.display = 'none';
-                toastText.textContent = '已开启日间模式';
-                toastSun.style.animation = 'sunRise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            }
-            
-            // 显示提示
-            modeToast.classList.remove('hide', 'show');
-            void modeToast.offsetWidth;
-            modeToast.classList.add('show');
-            
-            // 1.5秒后淡出
-            toastTimeout = setTimeout(() => {
-                modeToast.classList.remove('show');
-                modeToast.classList.add('hide');
+            clearTimeout(hintTimeout);
+            hintTimeout = setTimeout(() => {
+                doubleTapHint.classList.remove('show');
             }, 1500);
         }
 
-        // ===== 切换深色模式 =====
+        // 切换深色模式
         function toggleNightMode() {
-            const isNight = document.body.classList.toggle('night-mode');
-            showModeToast(isNight);
-            
+            document.body.classList.toggle('night-mode');
             // 更新图表颜色
             if (chart && chartCard.classList.contains('show')) {
                 generateChart();
             }
         }
 
-        // ===== 监听双击（手机）=====
+        // 监听双击（手机）
         document.addEventListener('touchstart', (e) => {
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
@@ -1559,12 +1418,13 @@ html += '''
             if (tapLength < 300 && tapLength > 0) {
                 // 双击
                 toggleNightMode();
+                showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
                 e.preventDefault();
             }
             lastTap = currentTime;
-        }, { passive: false });
+        });
 
-        // ===== 监听双空格（电脑）=====
+        // 监听双空格（电脑）
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault(); // 防止页面滚动
@@ -1572,10 +1432,12 @@ html += '''
                 const currentTime = new Date().getTime();
                 
                 if (currentTime - lastSpaceTime < 500) {
+                    // 两次空格间隔小于500ms
                     spaceCount++;
                     if (spaceCount === 2) {
                         // 双空格
                         toggleNightMode();
+                        showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
                         spaceCount = 0;
                     }
                 } else {
@@ -1586,7 +1448,7 @@ html += '''
             }
         });
 
-        // ===== 统计数据 =====
+        // 统计数据
         const statsData = [
 '''
 
@@ -1609,7 +1471,7 @@ html += '''        ];
         
         let chart = null;
 
-        // 显示下载提示
+        // 显示提示
         function showToast(message, isSuccess = true) {
             toastMessage.textContent = message;
             downloadToast.classList.add('show');
@@ -1726,34 +1588,21 @@ html += '''        ];
             }
         }
 
-        // 下载按钮点击 - 显示统计图
         downloadBtn.addEventListener('click', () => {
-            chartCard.classList.remove('hide', 'show');
-            void chartCard.offsetWidth;
             chartCard.classList.add('show');
-            
             generateChart();
             generateStatsGrid();
             showToast('📊 统计图已生成');
         });
 
-        // 保存按钮点击
         if (saveChartBtn) {
             saveChartBtn.addEventListener('click', saveChartToGallery);
         }
 
-        // 关闭统计图 - 带动画
         closeChart.addEventListener('click', () => {
             chartCard.classList.remove('show');
-            chartCard.classList.add('hide');
-            
-            setTimeout(() => {
-                chartCard.classList.remove('hide');
-                chartCard.style.display = 'none';
-            }, 300);
         });
 
-        // 搜索功能
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             allRows.forEach(row => {
@@ -1762,7 +1611,6 @@ html += '''        ];
             });
         });
 
-        // 深色模式切换时更新图表颜色
         const observer = new MutationObserver(() => {
             if (chart && chartCard.classList.contains('show')) {
                 generateChart();
@@ -1785,4 +1633,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 新增：太阳月亮升降动画 + 缩小版提示")
+print("✨ 新增：双击屏幕/双空格切换深色模式")
