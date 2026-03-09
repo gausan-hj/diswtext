@@ -976,7 +976,7 @@ html = '''<!DOCTYPE html>
             <div class="header-top">
                 <div class="title-group">
                     <span class="school-icon">🏫</span>
-                    <h1>🏫 学长团分数板</h1>
+                    <h1>学长团分数板</h1>
                 </div>
                 <div class="action-buttons">
                     <button class="download-btn" id="downloadBtn">
