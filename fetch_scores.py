@@ -990,7 +990,7 @@ html = '''<!DOCTYPE html>
                 </div>
             </div>
             <div class="meta-info">
-                <span>训育处 · 奖励机制</span>
+                <span>Prefects' Scoreboard</span>
                 <span class="date-badge">''' + datetime.now().strftime('%m/%d %H:%M') + '''</span>
             </div>
             <div class="search-wrapper">
