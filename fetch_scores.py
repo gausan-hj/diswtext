@@ -1415,7 +1415,7 @@ html += '''
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
             
-            if (tapLength < 300 && tapLength > 0) {
+            if (tapLength < 500 && tapLength > 0) {
                 // 双击
                 toggleNightMode();
                 showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
