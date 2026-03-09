@@ -920,7 +920,7 @@
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/09 12:52</span>
+                <span class="date-badge">03/09 13:22</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1604,7 +1604,7 @@
             const currentTime = new Date().getTime();
             const tapLength = currentTime - lastTap;
             
-            if (tapLength < 300 && tapLength > 0) {
+            if (tapLength < 500 && tapLength > 0) {
                 // 双击
                 toggleNightMode();
                 showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
