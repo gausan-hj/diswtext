@@ -202,7 +202,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 修正热力图颜色（越浅越高分）
+# 生成HTML - 添加双击/双空格切换深色模式
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -324,6 +324,35 @@ html = '''<!DOCTYPE html>
             margin: 0 auto;
         }
 
+        /* 双击提示 */
+        .double-tap-hint {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .double-tap-hint.show {
+            opacity: 0.9;
+        }
+
+        body.night-mode .double-tap-hint {
+            background: #2d313e;
+            color: white;
+        }
+
         /* 头部 */
         .header {
             background: var(--card-bg);
@@ -365,7 +394,7 @@ html = '''<!DOCTYPE html>
             align-items: center;
         }
 
-        /* 深色模式按钮 */
+        /* 深色模式按钮 - 备用 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -469,7 +498,7 @@ html = '''<!DOCTYPE html>
             border-color: var(--text-tertiary);
         }
 
-        /* 热力图说明 - 修正文字 */
+        /* 热力图说明 */
         .heatmap-legend {
             display: flex;
             align-items: center;
@@ -759,7 +788,7 @@ html = '''<!DOCTYPE html>
         .group-card[data-group="夜曜组"] .group-badge { background: #a855f7; }
         .group-card[data-group="沧澜组"] .group-badge { background: #3b82f6; }
 
-        /* 表格 - 完整显示英文名 */
+        /* 表格 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -770,7 +799,7 @@ html = '''<!DOCTYPE html>
         .member-table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 750px;  /* 增加宽度以容纳完整英文名 */
+            min-width: 750px;
             font-size: 0.8rem;
         }
 
@@ -794,7 +823,7 @@ html = '''<!DOCTYPE html>
         }
 
         .member-table th:nth-child(1) { width: 30px; text-align: center; }
-        .member-table th:nth-child(2) { width: 180px; }  /* 增加姓名列宽度 */
+        .member-table th:nth-child(2) { width: 180px; }
         .member-table th:nth-child(3) { width: 45px; }
         .member-table th:nth-child(4) { width: 60px; }
         .member-table th:nth-child(5) { width: auto; }
@@ -821,9 +850,9 @@ html = '''<!DOCTYPE html>
         .name-en {
             font-size: 0.65rem;
             color: var(--text-tertiary);
-            white-space: normal;  /* 允许换行 */
+            white-space: normal;
             line-height: 1.3;
-            word-break: break-word;  /* 长单词换行 */
+            word-break: break-word;
         }
 
         .info-cell {
@@ -862,7 +891,7 @@ html = '''<!DOCTYPE html>
         .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
-        /* 总分热力图 - 越浅越高分 */
+        /* 总分热力图 */
         .total-heat {
             font-weight: 700;
             font-size: 0.9rem;
@@ -1072,6 +1101,11 @@ html = '''<!DOCTYPE html>
 </head>
 <body>
     <div class="container">
+        <!-- 双击提示 -->
+        <div class="double-tap-hint" id="doubleTapHint">
+            <span id="hintText">👆 双击屏幕 / 按两次空格 切换深色模式</span>
+        </div>
+
         <div class="header">
             <div class="header-top">
                 <div class="title-group">
@@ -1099,7 +1133,7 @@ html = '''<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- 热力图图例 - 修正说明 -->
+        <!-- 热力图图例 -->
         <div class="heatmap-legend">
             <div class="legend-label">
                 <span class="low">低分 █</span>
@@ -1234,20 +1268,17 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
         if not score_tags:
             score_tags = '<span class="score-item">—</span>'
         
-        # 完整显示英文名，不截断
+        # 完整显示英文名
         name_en_full = member['name_en']
         
         # 计算热力图颜色 - 越浅越高分
         total_score = member['total']
         if group_max > group_min:
-            # 计算相对位置 (0-1)，高分对应浅色 (heat level 9)
             relative_score = (total_score - group_min) / (group_max - group_min)
-            # 映射到9个颜色等级：分数越高，heat_level越大（颜色越浅）
             heat_level = min(9, max(1, int(relative_score * 9) + 1))
         else:
-            heat_level = 5  # 如果所有人分数相同
+            heat_level = 5
         
-        # 添加热力图样式 - 数字白色
         total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level});">{int(total_score)}</span>'
         
         html += f'''
@@ -1325,7 +1356,7 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 📊下载统计 · 颜色越浅分数越高
+            👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高
         </div>
     </div>
 
@@ -1350,7 +1381,73 @@ html += '''
         const downloadToast = document.getElementById('downloadToast');
         const toastMessage = document.getElementById('toastMessage');
         const statsGrid = document.getElementById('statsGrid');
+        const doubleTapHint = document.getElementById('doubleTapHint');
+        const hintText = document.getElementById('hintText');
         
+        // ===== 双击/双空格切换深色模式 =====
+        let lastTap = 0;
+        let lastSpaceTime = 0;
+        let spaceCount = 0;
+        let hintTimeout;
+
+        // 显示提示
+        function showHint(message) {
+            hintText.textContent = message;
+            doubleTapHint.classList.add('show');
+            
+            clearTimeout(hintTimeout);
+            hintTimeout = setTimeout(() => {
+                doubleTapHint.classList.remove('show');
+            }, 1500);
+        }
+
+        // 切换深色模式
+        function toggleNightMode() {
+            document.body.classList.toggle('night-mode');
+            // 更新图表颜色
+            if (chart && chartCard.classList.contains('show')) {
+                generateChart();
+            }
+        }
+
+        // 监听双击（手机）
+        document.addEventListener('touchstart', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            
+            if (tapLength < 300 && tapLength > 0) {
+                // 双击
+                toggleNightMode();
+                showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+                e.preventDefault();
+            }
+            lastTap = currentTime;
+        });
+
+        // 监听双空格（电脑）
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); // 防止页面滚动
+                
+                const currentTime = new Date().getTime();
+                
+                if (currentTime - lastSpaceTime < 500) {
+                    // 两次空格间隔小于500ms
+                    spaceCount++;
+                    if (spaceCount === 2) {
+                        // 双空格
+                        toggleNightMode();
+                        showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+                        spaceCount = 0;
+                    }
+                } else {
+                    spaceCount = 1;
+                }
+                
+                lastSpaceTime = currentTime;
+            }
+        });
+
         // 统计数据
         const statsData = [
 '''
@@ -1363,7 +1460,7 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
 
 html += '''        ];
 
-        // 组数据 - 按固定顺序
+        // 组数据
         const groups = ["星穹组", "夜曜组", "沧澜组"];
         const scores = [
             statsData.find(s => s.group === "星穹组").total,
@@ -1464,14 +1561,11 @@ html += '''        ];
             try {
                 showToast('📸 正在生成图片...');
                 
-                // 确保图表已生成
                 if (!chart) {
                     generateChart();
                 }
                 
-                // 等待图表渲染
                 setTimeout(async () => {
-                    // 使用html2canvas将图表卡片转为图片
                     const canvas = await html2canvas(chartCard, {
                         scale: 2,
                         backgroundColor: getComputedStyle(document.body).backgroundColor,
@@ -1480,7 +1574,6 @@ html += '''        ];
                         logging: false
                     });
                     
-                    // 创建下载链接
                     const link = document.createElement('a');
                     link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
                     link.href = canvas.toDataURL('image/png');
@@ -1495,29 +1588,21 @@ html += '''        ];
             }
         }
 
-        // 下载按钮点击 - 显示统计图
         downloadBtn.addEventListener('click', () => {
-            // 显示统计图卡片
             chartCard.classList.add('show');
-            
-            // 生成图表和统计卡片
             generateChart();
             generateStatsGrid();
-            
             showToast('📊 统计图已生成');
         });
 
-        // 保存按钮点击
         if (saveChartBtn) {
             saveChartBtn.addEventListener('click', saveChartToGallery);
         }
 
-        // 关闭统计图
         closeChart.addEventListener('click', () => {
             chartCard.classList.remove('show');
         });
 
-        // 搜索功能
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             allRows.forEach(row => {
@@ -1526,7 +1611,6 @@ html += '''        ];
             });
         });
 
-        // 深色模式切换时更新图表颜色
         const observer = new MutationObserver(() => {
             if (chart && chartCard.classList.contains('show')) {
                 generateChart();
@@ -1549,4 +1633,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 修正：热力图颜色越浅分数越高 + 完整英文名")
+print("✨ 新增：双击屏幕/双空格切换深色模式")
