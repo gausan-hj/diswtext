@@ -922,6 +922,74 @@ function getTomorrowUniform() {
             .name-en { font-size: 0.6rem; }
             .action-buttons { width: 100%; justify-content: flex-end; }
         }
+
+        /* 通知容器样式 */
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .notification-bell {
+            background: var(--star-primary);
+            color: #1a2b3c;
+            padding: 12px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-lg);
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+            border: 2px solid var(--border-light);
+        }
+
+        .test-notification-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-light);
+            font-size: 0.9rem;
+        }
+
+        .test-notification-btn:hover {
+            transform: scale(1.02);
+            background: var(--star-light);
+        }
+
+        .test-notification-btn:active {
+            transform: scale(0.98);
+        }
+
+        .test-icon {
+            font-size: 1.1rem;
+        }
+
+        .notification-bell:active {
+            transform: scale(0.95);
+        }
+
+        .notification-bell.subscribed {
+            background: var(--reward-pass);
+            color: var(--reward-pass-text);
+        }
+
+        .bell-icon {
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -950,7 +1018,7 @@ function getTomorrowUniform() {
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/11 12:37</span>
+                <span class="date-badge">03/11 12:45</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1586,165 +1654,16 @@ function getTomorrowUniform() {
     </div>
 
     <!-- ===== 推送通知功能 ===== -->
-    <div class="notification-bell" id="notificationBell">
-        <span class="bell-icon">🔔</span>
-        <span class="bell-text">开启每日提醒</span>
+    <div class="notification-container">
+        <div class="notification-bell" id="notificationBell">
+            <span class="bell-icon">🔔</span>
+            <span class="bell-text">开启每日提醒</span>
+        </div>
+        <button class="test-notification-btn" id="testNotificationBtn">
+            <span class="test-icon">📱</span>
+            <span class="test-text">测试通知</span>
+        </button>
     </div>
-
-    <style>
-    /* 通知按钮样式 */
-    .notification-bell {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: var(--star-primary);
-        color: #1a2b3c;
-        padding: 12px 20px;
-        border-radius: 50px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        box-shadow: var(--shadow-lg);
-        cursor: pointer;
-        z-index: 1000;
-        font-weight: 500;
-        transition: transform 0.2s ease;
-        border: 2px solid var(--border-light);
-    }
-
-    .notification-bell:active {
-        transform: scale(0.95);
-    }
-
-    .notification-bell.subscribed {
-        background: var(--reward-pass);
-        color: var(--reward-pass-text);
-    }
-
-    .bell-icon {
-        font-size: 1.2rem;
-    }
-
-    /* 通知权限提示 */
-    .notification-toast {
-        position: fixed;
-        bottom: 90px;
-        right: 20px;
-        background: var(--card-bg);
-        color: var(--text-primary);
-        padding: 12px 16px;
-        border-radius: 16px;
-        box-shadow: var(--shadow-lg);
-        border-left: 4px solid var(--star-primary);
-        max-width: 280px;
-        z-index: 999;
-        display: none;
-        animation: slideIn 0.3s ease;
-    }
-
-    .notification-toast.show {
-        display: block;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .toast-title {
-        font-weight: 600;
-        margin-bottom: 4px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .toast-close {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        cursor: pointer;
-        font-size: 0.7rem;
-        opacity: 0.6;
-    }
-
-    /* 时间段选择器 */
-    .time-picker {
-        position: fixed;
-        bottom: 90px;
-        right: 20px;
-        background: var(--card-bg);
-        border-radius: 20px;
-        padding: 16px;
-        box-shadow: var(--shadow-lg);
-        z-index: 1001;
-        width: 260px;
-        display: none;
-        border: 1px solid var(--border-light);
-    }
-
-    .time-picker.show {
-        display: block;
-        animation: slideIn 0.3s ease;
-    }
-
-    .time-picker h3 {
-        font-size: 1rem;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .time-option {
-        display: flex;
-        align-items: center;
-        padding: 8px 0;
-        border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .time-option:last-child {
-        border-bottom: none;
-    }
-
-    .time-option label {
-        flex: 1;
-        font-size: 0.9rem;
-    }
-
-    .time-option input {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--star-primary);
-    }
-
-    .time-confirm {
-        background: var(--star-primary);
-        color: #1a2b3c;
-        border: none;
-        border-radius: 30px;
-        padding: 10px;
-        width: 100%;
-        margin-top: 12px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-    .time-confirm:active {
-        opacity: 0.8;
-    }
-
-    /* 深色模式适配 */
-    body.night-mode .time-confirm {
-        color: #ffffff;
-    }
-    </style>
 
     <!-- 时间段选择器 -->
     <div class="time-picker" id="timePicker">
@@ -2032,6 +1951,7 @@ function getTomorrowUniform() {
         class NotificationManager {
             constructor() {
                 this.bell = document.getElementById('notificationBell');
+                this.testBtn = document.getElementById('testNotificationBtn');
                 this.timePicker = document.getElementById('timePicker');
                 this.toast = document.getElementById('notificationToast');
                 this.toastMessage = document.getElementById('toastMessage');
@@ -2054,6 +1974,11 @@ function getTomorrowUniform() {
                     } else {
                         this.requestPermission();
                     }
+                });
+                
+                // 测试按钮点击
+                this.testBtn.addEventListener('click', () => {
+                    this.testNotification();
                 });
                 
                 // 确认按钮
@@ -2084,6 +2009,40 @@ function getTomorrowUniform() {
                         this.showToast('❌ 通知被拒绝', '您可以在浏览器设置中重新开启');
                     }
                 });
+            }
+            
+            testNotification() {
+                // 检查权限状态
+                if (Notification.permission === 'granted') {
+                    // 已经允许，直接发送测试
+                    const testNotif = new Notification('✅ 测试成功', {
+                        body: '如果你看到这条通知，说明你的手机支持通知功能！
+（注意：手机锁屏后可能收不到）',
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                        vibrate: [200, 100, 200],
+                        requireInteraction: false,
+                        silent: false
+                    });
+                    
+                    // 点击通知跳转
+                    testNotif.onclick = function() {
+                        window.focus();
+                        this.close();
+                    };
+                    
+                    this.showToast('📱 测试通知已发送', '请查看手机通知栏');
+                } else if (Notification.permission === 'denied') {
+                    this.showToast('❌ 通知被拒绝', '请在浏览器设置中允许通知');
+                } else {
+                    // 还没请求过权限
+                    Notification.requestPermission().then(perm => {
+                        if (perm === 'granted') {
+                            this.testNotification(); // 递归调用，现在会发送
+                        } else {
+                            this.showToast('❌ 用户拒绝了通知', '无法发送测试');
+                        }
+                    });
+                }
             }
             
             saveSettings() {
