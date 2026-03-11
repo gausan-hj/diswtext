@@ -1600,8 +1600,8 @@ html += '''
             <input type="checkbox" value="19" class="time-checkbox">
         </div>
         <div class="time-option">
-            <label>晚上 8:00（再次提醒）</label>
-            <input type="checkbox" value="20" class="time-checkbox">
+            <label>晚上 8:15（再次提醒）</label>
+            <input type="checkbox" value="20.25" class="time-checkbox">
         </div>
         <div class="time-option">
             <label>晚上 10:00（睡前提醒）</label>
@@ -1936,7 +1936,7 @@ html += '''        ];
             saveSettings() {
                 const times = [];
                 this.checkboxes.forEach(cb => {
-                    if (cb.checked) times.push(parseInt(cb.value));
+                    if (cb.checked) times.push(parseFloat(cb.value));
                 });
                 
                 // 保存到 localStorage
@@ -1968,11 +1968,14 @@ html += '''        ];
                     const now = new Date();
                     const currentHour = now.getHours();
                     const currentMinute = now.getMinutes();
+                    const currentTime = currentHour + currentMinute / 100; // 转换为小数，如 20.15
                     
-                    // 检查是否需要发送通知（只在整点检查）
-                    if (currentMinute === 0 && times.includes(currentHour)) {
-                        this.sendNotification();
-                    }
+                    // 检查是否需要发送通知
+                    times.forEach(time => {
+                        if (Math.abs(currentTime - parseFloat(time)) < 0.01) {
+                            this.sendNotification();
+                        }
+                    });
                 }, 60000); // 每分钟检查一次
             }
             
@@ -2034,4 +2037,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
 print("✨ 新增：双击屏幕/双空格切换深色模式")
-print("🔔 新增：右下角铃铛按钮，可开启每日服装提醒")
+print("🔔 新增：右下角铃铛按钮，可开启每日服装提醒（含晚上8:15）")
