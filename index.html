@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- OneSignal SDK -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 // 联课活动数据（用于服装提醒）
 const CCA_DATA = [{"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "uniform": "校服"}, {"date": "2026-02-26", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-03", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "uniform": "校服"}, {"date": "2026-03-10", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-12", "activity": "活动（行动组）", "uniform": "校服"}, {"date": "2026-03-17", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-31", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-02", "activity": "活动（值岗组）", "uniform": "校服"}, {"date": "2026-04-07", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-09", "activity": "活动（督察组）", "uniform": "校服"}, {"date": "2026-04-14", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-16", "activity": "活动（星穹组）", "uniform": "校服"}, {"date": "2026-04-21", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-23", "activity": "活动（夜曜组）", "uniform": "校服"}, {"date": "2026-04-28", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-30", "activity": "活动（沧澜组）", "uniform": "校服"}, {"date": "2026-05-05", "activity": "第一学期检讨", "uniform": "校服"}, {"date": "2026-05-07", "activity": "操步", "uniform": "体育衣"}];
@@ -33,6 +35,62 @@ function getTomorrowUniform() {
     } else {
         return "👔 明天穿整齐校服，记得带名牌！";
     }
+}
+
+// OneSignal 初始化
+window.OneSignalDeferred = window.OneSignalDeferred || [];
+OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+        appId: "137d66ce-9746-4206-9861-a1c368a0b548",
+        allowLocalhostAsSecureOrigin: true,
+        notifyButton: {
+            enable: true,
+            size: 'medium',
+            showCredit: false,
+            position: 'bottom-right',
+            text: {
+                'message': '开启每日服装提醒',
+                'subscribe': '允许通知',
+                'unsubscribe': '关闭通知'
+            },
+            colors: {
+                'circle.background': '#eab308',
+                'circle.foreground': '#1a2b3c',
+                'badge.background': '#eab308',
+                'badge.foreground': '#1a2b3c',
+                'badge.bordercolor': '#e2e8f0',
+                'button.background': '#eab308',
+                'button.foreground': '#1a2b3c',
+                'button.hover.background': '#ca8a04'
+            }
+        },
+        serviceWorkerParam: { scope: '/' },
+        serviceWorkerPath: 'OneSignalSDKWorker.js',
+        serviceWorkerUpdaterPath: 'OneSignalSDKUpdaterWorker.js'
+    });
+    console.log('OneSignal 初始化成功');
+});
+
+// 测试推送
+function sendTestPush() {
+    const message = getTomorrowUniform();
+    OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.Notifications.create({
+            title: "🔔 学长团测试",
+            message: message,
+            url: window.location.href
+        });
+        alert('测试推送已发送！');
+    });
+}
+
+// 检查订阅状态
+async function checkSubscription() {
+    const isSubscribed = await OneSignalDeferred.push(async function(OneSignal) {
+        return await OneSignal.User.PushSubscription.optedIn;
+    });
+    console.log('订阅状态:', isSubscribed);
+    return isSubscribed;
 }
 </script>
 
@@ -923,33 +981,11 @@ function getTomorrowUniform() {
             .action-buttons { width: 100%; justify-content: flex-end; }
         }
 
-        /* 通知容器样式 */
-        .notification-container {
+        /* 自定义按钮样式（OneSignal会覆盖） */
+        .custom-test-btn {
             position: fixed;
-            bottom: 20px;
+            bottom: 100px;
             right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 1000;
-        }
-
-        .notification-bell {
-            background: var(--star-primary);
-            color: #1a2b3c;
-            padding: 12px 20px;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: var(--shadow-lg);
-            cursor: pointer;
-            font-weight: 500;
-            transition: transform 0.2s ease;
-            border: 2px solid var(--border-light);
-        }
-
-        .test-notification-btn {
             background: var(--bg-secondary);
             color: var(--text-primary);
             padding: 10px 16px;
@@ -960,35 +996,13 @@ function getTomorrowUniform() {
             box-shadow: var(--shadow-md);
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.2s ease;
             border: 1px solid var(--border-light);
+            z-index: 999;
             font-size: 0.9rem;
         }
 
-        .test-notification-btn:hover {
-            transform: scale(1.02);
+        .custom-test-btn:hover {
             background: var(--star-light);
-        }
-
-        .test-notification-btn:active {
-            transform: scale(0.98);
-        }
-
-        .test-icon {
-            font-size: 1.1rem;
-        }
-
-        .notification-bell:active {
-            transform: scale(0.95);
-        }
-
-        .notification-bell.subscribed {
-            background: var(--reward-pass);
-            color: var(--reward-pass-text);
-        }
-
-        .bell-icon {
-            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -1018,7 +1032,7 @@ function getTomorrowUniform() {
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/11 12:45</span>
+                <span class="date-badge">03/11 13:35</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1653,38 +1667,10 @@ function getTomorrowUniform() {
         <span id="toastMessage">统计图已生成</span>
     </div>
 
-    <!-- ===== 推送通知功能 ===== -->
-    <div class="notification-container">
-        <div class="notification-bell" id="notificationBell">
-            <span class="bell-icon">🔔</span>
-            <span class="bell-text">开启每日提醒</span>
-        </div>
-        <button class="test-notification-btn" id="testNotificationBtn">
-            <span class="test-icon">📱</span>
-            <span class="test-text">测试通知</span>
-        </button>
-    </div>
-
-    <!-- 时间段选择器 -->
-    <div class="time-picker" id="timePicker">
-        <h3>⏰ 选择提醒时间</h3>
-        <div class="time-option">
-            <label>早上 6:00（起床提醒）</label>
-            <input type="checkbox" value="6" class="time-checkbox">
-        </div>
-        <div class="time-option">
-            <label>晚上 7:00（明天衣服）</label>
-            <input type="checkbox" value="19" class="time-checkbox">
-        </div>
-        <div class="time-option">
-            <label>晚上 8:15（再次提醒）</label>
-            <input type="checkbox" value="20.25" class="time-checkbox">
-        </div>
-        <div class="time-option">
-            <label>晚上 10:00（睡前提醒）</label>
-            <input type="checkbox" value="22" class="time-checkbox">
-        </div>
-        <button class="time-confirm" id="confirmTime">确认开启提醒</button>
+    <!-- 自定义测试按钮（OneSignal会自动显示自己的按钮） -->
+    <div class="custom-test-btn" onclick="sendTestPush()">
+        <span>📱</span>
+        <span>测试推送</span>
     </div>
 
     <!-- 提示浮层 -->
@@ -1692,12 +1678,60 @@ function getTomorrowUniform() {
         <div class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</div>
         <div class="toast-title">
             <span>🔔</span>
-            <span id="toastMessage">通知已开启</span>
+            <span id="toastMessage">通知</span>
         </div>
-        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail">
-            每天将在您选择的时间提醒
-        </div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail"></div>
     </div>
+
+    <style>
+    .notification-toast {
+        position: fixed;
+        bottom: 180px;
+        right: 20px;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        padding: 12px 16px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        border-left: 4px solid var(--star-primary);
+        max-width: 280px;
+        z-index: 999;
+        display: none;
+        animation: slideIn 0.3s ease;
+    }
+
+    .notification-toast.show {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .toast-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        opacity: 0.6;
+    }
+    </style>
 
     <script>
         // 检查系统主题偏好
@@ -1947,192 +1981,39 @@ function getTomorrowUniform() {
         
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
-        // ===== 推送通知功能 =====
-        class NotificationManager {
-            constructor() {
-                this.bell = document.getElementById('notificationBell');
-                this.testBtn = document.getElementById('testNotificationBtn');
-                this.timePicker = document.getElementById('timePicker');
-                this.toast = document.getElementById('notificationToast');
-                this.toastMessage = document.getElementById('toastMessage');
-                this.toastDetail = document.getElementById('toastDetail');
-                this.checkboxes = document.querySelectorAll('.time-checkbox');
-                this.confirmBtn = document.getElementById('confirmTime');
-                
-                // 从 localStorage 加载设置
-                this.loadSettings();
-                
-                // 绑定事件
-                this.init();
-            }
+        // 显示网页内提醒
+        function showPageToast(title, message) {
+            const toast = document.getElementById('notificationToast');
+            const titleEl = document.getElementById('toastMessage');
+            const detailEl = document.getElementById('toastDetail');
             
-            init() {
-                // 点击铃铛显示时间段选择器
-                this.bell.addEventListener('click', () => {
-                    if (this.checkPermission()) {
-                        this.timePicker.classList.add('show');
-                    } else {
-                        this.requestPermission();
-                    }
-                });
-                
-                // 测试按钮点击
-                this.testBtn.addEventListener('click', () => {
-                    this.testNotification();
-                });
-                
-                // 确认按钮
-                this.confirmBtn.addEventListener('click', () => {
-                    this.saveSettings();
-                    this.timePicker.classList.remove('show');
-                    this.showToast('✅ 提醒已开启', '每天将在您选择的时间发送通知');
-                });
-                
-                // 点击外部关闭时间段选择器
-                document.addEventListener('click', (e) => {
-                    if (!this.timePicker.contains(e.target) && !this.bell.contains(e.target)) {
-                        this.timePicker.classList.remove('show');
-                    }
-                });
-            }
+            titleEl.textContent = title;
+            detailEl.textContent = message;
+            toast.classList.add('show');
             
-            checkPermission() {
-                return Notification.permission === 'granted';
-            }
-            
-            requestPermission() {
-                Notification.requestPermission().then(perm => {
-                    if (perm === 'granted') {
-                        this.showToast('✅ 通知权限已开启', '现在可以设置提醒时间了');
-                        this.timePicker.classList.add('show');
-                    } else {
-                        this.showToast('❌ 通知被拒绝', '您可以在浏览器设置中重新开启');
-                    }
-                });
-            }
-            
-            testNotification() {
-                // 检查权限状态
-                if (Notification.permission === 'granted') {
-                    // 已经允许，直接发送测试
-                    const testNotif = new Notification('✅ 测试成功', {
-                        body: '如果你看到这条通知，说明你的手机支持通知功能！
-（注意：手机锁屏后可能收不到）',
-                        icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-                        vibrate: [200, 100, 200],
-                        requireInteraction: false,
-                        silent: false
-                    });
-                    
-                    // 点击通知跳转
-                    testNotif.onclick = function() {
-                        window.focus();
-                        this.close();
-                    };
-                    
-                    this.showToast('📱 测试通知已发送', '请查看手机通知栏');
-                } else if (Notification.permission === 'denied') {
-                    this.showToast('❌ 通知被拒绝', '请在浏览器设置中允许通知');
-                } else {
-                    // 还没请求过权限
-                    Notification.requestPermission().then(perm => {
-                        if (perm === 'granted') {
-                            this.testNotification(); // 递归调用，现在会发送
-                        } else {
-                            this.showToast('❌ 用户拒绝了通知', '无法发送测试');
-                        }
-                    });
-                }
-            }
-            
-            saveSettings() {
-                const times = [];
-                this.checkboxes.forEach(cb => {
-                    if (cb.checked) times.push(parseFloat(cb.value));
-                });
-                
-                // 保存到 localStorage
-                localStorage.setItem('notificationTimes', JSON.stringify(times));
-                localStorage.setItem('notificationEnabled', 'true');
-                
-                // 更新铃铛样式
-                this.bell.classList.add('subscribed');
-                this.bell.innerHTML = '<span class="bell-icon">✅</span><span class="bell-text">提醒已开启</span>';
-                
-                // 注册定时检查
-                this.scheduleChecks(times);
-            }
-            
-            loadSettings() {
-                const enabled = localStorage.getItem('notificationEnabled') === 'true';
-                if (enabled) {
-                    this.bell.classList.add('subscribed');
-                    this.bell.innerHTML = '<span class="bell-icon">✅</span><span class="bell-text">提醒已开启</span>';
-                    
-                    const times = JSON.parse(localStorage.getItem('notificationTimes') || '[]');
-                    this.scheduleChecks(times);
-                }
-            }
-            
-            scheduleChecks(times) {
-                // 每分钟检查一次是否需要发送通知
-                setInterval(() => {
-                    const now = new Date();
-                    const currentHour = now.getHours();
-                    const currentMinute = now.getMinutes();
-                    const currentTime = currentHour + currentMinute / 100; // 转换为小数，如 20.15
-                    
-                    // 检查是否需要发送通知
-                    times.forEach(time => {
-                        if (Math.abs(currentTime - parseFloat(time)) < 0.01) {
-                            this.sendNotification();
-                        }
-                    });
-                }, 60000); // 每分钟检查一次
-            }
-            
-            sendNotification() {
-                // 获取明天的服装信息
-                const tomorrowUniform = getTomorrowUniform();
-                
-                // 发送通知
-                if (this.checkPermission()) {
-                    const notification = new Notification('学长团提醒', {
-                        body: tomorrowUniform,
-                        icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-                        badge: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
-                        vibrate: [200, 100, 200],
-                        requireInteraction: true,
-                        silent: false
-                    });
-                    
-                    // 点击通知跳转到页面
-                    notification.onclick = function() {
-                        window.focus();
-                        this.close();
-                    };
-                    
-                    // 显示在网页上也显示一下
-                    this.showToast('🔔 新提醒', tomorrowUniform);
-                }
-            }
-            
-            showToast(title, detail) {
-                this.toastMessage.textContent = title;
-                this.toastDetail.textContent = detail;
-                this.toast.classList.add('show');
-                
-                // 5秒后自动关闭
-                setTimeout(() => {
-                    this.toast.classList.remove('show');
-                }, 5000);
-            }
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
         }
 
-        // 初始化通知管理器
-        document.addEventListener('DOMContentLoaded', () => {
-            window.notificationManager = new NotificationManager();
-        });
+        // 发送测试推送（OneSignal）
+        window.sendTestPush = function() {
+            const message = getTomorrowUniform();
+            showPageToast('📱 发送测试', '请稍候...');
+            
+            OneSignalDeferred.push(async function(OneSignal) {
+                try {
+                    await OneSignal.Notifications.create({
+                        title: "🔔 学长团测试",
+                        message: message,
+                        url: window.location.href
+                    });
+                    showPageToast('✅ 测试已发送', '请查看手机通知栏');
+                } catch (e) {
+                    showPageToast('❌ 发送失败', e.message);
+                }
+            });
+        };
     </script>
 </body>
 </html>
