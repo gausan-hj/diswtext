@@ -6,6 +6,36 @@
     <title>训育处 - 学长团分数板 · 热力图</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+// 联课活动数据（用于服装提醒）
+const CCA_DATA = [{"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "uniform": "校服"}, {"date": "2026-02-26", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-03", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "uniform": "校服"}, {"date": "2026-03-10", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-12", "activity": "活动（行动组）", "uniform": "校服"}, {"date": "2026-03-17", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-31", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-02", "activity": "活动（值岗组）", "uniform": "校服"}, {"date": "2026-04-07", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-09", "activity": "活动（督察组）", "uniform": "校服"}, {"date": "2026-04-14", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-16", "activity": "活动（星穹组）", "uniform": "校服"}, {"date": "2026-04-21", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-23", "activity": "活动（夜曜组）", "uniform": "校服"}, {"date": "2026-04-28", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-30", "activity": "活动（沧澜组）", "uniform": "校服"}, {"date": "2026-05-05", "activity": "第一学期检讨", "uniform": "校服"}, {"date": "2026-05-07", "activity": "操步", "uniform": "体育衣"}];
+
+// 获取明天要穿的衣服
+function getTomorrowUniform() {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const year = tomorrow.getFullYear();
+    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+    const day = String(tomorrow.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+    
+    const tomorrowCCA = CCA_DATA.find(item => item.date === dateStr);
+    
+    if (tomorrowCCA) {
+        if (tomorrowCCA.uniform === "体育衣") {
+            return `🎽 明天请穿体育衣！活动：${tomorrowCCA.activity}`;
+        } else {
+            return `👔 明天穿校服，活动：${tomorrowCCA.activity}`;
+        }
+    } else {
+        return "👔 明天穿整齐校服，记得带名牌！";
+    }
+}
+</script>
+
     <style>
         * {
             margin: 0;
@@ -920,7 +950,7 @@
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/11 11:07</span>
+                <span class="date-badge">03/11 11:25</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1555,6 +1585,201 @@
         <span id="toastMessage">统计图已生成</span>
     </div>
 
+    <!-- ===== 推送通知功能 ===== -->
+    <div class="notification-bell" id="notificationBell">
+        <span class="bell-icon">🔔</span>
+        <span class="bell-text">开启每日提醒</span>
+    </div>
+
+    <style>
+    /* 通知按钮样式 */
+    .notification-bell {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: var(--star-primary);
+        color: #1a2b3c;
+        padding: 12px 20px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: var(--shadow-lg);
+        cursor: pointer;
+        z-index: 1000;
+        font-weight: 500;
+        transition: transform 0.2s ease;
+        border: 2px solid var(--border-light);
+    }
+
+    .notification-bell:active {
+        transform: scale(0.95);
+    }
+
+    .notification-bell.subscribed {
+        background: var(--reward-pass);
+        color: var(--reward-pass-text);
+    }
+
+    .bell-icon {
+        font-size: 1.2rem;
+    }
+
+    /* 通知权限提示 */
+    .notification-toast {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        padding: 12px 16px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        border-left: 4px solid var(--star-primary);
+        max-width: 280px;
+        z-index: 999;
+        display: none;
+        animation: slideIn 0.3s ease;
+    }
+
+    .notification-toast.show {
+        display: block;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .toast-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        cursor: pointer;
+        font-size: 0.7rem;
+        opacity: 0.6;
+    }
+
+    /* 时间段选择器 */
+    .time-picker {
+        position: fixed;
+        bottom: 90px;
+        right: 20px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: var(--shadow-lg);
+        z-index: 1001;
+        width: 260px;
+        display: none;
+        border: 1px solid var(--border-light);
+    }
+
+    .time-picker.show {
+        display: block;
+        animation: slideIn 0.3s ease;
+    }
+
+    .time-picker h3 {
+        font-size: 1rem;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .time-option {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .time-option:last-child {
+        border-bottom: none;
+    }
+
+    .time-option label {
+        flex: 1;
+        font-size: 0.9rem;
+    }
+
+    .time-option input {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--star-primary);
+    }
+
+    .time-confirm {
+        background: var(--star-primary);
+        color: #1a2b3c;
+        border: none;
+        border-radius: 30px;
+        padding: 10px;
+        width: 100%;
+        margin-top: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .time-confirm:active {
+        opacity: 0.8;
+    }
+
+    /* 深色模式适配 */
+    body.night-mode .time-confirm {
+        color: #ffffff;
+    }
+    </style>
+
+    <!-- 时间段选择器 -->
+    <div class="time-picker" id="timePicker">
+        <h3>⏰ 选择提醒时间</h3>
+        <div class="time-option">
+            <label>早上 6:00（起床提醒）</label>
+            <input type="checkbox" value="6" class="time-checkbox">
+        </div>
+        <div class="time-option">
+            <label>晚上 7:00（明天衣服）</label>
+            <input type="checkbox" value="19" class="time-checkbox">
+        </div>
+        <div class="time-option">
+            <label>晚上 8:00（再次提醒）</label>
+            <input type="checkbox" value="20" class="time-checkbox">
+        </div>
+        <div class="time-option">
+            <label>晚上 10:00（睡前提醒）</label>
+            <input type="checkbox" value="22" class="time-checkbox">
+        </div>
+        <button class="time-confirm" id="confirmTime">确认开启提醒</button>
+    </div>
+
+    <!-- 提示浮层 -->
+    <div class="notification-toast" id="notificationToast">
+        <div class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</div>
+        <div class="toast-title">
+            <span>🔔</span>
+            <span id="toastMessage">通知已开启</span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail">
+            每天将在您选择的时间提醒
+        </div>
+    </div>
+
     <script>
         // 检查系统主题偏好
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -1802,6 +2027,150 @@
         });
         
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        // ===== 推送通知功能 =====
+        class NotificationManager {
+            constructor() {
+                this.bell = document.getElementById('notificationBell');
+                this.timePicker = document.getElementById('timePicker');
+                this.toast = document.getElementById('notificationToast');
+                this.toastMessage = document.getElementById('toastMessage');
+                this.toastDetail = document.getElementById('toastDetail');
+                this.checkboxes = document.querySelectorAll('.time-checkbox');
+                this.confirmBtn = document.getElementById('confirmTime');
+                
+                // 从 localStorage 加载设置
+                this.loadSettings();
+                
+                // 绑定事件
+                this.init();
+            }
+            
+            init() {
+                // 点击铃铛显示时间段选择器
+                this.bell.addEventListener('click', () => {
+                    if (this.checkPermission()) {
+                        this.timePicker.classList.add('show');
+                    } else {
+                        this.requestPermission();
+                    }
+                });
+                
+                // 确认按钮
+                this.confirmBtn.addEventListener('click', () => {
+                    this.saveSettings();
+                    this.timePicker.classList.remove('show');
+                    this.showToast('✅ 提醒已开启', '每天将在您选择的时间发送通知');
+                });
+                
+                // 点击外部关闭时间段选择器
+                document.addEventListener('click', (e) => {
+                    if (!this.timePicker.contains(e.target) && !this.bell.contains(e.target)) {
+                        this.timePicker.classList.remove('show');
+                    }
+                });
+            }
+            
+            checkPermission() {
+                return Notification.permission === 'granted';
+            }
+            
+            requestPermission() {
+                Notification.requestPermission().then(perm => {
+                    if (perm === 'granted') {
+                        this.showToast('✅ 通知权限已开启', '现在可以设置提醒时间了');
+                        this.timePicker.classList.add('show');
+                    } else {
+                        this.showToast('❌ 通知被拒绝', '您可以在浏览器设置中重新开启');
+                    }
+                });
+            }
+            
+            saveSettings() {
+                const times = [];
+                this.checkboxes.forEach(cb => {
+                    if (cb.checked) times.push(parseInt(cb.value));
+                });
+                
+                // 保存到 localStorage
+                localStorage.setItem('notificationTimes', JSON.stringify(times));
+                localStorage.setItem('notificationEnabled', 'true');
+                
+                // 更新铃铛样式
+                this.bell.classList.add('subscribed');
+                this.bell.innerHTML = '<span class="bell-icon">✅</span><span class="bell-text">提醒已开启</span>';
+                
+                // 注册定时检查
+                this.scheduleChecks(times);
+            }
+            
+            loadSettings() {
+                const enabled = localStorage.getItem('notificationEnabled') === 'true';
+                if (enabled) {
+                    this.bell.classList.add('subscribed');
+                    this.bell.innerHTML = '<span class="bell-icon">✅</span><span class="bell-text">提醒已开启</span>';
+                    
+                    const times = JSON.parse(localStorage.getItem('notificationTimes') || '[]');
+                    this.scheduleChecks(times);
+                }
+            }
+            
+            scheduleChecks(times) {
+                // 每分钟检查一次是否需要发送通知
+                setInterval(() => {
+                    const now = new Date();
+                    const currentHour = now.getHours();
+                    const currentMinute = now.getMinutes();
+                    
+                    // 检查是否需要发送通知（只在整点检查）
+                    if (currentMinute === 0 && times.includes(currentHour)) {
+                        this.sendNotification();
+                    }
+                }, 60000); // 每分钟检查一次
+            }
+            
+            sendNotification() {
+                // 获取明天的服装信息
+                const tomorrowUniform = getTomorrowUniform();
+                
+                // 发送通知
+                if (this.checkPermission()) {
+                    const notification = new Notification('学长团提醒', {
+                        body: tomorrowUniform,
+                        icon: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                        badge: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
+                        vibrate: [200, 100, 200],
+                        requireInteraction: true,
+                        silent: false
+                    });
+                    
+                    // 点击通知跳转到页面
+                    notification.onclick = function() {
+                        window.focus();
+                        this.close();
+                    };
+                    
+                    // 显示在网页上也显示一下
+                    this.showToast('🔔 新提醒', tomorrowUniform);
+                }
+            }
+            
+            showToast(title, detail) {
+                this.toastMessage.textContent = title;
+                this.toastDetail.textContent = detail;
+                this.toast.classList.add('show');
+                
+                // 5秒后自动关闭
+                setTimeout(() => {
+                    this.toast.classList.remove('show');
+                }, 5000);
+            }
+        }
+
+        // 初始化通知管理器
+        document.addEventListener('DOMContentLoaded', () => {
+            window.notificationManager = new NotificationManager();
+        });
     </script>
 </body>
 </html>
