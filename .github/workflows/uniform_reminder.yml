@@ -73,9 +73,11 @@ jobs:
             fi
           fi
           
-          # 如果是手动触发且没有消息，就发测试消息（用正常的内容）
+          # 如果是手动触发且没有消息，就发测试消息（用日期信息）
           if [ "$IS_MANUAL" = "true" ] && [ -z "$MESSAGE" ]; then
-            MESSAGE="🔔 学长团提醒：系统测试中，请忽略此消息"
+            TODAY_NAME="${{ steps.time.outputs.weekday_name }}"
+            TOMORROW_NAME="${{ steps.time.outputs.tomorrow_name }}"
+            MESSAGE="系统运行正常 | 今天$TODAY_NAME，明天$TOMORROW_NAME"
           fi
           
           # 输出消息
@@ -97,7 +99,7 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{
               "app_id": "${{ secrets.ONESIGNAL_APP_ID }}",
-              "headings": {"en": "🔔 学长团提醒"},
+              "headings": {"en": "📋 系统状态报告"},
               "contents": {"en": "${{ steps.message.outputs.message }}"},
               "included_segments": ["All"],
               "chrome_web_icon": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
