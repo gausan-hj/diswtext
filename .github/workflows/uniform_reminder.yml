@@ -59,7 +59,7 @@ jobs:
           # 早上6点 (UTC 22:00) - 提醒今天
           if [ "$HOUR" = "22" ]; then
             if [ "$WEEKDAY" = "2" ]; then
-              MESSAGE="🎽 今天是星期二！有联课活动，请穿体育衣！"
+              MESSAGE="🎽 今天是星期二！有联课活动，请穿体育衣"
             elif [ "$WEEKDAY" = "4" ]; then
               MESSAGE="👔 今天是星期四！有联课活动，请穿校服"
             fi
@@ -67,15 +67,15 @@ jobs:
           # 晚上 - 提醒明天
           else
             if [ "$TOMORROW" = "2" ]; then
-              MESSAGE="🎽 明天星期二有联课活动，请准备体育衣！"
+              MESSAGE="🎽 明天星期二有联课活动，请准备体育衣"
             elif [ "$TOMORROW" = "4" ]; then
               MESSAGE="👔 明天星期四有联课活动，请准备校服"
             fi
           fi
           
-          # 如果是手动触发且没有消息，就发测试消息
+          # 如果是手动触发且没有消息，就发测试消息（用正常的内容）
           if [ "$IS_MANUAL" = "true" ] && [ -z "$MESSAGE" ]; then
-            MESSAGE="🧪 这是一条测试消息，你可以不要理会"
+            MESSAGE="🔔 学长团提醒：系统测试中，请忽略此消息"
           fi
           
           # 输出消息
