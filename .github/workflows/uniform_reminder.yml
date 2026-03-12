@@ -1,0 +1,38 @@
+name: 每日服装提醒
+
+on:
+  schedule:
+    # 每天早上6点、晚上7点、8:15、10点 (北京时间)
+    - cron: '0 22 * * *'   # 早上6点
+    - cron: '0 11 * * *'   # 晚上7点
+    - cron: '15 12 * * *'  # 晚上8:15
+    - cron: '0 14 * * *'   # 晚上10点
+  
+  workflow_dispatch:
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 设置提醒内容
+        id: reminder
+        run: |
+          DAY=$(date +%u)
+          if [ "$DAY" = "3" ] || [ "$DAY" = "5" ]; then
+            echo "message=🎽 明天请穿体育衣！活动：操步" >> $GITHUB_OUTPUT
+          else
+            echo "message=👔 明天穿整齐校服，记得带名牌" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: 发送 OneSignal 推送
+        run: |
+          curl -X POST "https://onesignal.com/api/v1/notifications" \
+            -H "Authorization: Basic ${{ secrets.ONESIGNAL_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "app_id": "${{ secrets.ONESIGNAL_APP_ID }}",
+              "headings": {"en": "🔔 学长团提醒"},
+              "contents": {"en": "${{ steps.reminder.outputs.message }}"},
+              "included_segments": ["All"]
+            }'
