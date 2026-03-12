@@ -247,20 +247,31 @@ html += f'''
 // 联课活动数据（用于服装提醒）
 const CCA_DATA = {cca_json};
 
-// 翻译字典
+// ===== 完整的翻译字典 =====
 const translations = {{
     'zh': {{
+        // 页面标题
         'title': '训育处 - 学长团分数板 · 热力图',
+        
+        // 头部按钮
         'download': '下载统计',
         'dark': '深色',
-        'lang': 'EN/中文',
         'lang_btn': 'EN/中文',
-        'search': '搜姓名/班级/学号...',
+        
+        // 搜索框
+        'search_placeholder': '搜姓名/班级/学号...',
+        
+        // 图例
         'legend_low': '低分',
         'legend_high': '高分',
+        'legend_desc': '颜色越浅分数越高',
+        
+        // 统计图卡片
         'chart_title': '各组总分对比',
         'save_chart': '保存到相册',
         'close': '关闭',
+        
+        // 奖励机制卡片
         'reward_title': '本轮奖励机制',
         'reward_subtitle': '公平原则 · 不负每一位付出的学长',
         'reward_1': '第1名',
@@ -274,7 +285,11 @@ const translations = {{
         'reward_3_benefit': '✨免搬椅子+减免操步',
         'reward_note': '🎁 第1名达标者额外奖励一份',
         'reward_footer': '* 未达标者工作照旧 *',
+        
+        // 页脚
         'footer': '👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高',
+        
+        // 提醒按钮和弹窗
         'reminder_btn': '开启提醒',
         'popup_title': '每日提醒时间',
         'time_morning': '早上 6:00',
@@ -286,14 +301,22 @@ const translations = {{
         'time_evening3': '晚上 10:00',
         'time_evening3_desc': '睡前提醒',
         'popup_btn': '知道了，开启提醒',
+        
+        // 提示浮层
         'toast_message': '通知',
         'double_tap': '👆 双击屏幕 / 按两次空格 切换深色模式',
+        
+        // 组名翻译
         'group_names': {{
             '星穹组': '星穹组',
             '夜曜组': '夜曜组',
             '沧澜组': '沧澜组'
         }},
+        
+        // 表格表头
         'table_headers': ['#', '姓名', '班', '学号', '每日得分', '总分', '奖'],
+        
+        // 服装提醒
         'uniform_today': '今天是',
         'uniform_tomorrow': '明天',
         'uniform_activity': '有活动：',
@@ -301,20 +324,44 @@ const translations = {{
         'uniform_prepare': '请准备',
         'uniform_sports': '体育衣',
         'uniform_school': '校服',
-        'uniform_normal': '穿整齐校服，记得带名牌'
+        'uniform_normal': '穿整齐校服，记得带名牌',
+        
+        // 排名卡片
+        'rank_prefix': '第',
+        'rank_suffix': '名',
+        'points': '分',
+        'average': '平均',
+        
+        // 达标状态
+        'reward_passed': '✅',
+        'reward_failed': '❌',
+        
+        // 日期显示
+        'date_format': '月/日 时:分',
     }},
     'en': {{
+        // Page title
         'title': 'Discipline Unit - Prefect Scoreboard · Heatmap',
+        
+        // Header buttons
         'download': 'Download Stats',
         'dark': 'Dark',
-        'lang': '中文/EN',
         'lang_btn': '中文/EN',
-        'search': 'Search name/class/id...',
+        
+        // Search
+        'search_placeholder': 'Search name/class/id...',
+        
+        // Legend
         'legend_low': 'Low',
         'legend_high': 'High',
+        'legend_desc': 'Lighter color = higher score',
+        
+        // Chart card
         'chart_title': 'Group Total Score Comparison',
         'save_chart': 'Save to Gallery',
         'close': 'Close',
+        
+        // Reward card
         'reward_title': 'Reward Mechanism',
         'reward_subtitle': 'Fairness · Every effort counts',
         'reward_1': '1st Place',
@@ -328,7 +375,11 @@ const translations = {{
         'reward_3_benefit': '✨ No chairs + Reduced drills',
         'reward_note': '🎁 Extra reward for 1st place qualifiers',
         'reward_footer': '* Others continue as usual *',
+        
+        // Footer
         'footer': '👆 Double tap / Double space for dark mode · 📊 Download stats · Lighter color = higher score',
+        
+        // Reminder button and popup
         'reminder_btn': 'Enable Reminders',
         'popup_title': 'Daily Reminder Times',
         'time_morning': '6:00 AM',
@@ -340,14 +391,22 @@ const translations = {{
         'time_evening3': '10:00 PM',
         'time_evening3_desc': 'Before sleep',
         'popup_btn': 'Got it, enable reminders',
+        
+        // Toast
         'toast_message': 'Notification',
         'double_tap': '👆 Double tap / Double space to toggle dark mode',
+        
+        // Group name translations
         'group_names': {{
             '星穹组': 'Starry Group',
             '夜曜组': 'Night Group',
             '沧澜组': 'Ocean Group'
         }},
+        
+        // Table headers
         'table_headers': ['#', 'Name', 'Class', 'ID', 'Daily Scores', 'Total', 'Reward'],
+        
+        // Uniform reminders
         'uniform_today': 'Today is',
         'uniform_tomorrow': 'Tomorrow',
         'uniform_activity': 'Activity:',
@@ -355,7 +414,20 @@ const translations = {{
         'uniform_prepare': 'Prepare',
         'uniform_sports': 'Sports Uniform',
         'uniform_school': 'School Uniform',
-        'uniform_normal': 'Wear school uniform, bring name tag'
+        'uniform_normal': 'Wear school uniform, bring name tag',
+        
+        // Rank cards
+        'rank_prefix': '',
+        'rank_suffix': 'th',
+        'points': 'pts',
+        'average': 'Avg',
+        
+        // Reward status
+        'reward_passed': '✅',
+        'reward_failed': '❌',
+        
+        // Date display
+        'date_format': 'MM/DD HH:MM',
     }}
 }};
 
@@ -390,19 +462,56 @@ function toggleLanguage() {{
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     localStorage.setItem('prefect_lang', currentLang);
     
-    // 更新页面
-    updateLanguage();
+    // 更新整个页面
+    updateFullPage();
     
     // 显示提示
     showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
 }}
 
-// 更新页面语言
-function updateLanguage() {{
+// 更新整个页面（全部翻译）
+function updateFullPage() {{
     // 更新标题
     document.title = t('title');
     
-    // 更新头部
+    // 更新头部所有元素
+    updateHeader();
+    
+    // 更新图例
+    updateLegend();
+    
+    // 更新统计图卡片
+    updateChartCard();
+    
+    // 更新排名卡片
+    updateRankCards();
+    
+    // 更新所有组别（包括表格）
+    updateAllGroups();
+    
+    // 更新奖励机制卡片
+    updateRewardCard();
+    
+    // 更新页脚
+    updateFooter();
+    
+    // 更新提醒按钮和弹窗
+    updateReminderPopup();
+    
+    // 更新提示浮层
+    updateToast();
+    
+    // 更新统计图（如果已生成）
+    if (chart && chartCard.classList.contains('show')) {{
+        generateChart();
+    }}
+    
+    // 更新 OneSignal 按钮文字
+    updateOneSignal();
+}}
+
+// 更新头部
+function updateHeader() {{
     const h1 = document.querySelector('h1');
     if (h1) h1.textContent = t('title');
     
@@ -416,15 +525,22 @@ function updateLanguage() {{
     if (langBtnText) langBtnText.textContent = t('lang_btn');
     
     const searchInput = document.getElementById('search');
-    if (searchInput) searchInput.placeholder = t('search');
+    if (searchInput) searchInput.placeholder = t('search_placeholder');
     
-    // 更新图例
+    const metaSpan = document.querySelector('.meta-info span:first-child');
+    if (metaSpan) metaSpan.textContent = 'Prefects\' Scoreboard · ' + t('legend_desc');
+}}
+
+// 更新图例
+function updateLegend() {{
     const legendLow = document.querySelector('.legend-label span.low');
     const legendHigh = document.querySelector('.legend-label span.high');
     if (legendLow) legendLow.innerHTML = t('legend_low') + ' █';
     if (legendHigh) legendHigh.innerHTML = t('legend_high') + ' █';
-    
-    // 更新统计图卡片
+}}
+
+// 更新统计图卡片
+function updateChartCard() {{
     const chartTitle = document.querySelector('.chart-title span:last-child');
     if (chartTitle) chartTitle.textContent = t('chart_title');
     
@@ -433,8 +549,114 @@ function updateLanguage() {{
     
     const closeChartBtn = document.querySelector('.close-chart');
     if (closeChartBtn) closeChartBtn.textContent = t('close');
+}}
+
+// 更新排名卡片
+function updateRankCards() {{
+    document.querySelectorAll('.rank-card').forEach(card => {{
+        const groupName = card.dataset.group;
+        const nameEl = card.querySelector('.rank-name');
+        const scoreEl = card.querySelector('.rank-score');
+        
+        if (nameEl && groupName) {{
+            nameEl.textContent = t(`group_names.${{groupName}}`);
+        }}
+        
+        if (scoreEl) {{
+            const score = scoreEl.textContent.replace(/[^0-9]/g, '');
+            scoreEl.innerHTML = score + `<small>${{t('points')}}</small>`;
+        }}
+    }});
+}}
+
+// 更新所有组别
+function updateAllGroups() {{
+    document.querySelectorAll('.group-card').forEach(card => {{
+        const groupName = card.dataset.group;
+        const titleEl = card.querySelector('.group-title');
+        const avgEl = card.querySelector('.group-avg');
+        const badgeEl = card.querySelector('.group-badge');
+        
+        // 更新组名
+        if (titleEl && groupName) {{
+            titleEl.textContent = t(`group_names.${{groupName}}`);
+        }}
+        
+        // 更新平均分文字
+        if (avgEl) {{
+            const avgText = avgEl.textContent;
+            const avgNum = avgText.replace(/[^0-9]/g, '');
+            avgEl.textContent = t('average') + avgNum;
+        }}
+        
+        // 更新排名徽章
+        if (badgeEl) {{
+            const rankText = badgeEl.textContent;
+            const rankNum = rankText.replace(/[^0-9]/g, '');
+            if (currentLang === 'en') {{
+                badgeEl.textContent = rankNum + t('rank_suffix');
+            }} else {{
+                badgeEl.textContent = t('rank_prefix') + rankNum + t('rank_suffix');
+            }}
+        }}
+    }});
     
-    // 更新奖励机制卡片
+    // 更新表格
+    updateAllTables();
+}}
+
+// 更新所有表格
+function updateAllTables() {{
+    // 更新表头
+    const headers = t('table_headers');
+    document.querySelectorAll('.member-table').forEach(table => {{
+        const ths = table.querySelectorAll('th');
+        ths.forEach((th, index) => {{
+            if (headers[index]) {{
+                th.textContent = headers[index];
+            }}
+        }});
+    }});
+    
+    // 更新每一行（交换中英文名位置）
+    document.querySelectorAll('tbody tr').forEach(row => {{
+        const nameCell = row.querySelector('.name-cell');
+        if (nameCell) {{
+            const nameCn = nameCell.querySelector('.name-cn');
+            const nameEn = nameCell.querySelector('.name-en');
+            
+            if (nameCn && nameEn) {{
+                if (currentLang === 'en') {{
+                    // 英文模式：英文名在上，中文名在下
+                    nameEn.style.fontSize = '0.8rem';
+                    nameEn.style.fontWeight = '600';
+                    nameCn.style.fontSize = '0.65rem';
+                    nameCn.style.fontWeight = '400';
+                    nameCn.style.color = 'var(--text-tertiary)';
+                }} else {{
+                    // 中文模式：中文名在上，英文名在下
+                    nameCn.style.fontSize = '0.8rem';
+                    nameCn.style.fontWeight = '600';
+                    nameEn.style.fontSize = '0.65rem';
+                    nameEn.style.fontWeight = '400';
+                    nameEn.style.color = 'var(--text-tertiary)';
+                }}
+            }}
+        }}
+        
+        // 更新奖励列
+        const rewardCell = row.querySelector('td:last-child span');
+        if (rewardCell) {{
+            const status = rewardCell.textContent;
+            if (status === '✅' || status === '❌') {{
+                rewardCell.textContent = status; // 保持emoji不变
+            }}
+        }}
+    }});
+}}
+
+// 更新奖励机制卡片
+function updateRewardCard() {{
     const rewardTitle = document.querySelector('.reward-header h2');
     if (rewardTitle) rewardTitle.textContent = t('reward_title');
     
@@ -473,12 +695,16 @@ function updateLanguage() {{
     
     const rewardFooter = document.querySelector('.reward-footer');
     if (rewardFooter) rewardFooter.textContent = t('reward_footer');
-    
-    // 更新页脚
+}}
+
+// 更新页脚
+function updateFooter() {{
     const footer = document.querySelector('.footer');
     if (footer) footer.innerHTML = t('footer');
-    
-    // 更新提醒按钮和弹窗
+}}
+
+// 更新提醒弹窗
+function updateReminderPopup() {{
     const reminderText = document.querySelector('.reminder-text');
     if (reminderText) reminderText.textContent = t('reminder_btn');
     
@@ -487,54 +713,39 @@ function updateLanguage() {{
     
     const timeItems = document.querySelectorAll('.time-item');
     if (timeItems.length >= 4) {{
-        const labels = timeItems[0].querySelectorAll('.time-label');
-        const descs = timeItems[0].querySelectorAll('.time-desc');
+        const labels = document.querySelectorAll('.time-label');
+        const descs = document.querySelectorAll('.time-desc');
         
-        if (labels[0]) labels[0].textContent = t('time_morning');
-        if (descs[0]) descs[0].textContent = t('time_morning_desc');
+        if (labels.length >= 4) {{
+            labels[0].textContent = t('time_morning');
+            labels[1].textContent = t('time_evening1');
+            labels[2].textContent = t('time_evening2');
+            labels[3].textContent = t('time_evening3');
+        }}
         
-        if (labels[1]) labels[1].textContent = t('time_evening1');
-        if (descs[1]) descs[1].textContent = t('time_evening1_desc');
-        
-        if (labels[2]) labels[2].textContent = t('time_evening2');
-        if (descs[2]) descs[2].textContent = t('time_evening2_desc');
-        
-        if (labels[3]) labels[3].textContent = t('time_evening3');
-        if (descs[3]) descs[3].textContent = t('time_evening3_desc');
+        if (descs.length >= 4) {{
+            descs[0].textContent = t('time_morning_desc');
+            descs[1].textContent = t('time_evening1_desc');
+            descs[2].textContent = t('time_evening2_desc');
+            descs[3].textContent = t('time_evening3_desc');
+        }}
     }}
     
     const popupBtn = document.querySelector('.popup-btn');
     if (popupBtn) popupBtn.textContent = t('popup_btn');
+}}
+
+// 更新提示浮层
+function updateToast() {{
+    const toastTitle = document.querySelector('.toast-title span:last-child');
+    if (toastTitle) toastTitle.textContent = t('toast_message');
     
-    // 更新双击提示
     const hintText = document.getElementById('hintText');
     if (hintText) hintText.textContent = t('double_tap');
-    
-    // 更新组名
-    document.querySelectorAll('.group-card').forEach(card => {{
-        const groupName = card.dataset.group;
-        const titleEl = card.querySelector('.group-title');
-        if (titleEl && groupName) {{
-            titleEl.textContent = t(`group_names.${{groupName}}`);
-        }}
-    }});
-    
-    // 更新表格表头
-    const headers = t('table_headers');
-    if (Array.isArray(headers)) {{
-        document.querySelectorAll('.member-table th').forEach((th, index) => {{
-            if (headers[index]) {{
-                th.textContent = headers[index];
-            }}
-        }});
-    }}
-    
-    // 更新统计图（如果已生成）
-    if (chart && chartCard.classList.contains('show')) {{
-        generateChart();
-    }}
-    
-    // 更新 OneSignal 按钮文字（如果已初始化）
+}}
+
+// 更新 OneSignal
+function updateOneSignal() {{
     if (window.OneSignalDeferred) {{
         OneSignalDeferred.push(function(OneSignal) {{
             OneSignal.NotifyButton.setOptions({{
@@ -548,7 +759,7 @@ function updateLanguage() {{
     }}
 }}
 
-// 修改 getTomorrowUniform 函数支持英文
+// 获取明天要穿的衣服（支持英文）
 function getTomorrowUniform() {{
     const today = new Date();
     const tomorrow = new Date(today);
@@ -597,7 +808,7 @@ function translateActivity(activity) {{
     return activityMap[activity] || activity;
 }}
 
-// 显示网页内提醒（复用已有的toast）
+// 显示网页内提醒
 function showPageToast(title, message) {{
     const toast = document.getElementById('notificationToast');
     const titleEl = document.getElementById('toastMessage');
@@ -686,9 +897,9 @@ document.addEventListener('click', function(e) {{
     }}
 }});
 
-// 初始化语言
+// 页面加载完成后更新整个页面
 document.addEventListener('DOMContentLoaded', function() {{
-    updateLanguage();
+    updateFullPage();
 }});
 </script>
 '''
@@ -1346,6 +1557,7 @@ html += '''
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: var(--text-primary);
         }
 
         .name-en {
@@ -1354,6 +1566,7 @@ html += '''
             white-space: normal;
             line-height: 1.3;
             word-break: break-word;
+            font-weight: 400;
         }
 
         .info-cell {
@@ -1918,7 +2131,6 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     # 获取该组的最高分和最低分
     group_max = group_max_scores[group_name]
     group_min = group_min_scores[group_name]
-    score_range = group_max - group_min if group_max > group_min else 1
     
     html += f'''
             <div class="group-card" data-group="{group_name}" id="{group_id}">
@@ -1961,7 +2173,8 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
             score_tags = '<span class="score-item">—</span>'
         
         # 完整显示英文名
-        name_en_full = member['name_en']
+        name_cn = member['name_cn']
+        name_en = member['name_en']
         
         # 计算热力图颜色 - 越浅越高分
         total_score = member['total']
@@ -1977,8 +2190,8 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
                             <td>{member['order']}</td>
                             <td class="name-cell">
-                                <div class="name-cn">{member['name_cn']}</div>
-                                <div class="name-en">{name_en_full}</div>
+                                <div class="name-cn">{name_cn}</div>
+                                <div class="name-en">{name_en}</div>
                             </td>
                             <td class="info-cell">{member['class']}</td>
                             <td class="info-cell">{member['student_id']}</td>
@@ -2375,8 +2588,6 @@ html += '''        ];
                 toast.classList.remove('show');
             }, 2000);
         }
-
-        // 初始化语言（已经在上面初始化了）
     </script>
 </body>
 </html>'''
@@ -2395,4 +2606,6 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
 print("✨ 新增功能：")
 print("   - 双击屏幕/双空格切换深色模式")
 print("   - 开启提醒按钮 + 动画提示框")
-print("   - 🌐 中英文切换（点击EN/中文按钮，带动画）")
+print("   - 🌐 完整中英文切换（整个网站全部翻译）")
+print("   - 英文模式：英文名在上，中文名在下")
+print("   - 中文模式：中文名在上，英文名在下")
