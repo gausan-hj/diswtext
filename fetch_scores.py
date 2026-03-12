@@ -250,9 +250,11 @@ const CCA_DATA = {cca_json};
 // 翻译字典
 const translations = {{
     'zh': {{
-        'title': '学长团分数板 · 热力图',
+        'title': '训育处 - 学长团分数板 · 热力图',
         'download': '下载统计',
         'dark': '深色',
+        'lang': 'EN/中文',
+        'lang_btn': 'EN/中文',
         'search': '搜姓名/班级/学号...',
         'legend_low': '低分',
         'legend_high': '高分',
@@ -305,6 +307,8 @@ const translations = {{
         'title': 'Discipline Unit - Prefect Scoreboard · Heatmap',
         'download': 'Download Stats',
         'dark': 'Dark',
+        'lang': '中文/EN',
+        'lang_btn': '中文/EN',
         'search': 'Search name/class/id...',
         'legend_low': 'Low',
         'legend_high': 'High',
@@ -330,7 +334,7 @@ const translations = {{
         'time_morning': '6:00 AM',
         'time_morning_desc': 'Wake up reminder',
         'time_evening1': '7:00 PM',
-        'time_evening1_desc': 'Tomorrow\'s uniform',
+        'time_evening1_desc': 'Tomorrow\\'s uniform',
         'time_evening2': '8:15 PM',
         'time_evening2_desc': 'Reminder again',
         'time_evening3': '10:00 PM',
@@ -372,11 +376,25 @@ function t(key) {{
     return value;
 }}
 
-// 切换语言
+// 切换语言（带动画）
 function toggleLanguage() {{
+    const langBtn = document.querySelector('.lang-toggle');
+    
+    // 添加点击动画
+    langBtn.style.transform = 'scale(0.9)';
+    setTimeout(() => {{
+        langBtn.style.transform = 'scale(1)';
+    }}, 150);
+    
+    // 切换语言
     currentLang = currentLang === 'zh' ? 'en' : 'zh';
     localStorage.setItem('prefect_lang', currentLang);
+    
+    // 更新页面
     updateLanguage();
+    
+    // 显示提示
+    showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
 }}
 
 // 更新页面语言
@@ -385,68 +403,112 @@ function updateLanguage() {{
     document.title = t('title');
     
     // 更新头部
-    document.querySelector('h1').textContent = t('title');
-    document.querySelector('.download-btn span:last-child').textContent = t('download');
-    document.querySelector('.theme-toggle span:last-child').textContent = t('dark');
-    document.querySelector('#search').placeholder = t('search');
+    const h1 = document.querySelector('h1');
+    if (h1) h1.textContent = t('title');
+    
+    const downloadBtnText = document.querySelector('.download-btn span:last-child');
+    if (downloadBtnText) downloadBtnText.textContent = t('download');
+    
+    const themeToggleText = document.querySelector('.theme-toggle span:last-child');
+    if (themeToggleText) themeToggleText.textContent = t('dark');
+    
+    const langBtnText = document.querySelector('.lang-toggle span:last-child');
+    if (langBtnText) langBtnText.textContent = t('lang_btn');
+    
+    const searchInput = document.getElementById('search');
+    if (searchInput) searchInput.placeholder = t('search');
     
     // 更新图例
-    document.querySelector('.legend-label span.low').innerHTML = t('legend_low') + ' █';
-    document.querySelector('.legend-label span.high').innerHTML = t('legend_high') + ' █';
+    const legendLow = document.querySelector('.legend-label span.low');
+    const legendHigh = document.querySelector('.legend-label span.high');
+    if (legendLow) legendLow.innerHTML = t('legend_low') + ' █';
+    if (legendHigh) legendHigh.innerHTML = t('legend_high') + ' █';
     
     // 更新统计图卡片
-    document.querySelector('.chart-title span:last-child').textContent = t('chart_title');
-    document.querySelector('.save-chart-btn span:last-child').textContent = t('save_chart');
-    document.querySelector('.close-chart').textContent = t('close');
+    const chartTitle = document.querySelector('.chart-title span:last-child');
+    if (chartTitle) chartTitle.textContent = t('chart_title');
+    
+    const saveChartBtnText = document.querySelector('.save-chart-btn span:last-child');
+    if (saveChartBtnText) saveChartBtnText.textContent = t('save_chart');
+    
+    const closeChartBtn = document.querySelector('.close-chart');
+    if (closeChartBtn) closeChartBtn.textContent = t('close');
     
     // 更新奖励机制卡片
-    document.querySelector('.reward-header h2').textContent = t('reward_title');
-    document.querySelector('.reward-subtitle').textContent = t('reward_subtitle');
+    const rewardTitle = document.querySelector('.reward-header h2');
+    if (rewardTitle) rewardTitle.textContent = t('reward_title');
+    
+    const rewardSubtitle = document.querySelector('.reward-subtitle');
+    if (rewardSubtitle) rewardSubtitle.textContent = t('reward_subtitle');
     
     const rewardItems = document.querySelectorAll('.reward-item');
     if (rewardItems.length >= 3) {{
         // 第1名
-        rewardItems[0].querySelector('.rank-title').textContent = t('reward_1');
-        rewardItems[0].querySelector('.reward-condition').textContent = t('reward_1_condition');
-        rewardItems[0].querySelector('.reward-benefit').textContent = t('reward_1_benefit');
+        const rankTitle1 = rewardItems[0].querySelector('.rank-title');
+        const condition1 = rewardItems[0].querySelector('.reward-condition');
+        const benefit1 = rewardItems[0].querySelector('.reward-benefit');
+        if (rankTitle1) rankTitle1.textContent = t('reward_1');
+        if (condition1) condition1.textContent = t('reward_1_condition');
+        if (benefit1) benefit1.textContent = t('reward_1_benefit');
         
         // 第2名
-        rewardItems[1].querySelector('.rank-title').textContent = t('reward_2');
-        rewardItems[1].querySelector('.reward-condition').textContent = t('reward_2_condition');
-        rewardItems[1].querySelector('.reward-benefit').textContent = t('reward_2_benefit');
+        const rankTitle2 = rewardItems[1].querySelector('.rank-title');
+        const condition2 = rewardItems[1].querySelector('.reward-condition');
+        const benefit2 = rewardItems[1].querySelector('.reward-benefit');
+        if (rankTitle2) rankTitle2.textContent = t('reward_2');
+        if (condition2) condition2.textContent = t('reward_2_condition');
+        if (benefit2) benefit2.textContent = t('reward_2_benefit');
         
         // 第3名
-        rewardItems[2].querySelector('.rank-title').textContent = t('reward_3');
-        rewardItems[2].querySelector('.reward-condition').textContent = t('reward_3_condition');
-        rewardItems[2].querySelector('.reward-benefit').textContent = t('reward_3_benefit');
+        const rankTitle3 = rewardItems[2].querySelector('.rank-title');
+        const condition3 = rewardItems[2].querySelector('.reward-condition');
+        const benefit3 = rewardItems[2].querySelector('.reward-benefit');
+        if (rankTitle3) rankTitle3.textContent = t('reward_3');
+        if (condition3) condition3.textContent = t('reward_3_condition');
+        if (benefit3) benefit3.textContent = t('reward_3_benefit');
     }}
     
-    document.querySelector('.reward-note').textContent = t('reward_note');
-    document.querySelector('.reward-footer').textContent = t('reward_footer');
+    const rewardNote = document.querySelector('.reward-note');
+    if (rewardNote) rewardNote.textContent = t('reward_note');
+    
+    const rewardFooter = document.querySelector('.reward-footer');
+    if (rewardFooter) rewardFooter.textContent = t('reward_footer');
     
     // 更新页脚
-    document.querySelector('.footer').innerHTML = t('footer');
+    const footer = document.querySelector('.footer');
+    if (footer) footer.innerHTML = t('footer');
     
     // 更新提醒按钮和弹窗
-    document.querySelector('.reminder-text').textContent = t('reminder_btn');
-    document.querySelector('.popup-title').textContent = t('popup_title');
+    const reminderText = document.querySelector('.reminder-text');
+    if (reminderText) reminderText.textContent = t('reminder_btn');
+    
+    const popupTitle = document.querySelector('.popup-title');
+    if (popupTitle) popupTitle.textContent = t('popup_title');
     
     const timeItems = document.querySelectorAll('.time-item');
     if (timeItems.length >= 4) {{
-        timeItems[0].querySelector('.time-label').textContent = t('time_morning');
-        timeItems[0].querySelector('.time-desc').textContent = t('time_morning_desc');
-        timeItems[1].querySelector('.time-label').textContent = t('time_evening1');
-        timeItems[1].querySelector('.time-desc').textContent = t('time_evening1_desc');
-        timeItems[2].querySelector('.time-label').textContent = t('time_evening2');
-        timeItems[2].querySelector('.time-desc').textContent = t('time_evening2_desc');
-        timeItems[3].querySelector('.time-label').textContent = t('time_evening3');
-        timeItems[3].querySelector('.time-desc').textContent = t('time_evening3_desc');
+        const labels = timeItems[0].querySelectorAll('.time-label');
+        const descs = timeItems[0].querySelectorAll('.time-desc');
+        
+        if (labels[0]) labels[0].textContent = t('time_morning');
+        if (descs[0]) descs[0].textContent = t('time_morning_desc');
+        
+        if (labels[1]) labels[1].textContent = t('time_evening1');
+        if (descs[1]) descs[1].textContent = t('time_evening1_desc');
+        
+        if (labels[2]) labels[2].textContent = t('time_evening2');
+        if (descs[2]) descs[2].textContent = t('time_evening2_desc');
+        
+        if (labels[3]) labels[3].textContent = t('time_evening3');
+        if (descs[3]) descs[3].textContent = t('time_evening3_desc');
     }}
     
-    document.querySelector('.popup-btn').textContent = t('popup_btn');
+    const popupBtn = document.querySelector('.popup-btn');
+    if (popupBtn) popupBtn.textContent = t('popup_btn');
     
     // 更新双击提示
-    document.getElementById('hintText').textContent = t('double_tap');
+    const hintText = document.getElementById('hintText');
+    if (hintText) hintText.textContent = t('double_tap');
     
     // 更新组名
     document.querySelectorAll('.group-card').forEach(card => {{
@@ -458,12 +520,32 @@ function updateLanguage() {{
     }});
     
     // 更新表格表头
-    const headers = t('table_headers').split(',');
-    document.querySelectorAll('.member-table th').forEach((th, index) => {{
-        if (headers[index]) {{
-            th.textContent = headers[index];
-        }}
-    }});
+    const headers = t('table_headers');
+    if (Array.isArray(headers)) {{
+        document.querySelectorAll('.member-table th').forEach((th, index) => {{
+            if (headers[index]) {{
+                th.textContent = headers[index];
+            }}
+        }});
+    }}
+    
+    // 更新统计图（如果已生成）
+    if (chart && chartCard.classList.contains('show')) {{
+        generateChart();
+    }}
+    
+    // 更新 OneSignal 按钮文字（如果已初始化）
+    if (window.OneSignalDeferred) {{
+        OneSignalDeferred.push(function(OneSignal) {{
+            OneSignal.NotifyButton.setOptions({{
+                text: {{
+                    'message': currentLang === 'en' ? 'Enable daily reminders' : '开启每日服装提醒',
+                    'subscribe': currentLang === 'en' ? 'Allow notifications' : '允许通知',
+                    'unsubscribe': currentLang === 'en' ? 'Disable' : '关闭通知'
+                }}
+            }});
+        }});
+    }}
 }}
 
 // 修改 getTomorrowUniform 函数支持英文
@@ -515,6 +597,23 @@ function translateActivity(activity) {{
     return activityMap[activity] || activity;
 }}
 
+// 显示网页内提醒（复用已有的toast）
+function showPageToast(title, message) {{
+    const toast = document.getElementById('notificationToast');
+    const titleEl = document.getElementById('toastMessage');
+    const detailEl = document.getElementById('toastDetail');
+    
+    if (toast && titleEl && detailEl) {{
+        titleEl.textContent = title;
+        detailEl.textContent = message;
+        toast.classList.add('show');
+        
+        setTimeout(() => {{
+            toast.classList.remove('show');
+        }}, 2000);
+    }}
+}}
+
 // OneSignal 初始化
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {{
@@ -527,9 +626,9 @@ OneSignalDeferred.push(async function(OneSignal) {{
             showCredit: false,
             position: 'bottom-right',
             text: {{
-                'message': currentLang === 'en' ? 'Enable daily reminders' : '开启每日服装提醒',
-                'subscribe': currentLang === 'en' ? 'Allow notifications' : '允许通知',
-                'unsubscribe': currentLang === 'en' ? 'Disable' : '关闭通知'
+                'message': '开启每日服装提醒',
+                'subscribe': '允许通知',
+                'unsubscribe': '关闭通知'
             }},
             colors: {{
                 'circle.background': '#eab308',
@@ -585,6 +684,11 @@ document.addEventListener('click', function(e) {{
             popup.classList.remove('show');
         }}
     }}
+}});
+
+// 初始化语言
+document.addEventListener('DOMContentLoaded', function() {{
+    updateLanguage();
 }});
 </script>
 '''
@@ -773,7 +877,7 @@ html += '''
             align-items: center;
         }
 
-        /* 语言切换按钮 */
+        /* 语言切换按钮 - 带动画 */
         .lang-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -790,7 +894,7 @@ html += '''
         }
 
         .lang-toggle:active {
-            transform: scale(0.98);
+            transform: scale(0.9);
         }
 
         .theme-toggle {
@@ -1703,7 +1807,7 @@ html += '''
                     </button>
                     <div class="lang-toggle" onclick="toggleLanguage()">
                         <span>🌐</span>
-                        <span>EN/中</span>
+                        <span>EN/中文</span>
                     </div>
                     <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                         <span class="moon-icon">🌓</span>
@@ -2269,11 +2373,10 @@ html += '''        ];
             
             setTimeout(() => {
                 toast.classList.remove('show');
-            }, 5000);
+            }, 2000);
         }
 
-        // 初始化语言
-        updateLanguage();
+        // 初始化语言（已经在上面初始化了）
     </script>
 </body>
 </html>'''
@@ -2292,4 +2395,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
 print("✨ 新增功能：")
 print("   - 双击屏幕/双空格切换深色模式")
 print("   - 开启提醒按钮 + 动画提示框")
-print("   - 🌐 中英文切换（点击EN/中按钮）")
+print("   - 🌐 中英文切换（点击EN/中文按钮，带动画）")
