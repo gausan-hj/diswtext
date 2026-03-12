@@ -13,569 +13,53 @@
 // 联课活动数据（用于服装提醒）
 const CCA_DATA = [{"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "uniform": "校服"}, {"date": "2026-02-26", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-03", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "uniform": "校服"}, {"date": "2026-03-10", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-12", "activity": "活动（行动组）", "uniform": "校服"}, {"date": "2026-03-17", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-31", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-02", "activity": "活动（值岗组）", "uniform": "校服"}, {"date": "2026-04-07", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-09", "activity": "活动（督察组）", "uniform": "校服"}, {"date": "2026-04-14", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-16", "activity": "活动（星穹组）", "uniform": "校服"}, {"date": "2026-04-21", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-23", "activity": "活动（夜曜组）", "uniform": "校服"}, {"date": "2026-04-28", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-30", "activity": "活动（沧澜组）", "uniform": "校服"}, {"date": "2026-05-05", "activity": "第一学期检讨", "uniform": "校服"}, {"date": "2026-05-07", "activity": "操步", "uniform": "体育衣"}];
 
-// ===== 完整的翻译字典 =====
-const translations = {
-    'zh': {
-        // 页面标题
-        'title': '训育处 - 学长团分数板 · 热力图',
-        
-        // 头部按钮
-        'download': '下载统计',
-        'dark': '深色',
-        'lang_btn': 'EN/中文',
-        
-        // 搜索框
-        'search_placeholder': '搜姓名/班级/学号...',
-        
-        // 图例
-        'legend_low': '低分',
-        'legend_high': '高分',
-        'legend_desc': '颜色越浅分数越高',
-        
-        // 统计图卡片
-        'chart_title': '各组总分对比',
-        'save_chart': '保存到相册',
-        'close': '关闭',
-        
-        // 奖励机制卡片
-        'reward_title': '本轮奖励机制',
-        'reward_subtitle': '公平原则 · 不负每一位付出的学长',
-        'reward_1': '第1名',
-        'reward_1_condition': '分数 ≥ 平均分÷2',
-        'reward_1_benefit': '✨免搬椅子+减免操步',
-        'reward_2': '第2名',
-        'reward_2_condition': '分数 ≥ 平均分',
-        'reward_2_benefit': '✨免搬椅子+减免操步',
-        'reward_3': '第3名',
-        'reward_3_condition': '组内前三名',
-        'reward_3_benefit': '✨免搬椅子+减免操步',
-        'reward_note': '🎁 第1名达标者额外奖励一份',
-        'reward_footer': '* 未达标者工作照旧 *',
-        
-        // 页脚
-        'footer': '👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高',
-        
-        // 提醒按钮和弹窗
-        'reminder_btn': '开启提醒',
-        'popup_title': '每日提醒时间',
-        'time_morning': '早上 6:00',
-        'time_morning_desc': '起床提醒',
-        'time_evening1': '晚上 7:00',
-        'time_evening1_desc': '明天衣服提醒',
-        'time_evening2': '晚上 8:15',
-        'time_evening2_desc': '再次提醒',
-        'time_evening3': '晚上 10:00',
-        'time_evening3_desc': '睡前提醒',
-        'popup_btn': '知道了，开启提醒',
-        
-        // 提示浮层
-        'toast_message': '通知',
-        'double_tap': '👆 双击屏幕 / 按两次空格 切换深色模式',
-        
-        // 组名翻译
-        'group_names': {
-            '星穹组': '星穹组',
-            '夜曜组': '夜曜组',
-            '沧澜组': '沧澜组'
-        },
-        
-        // 表格表头
-        'table_headers': ['#', '姓名', '班', '学号', '每日得分', '总分', '奖'],
-        
-        // 服装提醒
-        'uniform_today': '今天是',
-        'uniform_tomorrow': '明天',
-        'uniform_activity': '有活动：',
-        'uniform_wear': '请穿',
-        'uniform_prepare': '请准备',
-        'uniform_sports': '体育衣',
-        'uniform_school': '校服',
-        'uniform_normal': '穿整齐校服，记得带名牌',
-        
-        // 排名卡片
-        'rank_prefix': '第',
-        'rank_suffix': '名',
-        'points': '分',
-        'average': '平均',
-        
-        // 达标状态
-        'reward_passed': '✅',
-        'reward_failed': '❌',
-        
-        // 日期显示
-        'date_format': '月/日 时:分',
-    },
-    'en': {
-        // Page title
-        'title': 'Discipline Unit - Prefect Scoreboard · Heatmap',
-        
-        // Header buttons
-        'download': 'Download Stats',
-        'dark': 'Dark',
-        'lang_btn': '中文/EN',
-        
-        // Search
-        'search_placeholder': 'Search name/class/id...',
-        
-        // Legend
-        'legend_low': 'Low',
-        'legend_high': 'High',
-        'legend_desc': 'Lighter color = higher score',
-        
-        // Chart card
-        'chart_title': 'Group Total Score Comparison',
-        'save_chart': 'Save to Gallery',
-        'close': 'Close',
-        
-        // Reward card
-        'reward_title': 'Reward Mechanism',
-        'reward_subtitle': 'Fairness · Every effort counts',
-        'reward_1': '1st Place',
-        'reward_1_condition': 'Score ≥ Avg ÷ 2',
-        'reward_1_benefit': '✨ No chairs + Reduced drills',
-        'reward_2': '2nd Place',
-        'reward_2_condition': 'Score ≥ Avg',
-        'reward_2_benefit': '✨ No chairs + Reduced drills',
-        'reward_3': '3rd Place',
-        'reward_3_condition': 'Top 3 in group',
-        'reward_3_benefit': '✨ No chairs + Reduced drills',
-        'reward_note': '🎁 Extra reward for 1st place qualifiers',
-        'reward_footer': '* Others continue as usual *',
-        
-        // Footer
-        'footer': '👆 Double tap / Double space for dark mode · 📊 Download stats · Lighter color = higher score',
-        
-        // Reminder button and popup
-        'reminder_btn': 'Enable Reminders',
-        'popup_title': 'Daily Reminder Times',
-        'time_morning': '6:00 AM',
-        'time_morning_desc': 'Wake up reminder',
-        'time_evening1': '7:00 PM',
-        'time_evening1_desc': 'Tomorrow\'s uniform',
-        'time_evening2': '8:15 PM',
-        'time_evening2_desc': 'Reminder again',
-        'time_evening3': '10:00 PM',
-        'time_evening3_desc': 'Before sleep',
-        'popup_btn': 'Got it, enable reminders',
-        
-        // Toast
-        'toast_message': 'Notification',
-        'double_tap': '👆 Double tap / Double space to toggle dark mode',
-        
-        // Group name translations
-        'group_names': {
-            '星穹组': 'Starry Group',
-            '夜曜组': 'Night Group',
-            '沧澜组': 'Ocean Group'
-        },
-        
-        // Table headers
-        'table_headers': ['#', 'Name', 'Class', 'ID', 'Daily Scores', 'Total', 'Reward'],
-        
-        // Uniform reminders
-        'uniform_today': 'Today is',
-        'uniform_tomorrow': 'Tomorrow',
-        'uniform_activity': 'Activity:',
-        'uniform_wear': 'Wear',
-        'uniform_prepare': 'Prepare',
-        'uniform_sports': 'Sports Uniform',
-        'uniform_school': 'School Uniform',
-        'uniform_normal': 'Wear school uniform, bring name tag',
-        
-        // Rank cards
-        'rank_prefix': '',
-        'rank_suffix': 'th',
-        'points': 'pts',
-        'average': 'Avg',
-        
-        // Reward status
-        'reward_passed': '✅',
-        'reward_failed': '❌',
-        
-        // Date display
-        'date_format': 'MM/DD HH:MM',
+// ===== 全局函数，确保所有按钮都能访问 =====
+// 切换深色模式
+window.toggleNightMode = function() {
+    document.body.classList.toggle('night-mode');
+    // 更新图表颜色
+    if (window.chart && document.getElementById('chartCard').classList.contains('show')) {
+        window.generateChart();
+    }
+    window.showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+};
+
+// 显示提示
+window.showHint = function(message) {
+    const hintText = document.getElementById('hintText');
+    const doubleTapHint = document.getElementById('doubleTapHint');
+    if (hintText && doubleTapHint) {
+        hintText.textContent = message;
+        doubleTapHint.classList.add('show');
+        setTimeout(() => {
+            doubleTapHint.classList.remove('show');
+        }, 1500);
     }
 };
 
-// 当前语言
-let currentLang = localStorage.getItem('prefect_lang') || 'zh';
-
-// 翻译函数
-function t(key) {
-    const keys = key.split('.');
-    let value = translations[currentLang];
-    for (const k of keys) {
-        if (value && value[k] !== undefined) {
-            value = value[k];
-        } else {
-            return key;
-        }
-    }
-    return value;
-}
-
-// 切换语言（带动画）
-function toggleLanguage() {
+// 切换语言
+window.toggleLanguage = function() {
     const langBtn = document.querySelector('.lang-toggle');
-    
-    // 添加点击动画
-    langBtn.style.transform = 'scale(0.9)';
-    setTimeout(() => {
-        langBtn.style.transform = 'scale(1)';
-    }, 150);
+    if (langBtn) {
+        langBtn.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            langBtn.style.transform = 'scale(1)';
+        }, 150);
+    }
     
     // 切换语言
-    currentLang = currentLang === 'zh' ? 'en' : 'zh';
-    localStorage.setItem('prefect_lang', currentLang);
+    window.currentLang = window.currentLang === 'zh' ? 'en' : 'zh';
+    localStorage.setItem('prefect_lang', window.currentLang);
     
     // 更新整个页面
-    updateFullPage();
+    window.updateFullPage();
     
     // 显示提示
-    showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
-}
-
-// 更新整个页面（全部翻译）
-function updateFullPage() {
-    // 更新标题
-    document.title = t('title');
-    
-    // 更新头部所有元素
-    updateHeader();
-    
-    // 更新图例
-    updateLegend();
-    
-    // 更新统计图卡片
-    updateChartCard();
-    
-    // 更新排名卡片
-    updateRankCards();
-    
-    // 更新所有组别（包括表格）
-    updateAllGroups();
-    
-    // 更新奖励机制卡片
-    updateRewardCard();
-    
-    // 更新页脚
-    updateFooter();
-    
-    // 更新提醒按钮和弹窗
-    updateReminderPopup();
-    
-    // 更新提示浮层
-    updateToast();
-    
-    // 更新统计图（如果已生成）
-    if (chart && chartCard.classList.contains('show')) {
-        generateChart();
-    }
-    
-    // 更新 OneSignal 按钮文字
-    updateOneSignal();
-}
-
-// 更新头部
-function updateHeader() {
-    const h1 = document.querySelector('h1');
-    if (h1) h1.textContent = t('title');
-    
-    const downloadBtnText = document.querySelector('.download-btn span:last-child');
-    if (downloadBtnText) downloadBtnText.textContent = t('download');
-    
-    const themeToggleText = document.querySelector('.theme-toggle span:last-child');
-    if (themeToggleText) themeToggleText.textContent = t('dark');
-    
-    const langBtnText = document.querySelector('.lang-toggle span:last-child');
-    if (langBtnText) langBtnText.textContent = t('lang_btn');
-    
-    const searchInput = document.getElementById('search');
-    if (searchInput) searchInput.placeholder = t('search_placeholder');
-    
-    const metaSpan = document.querySelector('.meta-info span:first-child');
-    if (metaSpan) metaSpan.textContent = 'Prefects' Scoreboard · ' + t('legend_desc');
-}
-
-// 更新图例
-function updateLegend() {
-    const legendLow = document.querySelector('.legend-label span.low');
-    const legendHigh = document.querySelector('.legend-label span.high');
-    if (legendLow) legendLow.innerHTML = t('legend_low') + ' █';
-    if (legendHigh) legendHigh.innerHTML = t('legend_high') + ' █';
-}
-
-// 更新统计图卡片
-function updateChartCard() {
-    const chartTitle = document.querySelector('.chart-title span:last-child');
-    if (chartTitle) chartTitle.textContent = t('chart_title');
-    
-    const saveChartBtnText = document.querySelector('.save-chart-btn span:last-child');
-    if (saveChartBtnText) saveChartBtnText.textContent = t('save_chart');
-    
-    const closeChartBtn = document.querySelector('.close-chart');
-    if (closeChartBtn) closeChartBtn.textContent = t('close');
-}
-
-// 更新排名卡片
-function updateRankCards() {
-    document.querySelectorAll('.rank-card').forEach(card => {
-        const groupName = card.dataset.group;
-        const nameEl = card.querySelector('.rank-name');
-        const scoreEl = card.querySelector('.rank-score');
-        
-        if (nameEl && groupName) {
-            nameEl.textContent = t(`group_names.${groupName}`);
-        }
-        
-        if (scoreEl) {
-            const score = scoreEl.textContent.replace(/[^0-9]/g, '');
-            scoreEl.innerHTML = score + `<small>${t('points')}</small>`;
-        }
-    });
-}
-
-// 更新所有组别
-function updateAllGroups() {
-    document.querySelectorAll('.group-card').forEach(card => {
-        const groupName = card.dataset.group;
-        const titleEl = card.querySelector('.group-title');
-        const avgEl = card.querySelector('.group-avg');
-        const badgeEl = card.querySelector('.group-badge');
-        
-        // 更新组名
-        if (titleEl && groupName) {
-            titleEl.textContent = t(`group_names.${groupName}`);
-        }
-        
-        // 更新平均分文字
-        if (avgEl) {
-            const avgText = avgEl.textContent;
-            const avgNum = avgText.replace(/[^0-9]/g, '');
-            avgEl.textContent = t('average') + avgNum;
-        }
-        
-        // 更新排名徽章
-        if (badgeEl) {
-            const rankText = badgeEl.textContent;
-            const rankNum = rankText.replace(/[^0-9]/g, '');
-            if (currentLang === 'en') {
-                badgeEl.textContent = rankNum + t('rank_suffix');
-            } else {
-                badgeEl.textContent = t('rank_prefix') + rankNum + t('rank_suffix');
-            }
-        }
-    });
-    
-    // 更新表格
-    updateAllTables();
-}
-
-// 更新所有表格
-function updateAllTables() {
-    // 更新表头
-    const headers = t('table_headers');
-    document.querySelectorAll('.member-table').forEach(table => {
-        const ths = table.querySelectorAll('th');
-        ths.forEach((th, index) => {
-            if (headers[index]) {
-                th.textContent = headers[index];
-            }
-        });
-    });
-    
-    // 更新每一行（交换中英文名位置）
-    document.querySelectorAll('tbody tr').forEach(row => {
-        const nameCell = row.querySelector('.name-cell');
-        if (nameCell) {
-            const nameCn = nameCell.querySelector('.name-cn');
-            const nameEn = nameCell.querySelector('.name-en');
-            
-            if (nameCn && nameEn) {
-                if (currentLang === 'en') {
-                    // 英文模式：英文名在上，中文名在下
-                    nameEn.style.fontSize = '0.8rem';
-                    nameEn.style.fontWeight = '600';
-                    nameCn.style.fontSize = '0.65rem';
-                    nameCn.style.fontWeight = '400';
-                    nameCn.style.color = 'var(--text-tertiary)';
-                } else {
-                    // 中文模式：中文名在上，英文名在下
-                    nameCn.style.fontSize = '0.8rem';
-                    nameCn.style.fontWeight = '600';
-                    nameEn.style.fontSize = '0.65rem';
-                    nameEn.style.fontWeight = '400';
-                    nameEn.style.color = 'var(--text-tertiary)';
-                }
-            }
-        }
-        
-        // 更新奖励列
-        const rewardCell = row.querySelector('td:last-child span');
-        if (rewardCell) {
-            const status = rewardCell.textContent;
-            if (status === '✅' || status === '❌') {
-                rewardCell.textContent = status; // 保持emoji不变
-            }
-        }
-    });
-}
-
-// 更新奖励机制卡片
-function updateRewardCard() {
-    const rewardTitle = document.querySelector('.reward-header h2');
-    if (rewardTitle) rewardTitle.textContent = t('reward_title');
-    
-    const rewardSubtitle = document.querySelector('.reward-subtitle');
-    if (rewardSubtitle) rewardSubtitle.textContent = t('reward_subtitle');
-    
-    const rewardItems = document.querySelectorAll('.reward-item');
-    if (rewardItems.length >= 3) {
-        // 第1名
-        const rankTitle1 = rewardItems[0].querySelector('.rank-title');
-        const condition1 = rewardItems[0].querySelector('.reward-condition');
-        const benefit1 = rewardItems[0].querySelector('.reward-benefit');
-        if (rankTitle1) rankTitle1.textContent = t('reward_1');
-        if (condition1) condition1.textContent = t('reward_1_condition');
-        if (benefit1) benefit1.textContent = t('reward_1_benefit');
-        
-        // 第2名
-        const rankTitle2 = rewardItems[1].querySelector('.rank-title');
-        const condition2 = rewardItems[1].querySelector('.reward-condition');
-        const benefit2 = rewardItems[1].querySelector('.reward-benefit');
-        if (rankTitle2) rankTitle2.textContent = t('reward_2');
-        if (condition2) condition2.textContent = t('reward_2_condition');
-        if (benefit2) benefit2.textContent = t('reward_2_benefit');
-        
-        // 第3名
-        const rankTitle3 = rewardItems[2].querySelector('.rank-title');
-        const condition3 = rewardItems[2].querySelector('.reward-condition');
-        const benefit3 = rewardItems[2].querySelector('.reward-benefit');
-        if (rankTitle3) rankTitle3.textContent = t('reward_3');
-        if (condition3) condition3.textContent = t('reward_3_condition');
-        if (benefit3) benefit3.textContent = t('reward_3_benefit');
-    }
-    
-    const rewardNote = document.querySelector('.reward-note');
-    if (rewardNote) rewardNote.textContent = t('reward_note');
-    
-    const rewardFooter = document.querySelector('.reward-footer');
-    if (rewardFooter) rewardFooter.textContent = t('reward_footer');
-}
-
-// 更新页脚
-function updateFooter() {
-    const footer = document.querySelector('.footer');
-    if (footer) footer.innerHTML = t('footer');
-}
-
-// 更新提醒弹窗
-function updateReminderPopup() {
-    const reminderText = document.querySelector('.reminder-text');
-    if (reminderText) reminderText.textContent = t('reminder_btn');
-    
-    const popupTitle = document.querySelector('.popup-title');
-    if (popupTitle) popupTitle.textContent = t('popup_title');
-    
-    const timeItems = document.querySelectorAll('.time-item');
-    if (timeItems.length >= 4) {
-        const labels = document.querySelectorAll('.time-label');
-        const descs = document.querySelectorAll('.time-desc');
-        
-        if (labels.length >= 4) {
-            labels[0].textContent = t('time_morning');
-            labels[1].textContent = t('time_evening1');
-            labels[2].textContent = t('time_evening2');
-            labels[3].textContent = t('time_evening3');
-        }
-        
-        if (descs.length >= 4) {
-            descs[0].textContent = t('time_morning_desc');
-            descs[1].textContent = t('time_evening1_desc');
-            descs[2].textContent = t('time_evening2_desc');
-            descs[3].textContent = t('time_evening3_desc');
-        }
-    }
-    
-    const popupBtn = document.querySelector('.popup-btn');
-    if (popupBtn) popupBtn.textContent = t('popup_btn');
-}
-
-// 更新提示浮层
-function updateToast() {
-    const toastTitle = document.querySelector('.toast-title span:last-child');
-    if (toastTitle) toastTitle.textContent = t('toast_message');
-    
-    const hintText = document.getElementById('hintText');
-    if (hintText) hintText.textContent = t('double_tap');
-}
-
-// 更新 OneSignal
-function updateOneSignal() {
-    if (window.OneSignalDeferred) {
-        OneSignalDeferred.push(function(OneSignal) {
-            OneSignal.NotifyButton.setOptions({
-                text: {
-                    'message': currentLang === 'en' ? 'Enable daily reminders' : '开启每日服装提醒',
-                    'subscribe': currentLang === 'en' ? 'Allow notifications' : '允许通知',
-                    'unsubscribe': currentLang === 'en' ? 'Disable' : '关闭通知'
-                }
-            });
-        });
-    }
-}
-
-// 获取明天要穿的衣服（支持英文）
-function getTomorrowUniform() {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    const year = tomorrow.getFullYear();
-    const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
-    const day = String(tomorrow.getDate()).padStart(2, '0');
-    const dateStr = `${year}-${month}-${day}`;
-    const weekday = tomorrow.toLocaleDateString(currentLang === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'long' });
-    
-    const tomorrowCCA = CCA_DATA.find(item => item.date === dateStr);
-    
-    if (tomorrowCCA) {
-        const activity = currentLang === 'en' ? translateActivity(tomorrowCCA.activity) : tomorrowCCA.activity;
-        if (tomorrowCCA.uniform === "体育衣") {
-            return currentLang === 'en' 
-                ? `🎽 Tomorrow (${weekday}) wear sports uniform! Activity: ${activity}`
-                : `🎽 明天${weekday}请穿体育衣！活动：${activity}`;
-        } else {
-            return currentLang === 'en'
-                ? `👔 Tomorrow (${weekday}) wear school uniform. Activity: ${activity}`
-                : `👔 明天${weekday}穿校服，活动：${activity}`;
-        }
-    } else {
-        return currentLang === 'en'
-            ? `👔 Tomorrow (${weekday}) wear school uniform, bring name tag`
-            : `👔 明天${weekday}穿整齐校服，记得带名牌`;
-    }
-}
-
-// 翻译活动名称
-function translateActivity(activity) {
-    const activityMap = {
-        '活动顾问+总学长+副总学长': 'Activity: Advisor + Head Prefect + Deputy',
-        '操步': 'Marching',
-        '活动（文书+财政+查账）': 'Activity (Secretary + Treasurer + Auditor)',
-        '活动（行动组）': 'Activity (Action Team)',
-        '活动（值岗组）': 'Activity (Duty Team)',
-        '活动（督察组）': 'Activity (Discipline Team)',
-        '活动（星穹组）': 'Activity (Starry Group)',
-        '活动（夜曜组）': 'Activity (Night Group)',
-        '活动（沧澜组）': 'Activity (Ocean Group)',
-        '第一学期检讨': 'First Semester Review'
-    };
-    return activityMap[activity] || activity;
-}
+    window.showPageToast('🌐', window.currentLang === 'en' ? 'Switched to English' : '已切换到中文');
+};
 
 // 显示网页内提醒
-function showPageToast(title, message) {
+window.showPageToast = function(title, message) {
     const toast = document.getElementById('notificationToast');
     const titleEl = document.getElementById('toastMessage');
     const detailEl = document.getElementById('toastDetail');
@@ -589,11 +73,317 @@ function showPageToast(title, message) {
             toast.classList.remove('show');
         }, 2000);
     }
-}
+};
+
+// 显示提醒弹窗
+window.showReminderPopup = function() {
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.add('show');
+};
+
+// 关闭提醒弹窗
+window.closePopup = function() {
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.remove('show');
+};
+
+// 开启提醒
+window.enableReminders = function() {
+    if (window.OneSignalDeferred) {
+        window.OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.Notifications.requestPermission();
+        });
+    }
+    window.closePopup();
+};
+
+// 当前语言
+window.currentLang = localStorage.getItem('prefect_lang') || 'zh';
+
+// ===== 完整的翻译字典 =====
+const translations = {
+    'zh': {
+        'title': '训育处 - 学长团分数板 · 热力图',
+        'download': '下载统计',
+        'dark': '深色',
+        'lang_btn': 'EN/中文',
+        'search_placeholder': '搜姓名/班级/学号...',
+        'legend_low': '低分',
+        'legend_high': '高分',
+        'legend_desc': '颜色越浅分数越高',
+        'chart_title': '各组总分对比',
+        'save_chart': '保存到相册',
+        'close': '关闭',
+        'reward_title': '本轮奖励机制',
+        'reward_subtitle': '公平原则 · 不负每一位付出的学长',
+        'reward_1': '第1名',
+        'reward_1_condition': '分数 ≥ 平均分÷2',
+        'reward_1_benefit': '✨免搬椅子+减免操步',
+        'reward_2': '第2名',
+        'reward_2_condition': '分数 ≥ 平均分',
+        'reward_2_benefit': '✨免搬椅子+减免操步',
+        'reward_3': '第3名',
+        'reward_3_condition': '组内前三名',
+        'reward_3_benefit': '✨免搬椅子+减免操步',
+        'reward_note': '🎁 第1名达标者额外奖励一份',
+        'reward_footer': '* 未达标者工作照旧 *',
+        'footer': '👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高',
+        'reminder_btn': '开启提醒',
+        'popup_title': '每日提醒时间',
+        'time_morning': '早上 6:00',
+        'time_morning_desc': '起床提醒',
+        'time_evening1': '晚上 7:00',
+        'time_evening1_desc': '明天衣服提醒',
+        'time_evening2': '晚上 8:15',
+        'time_evening2_desc': '再次提醒',
+        'time_evening3': '晚上 10:00',
+        'time_evening3_desc': '睡前提醒',
+        'popup_btn': '知道了，开启提醒',
+        'toast_message': '通知',
+        'double_tap': '👆 双击屏幕 / 按两次空格 切换深色模式',
+        'group_names': {
+            '星穹组': '星穹组',
+            '夜曜组': '夜曜组',
+            '沧澜组': '沧澜组'
+        },
+        'table_headers': ['#', '姓名', '班', '学号', '每日得分', '总分', '奖'],
+        'rank_prefix': '第',
+        'rank_suffix': '名',
+        'points': '分',
+        'average': '平均',
+    },
+    'en': {
+        'title': 'Discipline Unit - Prefect Scoreboard · Heatmap',
+        'download': 'Download Stats',
+        'dark': 'Dark',
+        'lang_btn': '中文/EN',
+        'search_placeholder': 'Search name/class/id...',
+        'legend_low': 'Low',
+        'legend_high': 'High',
+        'legend_desc': 'Lighter color = higher score',
+        'chart_title': 'Group Total Score Comparison',
+        'save_chart': 'Save to Gallery',
+        'close': 'Close',
+        'reward_title': 'Reward Mechanism',
+        'reward_subtitle': 'Fairness · Every effort counts',
+        'reward_1': '1st Place',
+        'reward_1_condition': 'Score ≥ Avg ÷ 2',
+        'reward_1_benefit': '✨ No chairs + Reduced drills',
+        'reward_2': '2nd Place',
+        'reward_2_condition': 'Score ≥ Avg',
+        'reward_2_benefit': '✨ No chairs + Reduced drills',
+        'reward_3': '3rd Place',
+        'reward_3_condition': 'Top 3 in group',
+        'reward_3_benefit': '✨ No chairs + Reduced drills',
+        'reward_note': '🎁 Extra reward for 1st place qualifiers',
+        'reward_footer': '* Others continue as usual *',
+        'footer': '👆 Double tap / Double space for dark mode · 📊 Download stats · Lighter color = higher score',
+        'reminder_btn': 'Enable Reminders',
+        'popup_title': 'Daily Reminder Times',
+        'time_morning': '6:00 AM',
+        'time_morning_desc': 'Wake up reminder',
+        'time_evening1': '7:00 PM',
+        'time_evening1_desc': 'Tomorrow\'s uniform',
+        'time_evening2': '8:15 PM',
+        'time_evening2_desc': 'Reminder again',
+        'time_evening3': '10:00 PM',
+        'time_evening3_desc': 'Before sleep',
+        'popup_btn': 'Got it, enable reminders',
+        'toast_message': 'Notification',
+        'double_tap': '👆 Double tap / Double space to toggle dark mode',
+        'group_names': {
+            '星穹组': 'Starry Group',
+            '夜曜组': 'Night Group',
+            '沧澜组': 'Ocean Group'
+        },
+        'table_headers': ['#', 'Name', 'Class', 'ID', 'Daily Scores', 'Total', 'Reward'],
+        'rank_prefix': '',
+        'rank_suffix': 'th',
+        'points': 'pts',
+        'average': 'Avg',
+    }
+};
+
+// 翻译函数
+window.t = function(key) {
+    const keys = key.split('.');
+    let value = translations[window.currentLang];
+    for (const k of keys) {
+        if (value && value[k] !== undefined) {
+            value = value[k];
+        } else {
+            return key;
+        }
+    }
+    return value;
+};
+
+// 更新整个页面
+window.updateFullPage = function() {
+    // 更新标题
+    document.title = window.t('title');
+    
+    // 更新头部
+    const h1 = document.querySelector('h1');
+    if (h1) h1.textContent = window.t('title');
+    
+    const downloadBtnText = document.querySelector('.download-btn span:last-child');
+    if (downloadBtnText) downloadBtnText.textContent = window.t('download');
+    
+    const themeToggleText = document.querySelector('.theme-toggle span:last-child');
+    if (themeToggleText) themeToggleText.textContent = window.t('dark');
+    
+    const langBtnText = document.querySelector('.lang-toggle span:last-child');
+    if (langBtnText) langBtnText.textContent = window.t('lang_btn');
+    
+    const searchInput = document.getElementById('search');
+    if (searchInput) searchInput.placeholder = window.t('search_placeholder');
+    
+    const metaSpan = document.querySelector('.meta-info span:first-child');
+    if (metaSpan) metaSpan.textContent = 'Prefects' Scoreboard · ' + window.t('legend_desc');
+    
+    // 更新图例
+    const legendLow = document.querySelector('.legend-label span.low');
+    const legendHigh = document.querySelector('.legend-label span.high');
+    if (legendLow) legendLow.innerHTML = window.t('legend_low') + ' █';
+    if (legendHigh) legendHigh.innerHTML = window.t('legend_high') + ' █';
+    
+    // 更新统计图卡片
+    const chartTitle = document.querySelector('.chart-title span:last-child');
+    if (chartTitle) chartTitle.textContent = window.t('chart_title');
+    
+    const saveChartBtnText = document.querySelector('.save-chart-btn span:last-child');
+    if (saveChartBtnText) saveChartBtnText.textContent = window.t('save_chart');
+    
+    const closeChartBtn = document.querySelector('.close-chart');
+    if (closeChartBtn) closeChartBtn.textContent = window.t('close');
+    
+    // 更新排名卡片
+    document.querySelectorAll('.rank-card').forEach(card => {
+        const groupName = card.dataset.group;
+        const nameEl = card.querySelector('.rank-name');
+        const scoreEl = card.querySelector('.rank-score');
+        
+        if (nameEl && groupName) {
+            nameEl.textContent = window.t(`group_names.${groupName}`);
+        }
+        
+        if (scoreEl) {
+            const score = scoreEl.textContent.replace(/[^0-9]/g, '');
+            scoreEl.innerHTML = score + `<small>${window.t('points')}</small>`;
+        }
+    });
+    
+    // 更新所有组别
+    document.querySelectorAll('.group-card').forEach(card => {
+        const groupName = card.dataset.group;
+        const titleEl = card.querySelector('.group-title');
+        const avgEl = card.querySelector('.group-avg');
+        const badgeEl = card.querySelector('.group-badge');
+        
+        if (titleEl && groupName) {
+            titleEl.textContent = window.t(`group_names.${groupName}`);
+        }
+        
+        if (avgEl) {
+            const avgNum = avgEl.textContent.replace(/[^0-9]/g, '');
+            avgEl.textContent = window.t('average') + avgNum;
+        }
+        
+        if (badgeEl) {
+            const rankNum = badgeEl.textContent.replace(/[^0-9]/g, '');
+            if (window.currentLang === 'en') {
+                badgeEl.textContent = rankNum + window.t('rank_suffix');
+            } else {
+                badgeEl.textContent = window.t('rank_prefix') + rankNum + window.t('rank_suffix');
+            }
+        }
+    });
+    
+    // 更新表格表头
+    const headers = window.t('table_headers');
+    document.querySelectorAll('.member-table').forEach(table => {
+        const ths = table.querySelectorAll('th');
+        ths.forEach((th, index) => {
+            if (headers[index]) {
+                th.textContent = headers[index];
+            }
+        });
+    });
+    
+    // 更新奖励机制卡片
+    const rewardTitle = document.querySelector('.reward-header h2');
+    if (rewardTitle) rewardTitle.textContent = window.t('reward_title');
+    
+    const rewardSubtitle = document.querySelector('.reward-subtitle');
+    if (rewardSubtitle) rewardSubtitle.textContent = window.t('reward_subtitle');
+    
+    const rewardItems = document.querySelectorAll('.reward-item');
+    if (rewardItems.length >= 3) {
+        const rankTitles = rewardItems[0].querySelectorAll('.rank-title');
+        const conditions = rewardItems[0].querySelectorAll('.reward-condition');
+        const benefits = rewardItems[0].querySelectorAll('.reward-benefit');
+        
+        if (rankTitles[0]) rankTitles[0].textContent = window.t('reward_1');
+        if (rankTitles[1]) rankTitles[1].textContent = window.t('reward_2');
+        if (rankTitles[2]) rankTitles[2].textContent = window.t('reward_3');
+        
+        if (conditions[0]) conditions[0].textContent = window.t('reward_1_condition');
+        if (conditions[1]) conditions[1].textContent = window.t('reward_2_condition');
+        if (conditions[2]) conditions[2].textContent = window.t('reward_3_condition');
+        
+        if (benefits[0]) benefits[0].textContent = window.t('reward_1_benefit');
+        if (benefits[1]) benefits[1].textContent = window.t('reward_2_benefit');
+        if (benefits[2]) benefits[2].textContent = window.t('reward_3_benefit');
+    }
+    
+    const rewardNote = document.querySelector('.reward-note');
+    if (rewardNote) rewardNote.textContent = window.t('reward_note');
+    
+    const rewardFooter = document.querySelector('.reward-footer');
+    if (rewardFooter) rewardFooter.textContent = window.t('reward_footer');
+    
+    // 更新页脚
+    const footer = document.querySelector('.footer');
+    if (footer) footer.innerHTML = window.t('footer');
+    
+    // 更新提醒按钮和弹窗
+    const reminderText = document.querySelector('.reminder-text');
+    if (reminderText) reminderText.textContent = window.t('reminder_btn');
+    
+    const popupTitle = document.querySelector('.popup-title');
+    if (popupTitle) popupTitle.textContent = window.t('popup_title');
+    
+    const timeLabels = document.querySelectorAll('.time-label');
+    const timeDescs = document.querySelectorAll('.time-desc');
+    
+    if (timeLabels.length >= 4) {
+        timeLabels[0].textContent = window.t('time_morning');
+        timeLabels[1].textContent = window.t('time_evening1');
+        timeLabels[2].textContent = window.t('time_evening2');
+        timeLabels[3].textContent = window.t('time_evening3');
+    }
+    
+    if (timeDescs.length >= 4) {
+        timeDescs[0].textContent = window.t('time_morning_desc');
+        timeDescs[1].textContent = window.t('time_evening1_desc');
+        timeDescs[2].textContent = window.t('time_evening2_desc');
+        timeDescs[3].textContent = window.t('time_evening3_desc');
+    }
+    
+    const popupBtn = document.querySelector('.popup-btn');
+    if (popupBtn) popupBtn.textContent = window.t('popup_btn');
+    
+    const toastTitle = document.querySelector('.toast-title span:last-child');
+    if (toastTitle) toastTitle.textContent = window.t('toast_message');
+    
+    const hintText = document.getElementById('hintText');
+    if (hintText) hintText.textContent = window.t('double_tap');
+};
 
 // OneSignal 初始化
 window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(async function(OneSignal) {
+window.OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
         appId: "137d66ce-9746-4206-9861-a1c368a0b548",
         allowLocalhostAsSecureOrigin: true,
@@ -625,47 +415,9 @@ OneSignalDeferred.push(async function(OneSignal) {
     console.log('OneSignal 初始化成功');
 });
 
-// 检查订阅状态
-async function checkSubscription() {
-    const isSubscribed = await OneSignalDeferred.push(async function(OneSignal) {
-        return await OneSignal.User.PushSubscription.optedIn;
-    });
-    console.log('订阅状态:', isSubscribed);
-    return isSubscribed;
-}
-
-// 开启提醒
-function enableReminders() {
-    OneSignalDeferred.push(function(OneSignal) {
-        OneSignal.Notifications.requestPermission();
-    });
-    closePopup();
-}
-
-// 显示提示框
-function showReminderPopup() {
-    document.getElementById('reminderPopup').classList.add('show');
-}
-
-// 关闭提示框
-function closePopup() {
-    document.getElementById('reminderPopup').classList.remove('show');
-}
-
-// 点击外部关闭提示框
-document.addEventListener('click', function(e) {
-    const popup = document.getElementById('reminderPopup');
-    const btn = document.getElementById('reminderBtn');
-    if (popup && btn) {
-        if (!popup.contains(e.target) && !btn.contains(e.target)) {
-            popup.classList.remove('show');
-        }
-    }
-});
-
-// 页面加载完成后更新整个页面
+// 页面加载完成后更新语言
 document.addEventListener('DOMContentLoaded', function() {
-    updateFullPage();
+    window.updateFullPage();
 });
 </script>
 
@@ -1782,11 +1534,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span>📊</span>
                         <span>下载统计</span>
                     </button>
-                    <div class="lang-toggle" onclick="toggleLanguage()">
+                    <div class="lang-toggle" onclick="window.toggleLanguage()">
                         <span>🌐</span>
                         <span>EN/中文</span>
                     </div>
-                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                    <div class="theme-toggle" onclick="window.toggleNightMode()">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
                     </div>
@@ -1794,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/12 13:56</span>
+                <span class="date-badge">03/12 14:08</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -2430,7 +2182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 
     <!-- 开启提醒按钮 -->
-    <div class="reminder-btn" id="reminderBtn" onclick="showReminderPopup()">
+    <div class="reminder-btn" id="reminderBtn" onclick="window.showReminderPopup()">
         <span class="bell-icon">🔔</span>
         <span class="reminder-text">开启提醒</span>
     </div>
@@ -2440,7 +2192,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="popup-header">
             <span class="popup-icon">⏰</span>
             <span class="popup-title">每日提醒时间</span>
-            <span class="popup-close" onclick="closePopup()">✕</span>
+            <span class="popup-close" onclick="window.closePopup()">✕</span>
         </div>
         <div class="popup-content">
             <div class="time-item">
@@ -2465,7 +2217,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
         <div class="popup-footer">
-            <button class="popup-btn" onclick="enableReminders()">知道了，开启提醒</button>
+            <button class="popup-btn" onclick="window.enableReminders()">知道了，开启提醒</button>
         </div>
     </div>
 
@@ -2503,25 +2255,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let spaceCount = 0;
         let hintTimeout;
 
-        // 显示提示
-        function showHint(message) {
-            hintText.textContent = message;
-            doubleTapHint.classList.add('show');
-            
-            clearTimeout(hintTimeout);
-            hintTimeout = setTimeout(() => {
-                doubleTapHint.classList.remove('show');
-            }, 1500);
-        }
-
-        // 切换深色模式
-        function toggleNightMode() {
-            document.body.classList.toggle('night-mode');
-            // 更新图表颜色
-            if (chart && chartCard.classList.contains('show')) {
-                generateChart();
-            }
-        }
+        // 显示提示 (已经在window对象中定义了)
+        
+        // 切换深色模式 (已经在window对象中定义了)
 
         // 监听双击（手机）
         document.addEventListener('touchstart', (e) => {
@@ -2530,8 +2266,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (tapLength < 200 && tapLength > 0) {
                 // 双击
-                toggleNightMode();
-                showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+                window.toggleNightMode();
                 e.preventDefault();
             }
             lastTap = currentTime;
@@ -2549,8 +2284,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     spaceCount++;
                     if (spaceCount === 2) {
                         // 双空格
-                        toggleNightMode();
-                        showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+                        window.toggleNightMode();
                         spaceCount = 0;
                     }
                 } else {
@@ -2577,29 +2311,20 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
         
-        let chart = null;
-
-        // 显示提示
-        function showToast(message, isSuccess = true) {
-            toastMessage.textContent = message;
-            downloadToast.classList.add('show');
-            setTimeout(() => {
-                downloadToast.classList.remove('show');
-            }, 2000);
-        }
+        window.chart = null;
 
         // 生成统计图
-        function generateChart() {
+        window.generateChart = function() {
             const ctx = document.getElementById('groupChart').getContext('2d');
             const isNightMode = document.body.classList.contains('night-mode');
             const textColor = isNightMode ? '#b0b0b0' : '#5a6b7a';
             const gridColor = isNightMode ? '#3a3f4d' : '#e1e8f0';
             
-            if (chart) {
-                chart.destroy();
+            if (window.chart) {
+                window.chart.destroy();
             }
             
-            chart = new Chart(ctx, {
+            window.chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: groups,
@@ -2645,7 +2370,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 }
             });
-        }
+        };
 
         // 生成统计卡片
         function generateStatsGrid() {
@@ -2667,10 +2392,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const chartCard = document.getElementById('chartCard');
             
             try {
-                showToast('📸 正在生成图片...');
+                window.showPageToast('📸', '正在生成图片...');
                 
-                if (!chart) {
-                    generateChart();
+                if (!window.chart) {
+                    window.generateChart();
                 }
                 
                 setTimeout(async () => {
@@ -2683,24 +2408,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     
                     const link = document.createElement('a');
-                    link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
+                    link.download = `prefect_stats_${new Date().toISOString().slice(0,10)}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     
-                    showToast('✅ 已保存到相册');
+                    window.showPageToast('✅', '已保存到相册');
                 }, 500);
                 
             } catch (error) {
                 console.error('保存失败:', error);
-                showToast('❌ 保存失败');
+                window.showPageToast('❌', '保存失败');
             }
         }
 
         downloadBtn.addEventListener('click', () => {
             chartCard.classList.add('show');
-            generateChart();
+            window.generateChart();
             generateStatsGrid();
-            showToast('📊 统计图已生成');
+            window.showPageToast('📊', '统计图已生成');
         });
 
         if (saveChartBtn) {
@@ -2720,27 +2445,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         const observer = new MutationObserver(() => {
-            if (chart && chartCard.classList.contains('show')) {
-                generateChart();
+            if (window.chart && chartCard.classList.contains('show')) {
+                window.generateChart();
             }
         });
         
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-
-        // 显示网页内提醒
-        function showPageToast(title, message) {
-            const toast = document.getElementById('notificationToast');
-            const titleEl = document.getElementById('toastMessage');
-            const detailEl = document.getElementById('toastDetail');
-            
-            titleEl.textContent = title;
-            detailEl.textContent = message;
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
-        }
     </script>
 </body>
 </html>
