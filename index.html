@@ -13,7 +13,226 @@
 // 联课活动数据（用于服装提醒）
 const CCA_DATA = [{"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "uniform": "校服"}, {"date": "2026-02-26", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-03", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "uniform": "校服"}, {"date": "2026-03-10", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-12", "activity": "活动（行动组）", "uniform": "校服"}, {"date": "2026-03-17", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-31", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-02", "activity": "活动（值岗组）", "uniform": "校服"}, {"date": "2026-04-07", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-09", "activity": "活动（督察组）", "uniform": "校服"}, {"date": "2026-04-14", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-16", "activity": "活动（星穹组）", "uniform": "校服"}, {"date": "2026-04-21", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-23", "activity": "活动（夜曜组）", "uniform": "校服"}, {"date": "2026-04-28", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-30", "activity": "活动（沧澜组）", "uniform": "校服"}, {"date": "2026-05-05", "activity": "第一学期检讨", "uniform": "校服"}, {"date": "2026-05-07", "activity": "操步", "uniform": "体育衣"}];
 
-// 获取明天要穿的衣服
+// 翻译字典
+const translations = {
+    'zh': {
+        'title': '学长团分数板 · 热力图',
+        'download': '下载统计',
+        'dark': '深色',
+        'search': '搜姓名/班级/学号...',
+        'legend_low': '低分',
+        'legend_high': '高分',
+        'chart_title': '各组总分对比',
+        'save_chart': '保存到相册',
+        'close': '关闭',
+        'reward_title': '本轮奖励机制',
+        'reward_subtitle': '公平原则 · 不负每一位付出的学长',
+        'reward_1': '第1名',
+        'reward_1_condition': '分数 ≥ 平均分÷2',
+        'reward_1_benefit': '✨免搬椅子+减免操步',
+        'reward_2': '第2名',
+        'reward_2_condition': '分数 ≥ 平均分',
+        'reward_2_benefit': '✨免搬椅子+减免操步',
+        'reward_3': '第3名',
+        'reward_3_condition': '组内前三名',
+        'reward_3_benefit': '✨免搬椅子+减免操步',
+        'reward_note': '🎁 第1名达标者额外奖励一份',
+        'reward_footer': '* 未达标者工作照旧 *',
+        'footer': '👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高',
+        'reminder_btn': '开启提醒',
+        'popup_title': '每日提醒时间',
+        'time_morning': '早上 6:00',
+        'time_morning_desc': '起床提醒',
+        'time_evening1': '晚上 7:00',
+        'time_evening1_desc': '明天衣服提醒',
+        'time_evening2': '晚上 8:15',
+        'time_evening2_desc': '再次提醒',
+        'time_evening3': '晚上 10:00',
+        'time_evening3_desc': '睡前提醒',
+        'popup_btn': '知道了，开启提醒',
+        'toast_message': '通知',
+        'double_tap': '👆 双击屏幕 / 按两次空格 切换深色模式',
+        'group_names': {
+            '星穹组': '星穹组',
+            '夜曜组': '夜曜组',
+            '沧澜组': '沧澜组'
+        },
+        'table_headers': ['#', '姓名', '班', '学号', '每日得分', '总分', '奖'],
+        'uniform_today': '今天是',
+        'uniform_tomorrow': '明天',
+        'uniform_activity': '有活动：',
+        'uniform_wear': '请穿',
+        'uniform_prepare': '请准备',
+        'uniform_sports': '体育衣',
+        'uniform_school': '校服',
+        'uniform_normal': '穿整齐校服，记得带名牌'
+    },
+    'en': {
+        'title': 'Discipline Unit - Prefect Scoreboard · Heatmap',
+        'download': 'Download Stats',
+        'dark': 'Dark',
+        'search': 'Search name/class/id...',
+        'legend_low': 'Low',
+        'legend_high': 'High',
+        'chart_title': 'Group Total Score Comparison',
+        'save_chart': 'Save to Gallery',
+        'close': 'Close',
+        'reward_title': 'Reward Mechanism',
+        'reward_subtitle': 'Fairness · Every effort counts',
+        'reward_1': '1st Place',
+        'reward_1_condition': 'Score ≥ Avg ÷ 2',
+        'reward_1_benefit': '✨ No chairs + Reduced drills',
+        'reward_2': '2nd Place',
+        'reward_2_condition': 'Score ≥ Avg',
+        'reward_2_benefit': '✨ No chairs + Reduced drills',
+        'reward_3': '3rd Place',
+        'reward_3_condition': 'Top 3 in group',
+        'reward_3_benefit': '✨ No chairs + Reduced drills',
+        'reward_note': '🎁 Extra reward for 1st place qualifiers',
+        'reward_footer': '* Others continue as usual *',
+        'footer': '👆 Double tap / Double space for dark mode · 📊 Download stats · Lighter color = higher score',
+        'reminder_btn': 'Enable Reminders',
+        'popup_title': 'Daily Reminder Times',
+        'time_morning': '6:00 AM',
+        'time_morning_desc': 'Wake up reminder',
+        'time_evening1': '7:00 PM',
+        'time_evening1_desc': 'Tomorrow's uniform',
+        'time_evening2': '8:15 PM',
+        'time_evening2_desc': 'Reminder again',
+        'time_evening3': '10:00 PM',
+        'time_evening3_desc': 'Before sleep',
+        'popup_btn': 'Got it, enable reminders',
+        'toast_message': 'Notification',
+        'double_tap': '👆 Double tap / Double space to toggle dark mode',
+        'group_names': {
+            '星穹组': 'Starry Group',
+            '夜曜组': 'Night Group',
+            '沧澜组': 'Ocean Group'
+        },
+        'table_headers': ['#', 'Name', 'Class', 'ID', 'Daily Scores', 'Total', 'Reward'],
+        'uniform_today': 'Today is',
+        'uniform_tomorrow': 'Tomorrow',
+        'uniform_activity': 'Activity:',
+        'uniform_wear': 'Wear',
+        'uniform_prepare': 'Prepare',
+        'uniform_sports': 'Sports Uniform',
+        'uniform_school': 'School Uniform',
+        'uniform_normal': 'Wear school uniform, bring name tag'
+    }
+};
+
+// 当前语言
+let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+
+// 翻译函数
+function t(key) {
+    const keys = key.split('.');
+    let value = translations[currentLang];
+    for (const k of keys) {
+        if (value && value[k] !== undefined) {
+            value = value[k];
+        } else {
+            return key;
+        }
+    }
+    return value;
+}
+
+// 切换语言
+function toggleLanguage() {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    localStorage.setItem('prefect_lang', currentLang);
+    updateLanguage();
+}
+
+// 更新页面语言
+function updateLanguage() {
+    // 更新标题
+    document.title = t('title');
+    
+    // 更新头部
+    document.querySelector('h1').textContent = t('title');
+    document.querySelector('.download-btn span:last-child').textContent = t('download');
+    document.querySelector('.theme-toggle span:last-child').textContent = t('dark');
+    document.querySelector('#search').placeholder = t('search');
+    
+    // 更新图例
+    document.querySelector('.legend-label span.low').innerHTML = t('legend_low') + ' █';
+    document.querySelector('.legend-label span.high').innerHTML = t('legend_high') + ' █';
+    
+    // 更新统计图卡片
+    document.querySelector('.chart-title span:last-child').textContent = t('chart_title');
+    document.querySelector('.save-chart-btn span:last-child').textContent = t('save_chart');
+    document.querySelector('.close-chart').textContent = t('close');
+    
+    // 更新奖励机制卡片
+    document.querySelector('.reward-header h2').textContent = t('reward_title');
+    document.querySelector('.reward-subtitle').textContent = t('reward_subtitle');
+    
+    const rewardItems = document.querySelectorAll('.reward-item');
+    if (rewardItems.length >= 3) {
+        // 第1名
+        rewardItems[0].querySelector('.rank-title').textContent = t('reward_1');
+        rewardItems[0].querySelector('.reward-condition').textContent = t('reward_1_condition');
+        rewardItems[0].querySelector('.reward-benefit').textContent = t('reward_1_benefit');
+        
+        // 第2名
+        rewardItems[1].querySelector('.rank-title').textContent = t('reward_2');
+        rewardItems[1].querySelector('.reward-condition').textContent = t('reward_2_condition');
+        rewardItems[1].querySelector('.reward-benefit').textContent = t('reward_2_benefit');
+        
+        // 第3名
+        rewardItems[2].querySelector('.rank-title').textContent = t('reward_3');
+        rewardItems[2].querySelector('.reward-condition').textContent = t('reward_3_condition');
+        rewardItems[2].querySelector('.reward-benefit').textContent = t('reward_3_benefit');
+    }
+    
+    document.querySelector('.reward-note').textContent = t('reward_note');
+    document.querySelector('.reward-footer').textContent = t('reward_footer');
+    
+    // 更新页脚
+    document.querySelector('.footer').innerHTML = t('footer');
+    
+    // 更新提醒按钮和弹窗
+    document.querySelector('.reminder-text').textContent = t('reminder_btn');
+    document.querySelector('.popup-title').textContent = t('popup_title');
+    
+    const timeItems = document.querySelectorAll('.time-item');
+    if (timeItems.length >= 4) {
+        timeItems[0].querySelector('.time-label').textContent = t('time_morning');
+        timeItems[0].querySelector('.time-desc').textContent = t('time_morning_desc');
+        timeItems[1].querySelector('.time-label').textContent = t('time_evening1');
+        timeItems[1].querySelector('.time-desc').textContent = t('time_evening1_desc');
+        timeItems[2].querySelector('.time-label').textContent = t('time_evening2');
+        timeItems[2].querySelector('.time-desc').textContent = t('time_evening2_desc');
+        timeItems[3].querySelector('.time-label').textContent = t('time_evening3');
+        timeItems[3].querySelector('.time-desc').textContent = t('time_evening3_desc');
+    }
+    
+    document.querySelector('.popup-btn').textContent = t('popup_btn');
+    
+    // 更新双击提示
+    document.getElementById('hintText').textContent = t('double_tap');
+    
+    // 更新组名
+    document.querySelectorAll('.group-card').forEach(card => {
+        const groupName = card.dataset.group;
+        const titleEl = card.querySelector('.group-title');
+        if (titleEl && groupName) {
+            titleEl.textContent = t(`group_names.${groupName}`);
+        }
+    });
+    
+    // 更新表格表头
+    const headers = t('table_headers').split(',');
+    document.querySelectorAll('.member-table th').forEach((th, index) => {
+        if (headers[index]) {
+            th.textContent = headers[index];
+        }
+    });
+}
+
+// 修改 getTomorrowUniform 函数支持英文
 function getTomorrowUniform() {
     const today = new Date();
     const tomorrow = new Date(today);
@@ -23,18 +242,43 @@ function getTomorrowUniform() {
     const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
     const day = String(tomorrow.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
+    const weekday = tomorrow.toLocaleDateString(currentLang === 'zh' ? 'zh-CN' : 'en-US', { weekday: 'long' });
     
     const tomorrowCCA = CCA_DATA.find(item => item.date === dateStr);
     
     if (tomorrowCCA) {
+        const activity = currentLang === 'en' ? translateActivity(tomorrowCCA.activity) : tomorrowCCA.activity;
         if (tomorrowCCA.uniform === "体育衣") {
-            return `🎽 明天请穿体育衣！活动：${tomorrowCCA.activity}`;
+            return currentLang === 'en' 
+                ? `🎽 Tomorrow (${weekday}) wear sports uniform! Activity: ${activity}`
+                : `🎽 明天${weekday}请穿体育衣！活动：${activity}`;
         } else {
-            return `👔 明天穿校服，活动：${tomorrowCCA.activity}`;
+            return currentLang === 'en'
+                ? `👔 Tomorrow (${weekday}) wear school uniform. Activity: ${activity}`
+                : `👔 明天${weekday}穿校服，活动：${activity}`;
         }
     } else {
-        return "👔 明天穿整齐校服，记得带名牌！";
+        return currentLang === 'en'
+            ? `👔 Tomorrow (${weekday}) wear school uniform, bring name tag`
+            : `👔 明天${weekday}穿整齐校服，记得带名牌`;
     }
+}
+
+// 翻译活动名称
+function translateActivity(activity) {
+    const activityMap = {
+        '活动顾问+总学长+副总学长': 'Activity: Advisor + Head Prefect + Deputy',
+        '操步': 'Marching',
+        '活动（文书+财政+查账）': 'Activity (Secretary + Treasurer + Auditor)',
+        '活动（行动组）': 'Activity (Action Team)',
+        '活动（值岗组）': 'Activity (Duty Team)',
+        '活动（督察组）': 'Activity (Discipline Team)',
+        '活动（星穹组）': 'Activity (Starry Group)',
+        '活动（夜曜组）': 'Activity (Night Group)',
+        '活动（沧澜组）': 'Activity (Ocean Group)',
+        '第一学期检讨': 'First Semester Review'
+    };
+    return activityMap[activity] || activity;
 }
 
 // OneSignal 初始化
@@ -49,9 +293,9 @@ OneSignalDeferred.push(async function(OneSignal) {
             showCredit: false,
             position: 'bottom-right',
             text: {
-                'message': '开启每日服装提醒',
-                'subscribe': '允许通知',
-                'unsubscribe': '关闭通知'
+                'message': currentLang === 'en' ? 'Enable daily reminders' : '开启每日服装提醒',
+                'subscribe': currentLang === 'en' ? 'Allow notifications' : '允许通知',
+                'unsubscribe': currentLang === 'en' ? 'Disable' : '关闭通知'
             },
             colors: {
                 'circle.background': '#eab308',
@@ -291,6 +535,26 @@ document.addEventListener('click', function(e) {
             display: flex;
             gap: 8px;
             align-items: center;
+        }
+
+        /* 语言切换按钮 */
+        .lang-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .lang-toggle:active {
+            transform: scale(0.98);
         }
 
         .theme-toggle {
@@ -1201,6 +1465,10 @@ document.addEventListener('click', function(e) {
                         <span>📊</span>
                         <span>下载统计</span>
                     </button>
+                    <div class="lang-toggle" onclick="toggleLanguage()">
+                        <span>🌐</span>
+                        <span>EN/中</span>
+                    </div>
                     <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
@@ -1209,7 +1477,7 @@ document.addEventListener('click', function(e) {
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/12 12:36</span>
+                <span class="date-badge">03/12 13:04</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -2156,6 +2424,9 @@ document.addEventListener('click', function(e) {
                 toast.classList.remove('show');
             }, 5000);
         }
+
+        // 初始化语言
+        updateLanguage();
     </script>
 </body>
 </html>
