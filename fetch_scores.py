@@ -305,19 +305,6 @@ OneSignalDeferred.push(async function(OneSignal) {{
     console.log('OneSignal 初始化成功');
 }});
 
-// 测试推送
-function sendTestPush() {{
-    const message = getTomorrowUniform();
-    OneSignalDeferred.push(async function(OneSignal) {{
-        await OneSignal.Notifications.create({{
-            title: "🔔 学长团测试",
-            message: message,
-            url: window.location.href
-        }});
-        alert('测试推送已发送！');
-    }});
-}}
-
 // 检查订阅状态
 async function checkSubscription() {{
     const isSubscribed = await OneSignalDeferred.push(async function(OneSignal) {{
@@ -326,6 +313,35 @@ async function checkSubscription() {{
     console.log('订阅状态:', isSubscribed);
     return isSubscribed;
 }}
+
+// 开启提醒
+function enableReminders() {{
+    OneSignalDeferred.push(function(OneSignal) {{
+        OneSignal.Notifications.requestPermission();
+    }});
+    closePopup();
+}}
+
+// 显示提示框
+function showReminderPopup() {{
+    document.getElementById('reminderPopup').classList.add('show');
+}}
+
+// 关闭提示框
+function closePopup() {{
+    document.getElementById('reminderPopup').classList.remove('show');
+}}
+
+// 点击外部关闭提示框
+document.addEventListener('click', function(e) {{
+    const popup = document.getElementById('reminderPopup');
+    const btn = document.getElementById('reminderBtn');
+    if (popup && btn) {{
+        if (!popup.contains(e.target) && !btn.contains(e.target)) {{
+            popup.classList.remove('show');
+        }}
+    }}
+}});
 </script>
 '''
 
@@ -446,7 +462,7 @@ html += '''
         /* 双击提示 */
         .double-tap-hint {
             position: fixed;
-            bottom: 80px;
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
             background: var(--card-bg);
@@ -456,7 +472,7 @@ html += '''
             font-size: 0.7rem;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
-            z-index: 999;
+            z-index: 9999;
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
@@ -513,7 +529,6 @@ html += '''
             align-items: center;
         }
 
-        /* 深色模式按钮 - 备用 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -533,7 +548,6 @@ html += '''
             transform: scale(0.98);
         }
 
-        /* 下载按钮 */
         .download-btn {
             background: var(--star-primary);
             border: none;
@@ -1217,28 +1231,191 @@ html += '''
             .action-buttons { width: 100%; justify-content: flex-end; }
         }
 
-        /* 自定义按钮样式（OneSignal会覆盖） */
-        .custom-test-btn {
+        /* ===== 开启提醒按钮 ===== */
+        .reminder-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--star-primary);
+            color: #1a2b3c;
+            padding: 14px 24px;
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);
+            cursor: pointer;
+            font-weight: 600;
+            border: 2px solid var(--border-light);
+            z-index: 1000;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .reminder-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(234, 179, 8, 0.4);
+        }
+
+        .reminder-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);
+            }
+            50% {
+                box-shadow: 0 8px 25px rgba(234, 179, 8, 0.6);
+            }
+            100% {
+                box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3);
+            }
+        }
+
+        .bell-icon {
+            font-size: 1.4rem;
+            animation: ring 3s infinite;
+        }
+
+        @keyframes ring {
+            0%, 100% { transform: rotate(0); }
+            10%, 30%, 50%, 70%, 90% { transform: rotate(10deg); }
+            20%, 40%, 60%, 80% { transform: rotate(-10deg); }
+        }
+
+        /* 提醒时间提示框 */
+        .reminder-popup {
             position: fixed;
             bottom: 100px;
             right: 20px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            padding: 10px 16px;
-            border-radius: 50px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            width: 300px;
+            z-index: 1001;
+            display: none;
+            animation: slideUp 0.4s ease;
+        }
+
+        .reminder-popup.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .popup-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-subtle);
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: var(--shadow-md);
-            cursor: pointer;
-            font-weight: 500;
-            border: 1px solid var(--border-light);
-            z-index: 999;
-            font-size: 0.9rem;
+            position: relative;
         }
 
-        .custom-test-btn:hover {
-            background: var(--star-light);
+        .popup-icon {
+            font-size: 1.4rem;
+        }
+
+        .popup-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-tertiary);
+            padding: 4px;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .popup-close:hover {
+            background: var(--border-subtle);
+        }
+
+        .popup-content {
+            padding: 16px;
+        }
+
+        .time-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .time-item:last-child {
+            border-bottom: none;
+        }
+
+        .time-icon {
+            font-size: 1.2rem;
+            width: 32px;
+        }
+
+        .time-label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            width: 80px;
+        }
+
+        .time-desc {
+            font-size: 0.85rem;
+            color: var(--text-tertiary);
+        }
+
+        .popup-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .popup-btn {
+            width: 100%;
+            background: var(--star-primary);
+            color: #1a2b3c;
+            border: none;
+            border-radius: 30px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .popup-btn:hover {
+            transform: scale(1.02);
+            background: #ca8a04;
+        }
+
+        .popup-btn:active {
+            transform: scale(0.98);
+        }
+
+        body.night-mode .popup-btn {
+            color: #ffffff;
         }
     </style>
 </head>
@@ -1509,10 +1686,44 @@ html += '''
         <span id="toastMessage">统计图已生成</span>
     </div>
 
-    <!-- 自定义测试按钮（OneSignal会自动显示自己的按钮） -->
-    <div class="custom-test-btn" onclick="sendTestPush()">
-        <span>📱</span>
-        <span>测试推送</span>
+    <!-- 开启提醒按钮 -->
+    <div class="reminder-btn" id="reminderBtn" onclick="showReminderPopup()">
+        <span class="bell-icon">🔔</span>
+        <span class="reminder-text">开启提醒</span>
+    </div>
+
+    <!-- 提醒时间提示框 -->
+    <div class="reminder-popup" id="reminderPopup">
+        <div class="popup-header">
+            <span class="popup-icon">⏰</span>
+            <span class="popup-title">每日提醒时间</span>
+            <span class="popup-close" onclick="closePopup()">✕</span>
+        </div>
+        <div class="popup-content">
+            <div class="time-item">
+                <span class="time-icon">🌅</span>
+                <span class="time-label">早上 6:00</span>
+                <span class="time-desc">起床提醒</span>
+            </div>
+            <div class="time-item">
+                <span class="time-icon">🌆</span>
+                <span class="time-label">晚上 7:00</span>
+                <span class="time-desc">明天衣服提醒</span>
+            </div>
+            <div class="time-item">
+                <span class="time-icon">🌙</span>
+                <span class="time-label">晚上 8:15</span>
+                <span class="time-desc">再次提醒</span>
+            </div>
+            <div class="time-item">
+                <span class="time-icon">🌃</span>
+                <span class="time-label">晚上 10:00</span>
+                <span class="time-desc">睡前提醒</span>
+            </div>
+        </div>
+        <div class="popup-footer">
+            <button class="popup-btn" onclick="enableReminders()">知道了，开启提醒</button>
+        </div>
     </div>
 
     <!-- 提示浮层 -->
@@ -1524,56 +1735,6 @@ html += '''
         </div>
         <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail"></div>
     </div>
-
-    <style>
-    .notification-toast {
-        position: fixed;
-        bottom: 180px;
-        right: 20px;
-        background: var(--card-bg);
-        color: var(--text-primary);
-        padding: 12px 16px;
-        border-radius: 16px;
-        box-shadow: var(--shadow-lg);
-        border-left: 4px solid var(--star-primary);
-        max-width: 280px;
-        z-index: 999;
-        display: none;
-        animation: slideIn 0.3s ease;
-    }
-
-    .notification-toast.show {
-        display: block;
-    }
-
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-
-    .toast-title {
-        font-weight: 600;
-        margin-bottom: 4px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .toast-close {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        cursor: pointer;
-        font-size: 0.7rem;
-        opacity: 0.6;
-    }
-    </style>
 
     <script>
         // 检查系统主题偏好
@@ -1842,25 +2003,6 @@ html += '''        ];
                 toast.classList.remove('show');
             }, 5000);
         }
-
-        // 发送测试推送（OneSignal）
-        window.sendTestPush = function() {
-            const message = getTomorrowUniform();
-            showPageToast('📱 发送测试', '请稍候...');
-            
-            OneSignalDeferred.push(async function(OneSignal) {
-                try {
-                    await OneSignal.Notifications.create({
-                        title: "🔔 学长团测试",
-                        message: message,
-                        url: window.location.href
-                    });
-                    showPageToast('✅ 测试已发送', '请查看手机通知栏');
-                } catch (e) {
-                    showPageToast('❌ 发送失败', e.message);
-                }
-            });
-        };
     </script>
 </body>
 </html>'''
@@ -1876,4 +2018,5 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 新增：OneSignal 推送通知（手机锁屏也能收到！）")
+print("✨ 新增：双击屏幕/双空格切换深色模式")
+print("🔔 新增：开启提醒按钮 + 动画提示框")
