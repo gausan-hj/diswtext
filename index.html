@@ -13,94 +13,11 @@
 // 联课活动数据（用于服装提醒）
 const CCA_DATA = [{"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "uniform": "校服"}, {"date": "2026-02-26", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-03", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "uniform": "校服"}, {"date": "2026-03-10", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-12", "activity": "活动（行动组）", "uniform": "校服"}, {"date": "2026-03-17", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-03-31", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-02", "activity": "活动（值岗组）", "uniform": "校服"}, {"date": "2026-04-07", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-09", "activity": "活动（督察组）", "uniform": "校服"}, {"date": "2026-04-14", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-16", "activity": "活动（星穹组）", "uniform": "校服"}, {"date": "2026-04-21", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-23", "activity": "活动（夜曜组）", "uniform": "校服"}, {"date": "2026-04-28", "activity": "操步", "uniform": "体育衣"}, {"date": "2026-04-30", "activity": "活动（沧澜组）", "uniform": "校服"}, {"date": "2026-05-05", "activity": "第一学期检讨", "uniform": "校服"}, {"date": "2026-05-07", "activity": "操步", "uniform": "体育衣"}];
 
-// ===== 全局函数，确保所有按钮都能访问 =====
-// 切换深色模式
-window.toggleNightMode = function() {
-    document.body.classList.toggle('night-mode');
-    // 更新图表颜色
-    if (window.chart && document.getElementById('chartCard').classList.contains('show')) {
-        window.generateChart();
-    }
-    window.showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
-};
+// ===== 全局变量 =====
+let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+let chart = null;
 
-// 显示提示
-window.showHint = function(message) {
-    const hintText = document.getElementById('hintText');
-    const doubleTapHint = document.getElementById('doubleTapHint');
-    if (hintText && doubleTapHint) {
-        hintText.textContent = message;
-        doubleTapHint.classList.add('show');
-        setTimeout(() => {
-            doubleTapHint.classList.remove('show');
-        }, 1500);
-    }
-};
-
-// 切换语言
-window.toggleLanguage = function() {
-    const langBtn = document.querySelector('.lang-toggle');
-    if (langBtn) {
-        langBtn.style.transform = 'scale(0.9)';
-        setTimeout(() => {
-            langBtn.style.transform = 'scale(1)';
-        }, 150);
-    }
-    
-    // 切换语言
-    window.currentLang = window.currentLang === 'zh' ? 'en' : 'zh';
-    localStorage.setItem('prefect_lang', window.currentLang);
-    
-    // 更新整个页面
-    window.updateFullPage();
-    
-    // 显示提示
-    window.showPageToast('🌐', window.currentLang === 'en' ? 'Switched to English' : '已切换到中文');
-};
-
-// 显示网页内提醒
-window.showPageToast = function(title, message) {
-    const toast = document.getElementById('notificationToast');
-    const titleEl = document.getElementById('toastMessage');
-    const detailEl = document.getElementById('toastDetail');
-    
-    if (toast && titleEl && detailEl) {
-        titleEl.textContent = title;
-        detailEl.textContent = message;
-        toast.classList.add('show');
-        
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2000);
-    }
-};
-
-// 显示提醒弹窗
-window.showReminderPopup = function() {
-    const popup = document.getElementById('reminderPopup');
-    if (popup) popup.classList.add('show');
-};
-
-// 关闭提醒弹窗
-window.closePopup = function() {
-    const popup = document.getElementById('reminderPopup');
-    if (popup) popup.classList.remove('show');
-};
-
-// 开启提醒
-window.enableReminders = function() {
-    if (window.OneSignalDeferred) {
-        window.OneSignalDeferred.push(function(OneSignal) {
-            OneSignal.Notifications.requestPermission();
-        });
-    }
-    window.closePopup();
-};
-
-// 当前语言
-window.currentLang = localStorage.getItem('prefect_lang') || 'zh';
-
-// ===== 完整的翻译字典 =====
+// ===== 翻译字典 =====
 const translations = {
     'zh': {
         'title': '训育处 - 学长团分数板 · 热力图',
@@ -204,10 +121,10 @@ const translations = {
     }
 };
 
-// 翻译函数
-window.t = function(key) {
+// ===== 工具函数 =====
+function t(key) {
     const keys = key.split('.');
-    let value = translations[window.currentLang];
+    let value = translations[currentLang];
     for (const k of keys) {
         if (value && value[k] !== undefined) {
             value = value[k];
@@ -216,65 +133,128 @@ window.t = function(key) {
         }
     }
     return value;
-};
+}
 
-// 更新整个页面
-window.updateFullPage = function() {
-    // 更新标题
-    document.title = window.t('title');
+function showToast(message, isSuccess = true) {
+    const toast = document.getElementById('downloadToast');
+    const toastMessage = document.getElementById('toastMessage');
+    if (toast && toastMessage) {
+        toastMessage.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+}
+
+function showPageToast(title, message) {
+    const toast = document.getElementById('notificationToast');
+    const titleEl = document.getElementById('toastMessage');
+    const detailEl = document.getElementById('toastDetail');
     
-    // 更新头部
+    if (toast && titleEl && detailEl) {
+        titleEl.textContent = title;
+        detailEl.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+}
+
+function showHint(message) {
+    const hintText = document.getElementById('hintText');
+    const doubleTapHint = document.getElementById('doubleTapHint');
+    if (hintText && doubleTapHint) {
+        hintText.textContent = message;
+        doubleTapHint.classList.add('show');
+        setTimeout(() => {
+            doubleTapHint.classList.remove('show');
+        }, 1500);
+    }
+}
+
+// ===== 深色模式切换 =====
+function toggleNightMode() {
+    document.body.classList.toggle('night-mode');
+    if (chart && document.getElementById('chartCard').classList.contains('show')) {
+        generateChart();
+    }
+    showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+}
+
+// ===== 语言切换 =====
+function toggleLanguage() {
+    const langBtn = document.querySelector('.lang-toggle');
+    if (langBtn) {
+        langBtn.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+            langBtn.style.transform = 'scale(1)';
+        }, 150);
+    }
+    
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    localStorage.setItem('prefect_lang', currentLang);
+    updateFullPage();
+    showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
+}
+
+// ===== 更新页面 =====
+function updateFullPage() {
+    document.title = t('title');
+    
+    // 头部
     const h1 = document.querySelector('h1');
-    if (h1) h1.textContent = window.t('title');
+    if (h1) h1.textContent = t('title');
     
     const downloadBtnText = document.querySelector('.download-btn span:last-child');
-    if (downloadBtnText) downloadBtnText.textContent = window.t('download');
+    if (downloadBtnText) downloadBtnText.textContent = t('download');
     
     const themeToggleText = document.querySelector('.theme-toggle span:last-child');
-    if (themeToggleText) themeToggleText.textContent = window.t('dark');
+    if (themeToggleText) themeToggleText.textContent = t('dark');
     
     const langBtnText = document.querySelector('.lang-toggle span:last-child');
-    if (langBtnText) langBtnText.textContent = window.t('lang_btn');
+    if (langBtnText) langBtnText.textContent = t('lang_btn');
     
     const searchInput = document.getElementById('search');
-    if (searchInput) searchInput.placeholder = window.t('search_placeholder');
+    if (searchInput) searchInput.placeholder = t('search_placeholder');
     
     const metaSpan = document.querySelector('.meta-info span:first-child');
-    if (metaSpan) metaSpan.textContent = 'Prefects' Scoreboard · ' + window.t('legend_desc');
+    if (metaSpan) metaSpan.textContent = 'Prefects' Scoreboard · ' + t('legend_desc');
     
-    // 更新图例
+    // 图例
     const legendLow = document.querySelector('.legend-label span.low');
     const legendHigh = document.querySelector('.legend-label span.high');
-    if (legendLow) legendLow.innerHTML = window.t('legend_low') + ' █';
-    if (legendHigh) legendHigh.innerHTML = window.t('legend_high') + ' █';
+    if (legendLow) legendLow.innerHTML = t('legend_low') + ' █';
+    if (legendHigh) legendHigh.innerHTML = t('legend_high') + ' █';
     
-    // 更新统计图卡片
+    // 统计图卡片
     const chartTitle = document.querySelector('.chart-title span:last-child');
-    if (chartTitle) chartTitle.textContent = window.t('chart_title');
+    if (chartTitle) chartTitle.textContent = t('chart_title');
     
     const saveChartBtnText = document.querySelector('.save-chart-btn span:last-child');
-    if (saveChartBtnText) saveChartBtnText.textContent = window.t('save_chart');
+    if (saveChartBtnText) saveChartBtnText.textContent = t('save_chart');
     
     const closeChartBtn = document.querySelector('.close-chart');
-    if (closeChartBtn) closeChartBtn.textContent = window.t('close');
+    if (closeChartBtn) closeChartBtn.textContent = t('close');
     
-    // 更新排名卡片
+    // 排名卡片
     document.querySelectorAll('.rank-card').forEach(card => {
         const groupName = card.dataset.group;
         const nameEl = card.querySelector('.rank-name');
         const scoreEl = card.querySelector('.rank-score');
         
         if (nameEl && groupName) {
-            nameEl.textContent = window.t(`group_names.${groupName}`);
+            nameEl.textContent = t(`group_names.${groupName}`);
         }
         
         if (scoreEl) {
             const score = scoreEl.textContent.replace(/[^0-9]/g, '');
-            scoreEl.innerHTML = score + `<small>${window.t('points')}</small>`;
+            scoreEl.innerHTML = score + `<small>${t('points')}</small>`;
         }
     });
     
-    // 更新所有组别
+    // 组别
     document.querySelectorAll('.group-card').forEach(card => {
         const groupName = card.dataset.group;
         const titleEl = card.querySelector('.group-title');
@@ -282,26 +262,26 @@ window.updateFullPage = function() {
         const badgeEl = card.querySelector('.group-badge');
         
         if (titleEl && groupName) {
-            titleEl.textContent = window.t(`group_names.${groupName}`);
+            titleEl.textContent = t(`group_names.${groupName}`);
         }
         
         if (avgEl) {
             const avgNum = avgEl.textContent.replace(/[^0-9]/g, '');
-            avgEl.textContent = window.t('average') + avgNum;
+            avgEl.textContent = t('average') + avgNum;
         }
         
         if (badgeEl) {
             const rankNum = badgeEl.textContent.replace(/[^0-9]/g, '');
-            if (window.currentLang === 'en') {
-                badgeEl.textContent = rankNum + window.t('rank_suffix');
+            if (currentLang === 'en') {
+                badgeEl.textContent = rankNum + t('rank_suffix');
             } else {
-                badgeEl.textContent = window.t('rank_prefix') + rankNum + window.t('rank_suffix');
+                badgeEl.textContent = t('rank_prefix') + rankNum + t('rank_suffix');
             }
         }
     });
     
-    // 更新表格表头
-    const headers = window.t('table_headers');
+    // 表格表头
+    const headers = t('table_headers');
     document.querySelectorAll('.member-table').forEach(table => {
         const ths = table.querySelectorAll('th');
         ths.forEach((th, index) => {
@@ -311,75 +291,242 @@ window.updateFullPage = function() {
         });
     });
     
-    // 更新奖励机制卡片
+    // 奖励机制
     const rewardTitle = document.querySelector('.reward-header h2');
-    if (rewardTitle) rewardTitle.textContent = window.t('reward_title');
+    if (rewardTitle) rewardTitle.textContent = t('reward_title');
     
     const rewardSubtitle = document.querySelector('.reward-subtitle');
-    if (rewardSubtitle) rewardSubtitle.textContent = window.t('reward_subtitle');
+    if (rewardSubtitle) rewardSubtitle.textContent = t('reward_subtitle');
     
     const rewardItems = document.querySelectorAll('.reward-item');
     if (rewardItems.length >= 3) {
-        const rankTitles = rewardItems[0].querySelectorAll('.rank-title');
-        const conditions = rewardItems[0].querySelectorAll('.reward-condition');
-        const benefits = rewardItems[0].querySelectorAll('.reward-benefit');
+        const rankTitles = document.querySelectorAll('.rank-title');
+        const conditions = document.querySelectorAll('.reward-condition');
+        const benefits = document.querySelectorAll('.reward-benefit');
         
-        if (rankTitles[0]) rankTitles[0].textContent = window.t('reward_1');
-        if (rankTitles[1]) rankTitles[1].textContent = window.t('reward_2');
-        if (rankTitles[2]) rankTitles[2].textContent = window.t('reward_3');
+        if (rankTitles[0]) rankTitles[0].textContent = t('reward_1');
+        if (rankTitles[1]) rankTitles[1].textContent = t('reward_2');
+        if (rankTitles[2]) rankTitles[2].textContent = t('reward_3');
         
-        if (conditions[0]) conditions[0].textContent = window.t('reward_1_condition');
-        if (conditions[1]) conditions[1].textContent = window.t('reward_2_condition');
-        if (conditions[2]) conditions[2].textContent = window.t('reward_3_condition');
+        if (conditions[0]) conditions[0].textContent = t('reward_1_condition');
+        if (conditions[1]) conditions[1].textContent = t('reward_2_condition');
+        if (conditions[2]) conditions[2].textContent = t('reward_3_condition');
         
-        if (benefits[0]) benefits[0].textContent = window.t('reward_1_benefit');
-        if (benefits[1]) benefits[1].textContent = window.t('reward_2_benefit');
-        if (benefits[2]) benefits[2].textContent = window.t('reward_3_benefit');
+        if (benefits[0]) benefits[0].textContent = t('reward_1_benefit');
+        if (benefits[1]) benefits[1].textContent = t('reward_2_benefit');
+        if (benefits[2]) benefits[2].textContent = t('reward_3_benefit');
     }
     
     const rewardNote = document.querySelector('.reward-note');
-    if (rewardNote) rewardNote.textContent = window.t('reward_note');
+    if (rewardNote) rewardNote.textContent = t('reward_note');
     
     const rewardFooter = document.querySelector('.reward-footer');
-    if (rewardFooter) rewardFooter.textContent = window.t('reward_footer');
+    if (rewardFooter) rewardFooter.textContent = t('reward_footer');
     
-    // 更新页脚
+    // 页脚
     const footer = document.querySelector('.footer');
-    if (footer) footer.innerHTML = window.t('footer');
+    if (footer) footer.innerHTML = t('footer');
     
-    // 更新提醒按钮和弹窗
+    // 提醒按钮和弹窗
     const reminderText = document.querySelector('.reminder-text');
-    if (reminderText) reminderText.textContent = window.t('reminder_btn');
+    if (reminderText) reminderText.textContent = t('reminder_btn');
     
     const popupTitle = document.querySelector('.popup-title');
-    if (popupTitle) popupTitle.textContent = window.t('popup_title');
+    if (popupTitle) popupTitle.textContent = t('popup_title');
     
     const timeLabels = document.querySelectorAll('.time-label');
     const timeDescs = document.querySelectorAll('.time-desc');
     
     if (timeLabels.length >= 4) {
-        timeLabels[0].textContent = window.t('time_morning');
-        timeLabels[1].textContent = window.t('time_evening1');
-        timeLabels[2].textContent = window.t('time_evening2');
-        timeLabels[3].textContent = window.t('time_evening3');
+        timeLabels[0].textContent = t('time_morning');
+        timeLabels[1].textContent = t('time_evening1');
+        timeLabels[2].textContent = t('time_evening2');
+        timeLabels[3].textContent = t('time_evening3');
     }
     
     if (timeDescs.length >= 4) {
-        timeDescs[0].textContent = window.t('time_morning_desc');
-        timeDescs[1].textContent = window.t('time_evening1_desc');
-        timeDescs[2].textContent = window.t('time_evening2_desc');
-        timeDescs[3].textContent = window.t('time_evening3_desc');
+        timeDescs[0].textContent = t('time_morning_desc');
+        timeDescs[1].textContent = t('time_evening1_desc');
+        timeDescs[2].textContent = t('time_evening2_desc');
+        timeDescs[3].textContent = t('time_evening3_desc');
     }
     
     const popupBtn = document.querySelector('.popup-btn');
-    if (popupBtn) popupBtn.textContent = window.t('popup_btn');
+    if (popupBtn) popupBtn.textContent = t('popup_btn');
     
     const toastTitle = document.querySelector('.toast-title span:last-child');
-    if (toastTitle) toastTitle.textContent = window.t('toast_message');
+    if (toastTitle) toastTitle.textContent = t('toast_message');
     
     const hintText = document.getElementById('hintText');
-    if (hintText) hintText.textContent = window.t('double_tap');
-};
+    if (hintText) hintText.textContent = t('double_tap');
+}
+
+// ===== 提醒弹窗 =====
+function showReminderPopup() {
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.add('show');
+}
+
+function closePopup() {
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.remove('show');
+}
+
+function enableReminders() {
+    if (window.OneSignalDeferred) {
+        window.OneSignalDeferred.push(function(OneSignal) {
+            OneSignal.Notifications.requestPermission();
+        });
+    }
+    closePopup();
+}
+
+// ===== 统计图 =====
+function generateChart() {
+    const ctx = document.getElementById('groupChart').getContext('2d');
+    const isNightMode = document.body.classList.contains('night-mode');
+    const textColor = isNightMode ? '#b0b0b0' : '#5a6b7a';
+    const gridColor = isNightMode ? '#3a3f4d' : '#e1e8f0';
+    
+    if (chart) {
+        chart.destroy();
+    }
+    
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: groups,
+            datasets: [{
+                label: '总分',
+                data: scores,
+                backgroundColor: colors,
+                borderRadius: 6,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const group = groups[context.dataIndex];
+                            const stat = statsData.find(s => s.group === group);
+                            return [
+                                `总分: ${value}分`,
+                                `排名: 第${stat.rank}名`,
+                                `人数: ${stat.members}人`,
+                                `平均: ${stat.avg}分`
+                            ];
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: gridColor },
+                    ticks: { color: textColor }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textColor }
+                }
+            }
+        }
+    });
+}
+
+function generateStatsGrid() {
+    let html = '';
+    statsData.forEach(stat => {
+        html += `
+            <div class="stat-item">
+                <div class="stat-label">${stat.group}</div>
+                <div class="stat-value">${stat.total}</div>
+                <div class="stat-rank">第${stat.rank}名 · ${stat.members}人</div>
+            </div>
+        `;
+    });
+    document.getElementById('statsGrid').innerHTML = html;
+}
+
+async function saveChartToGallery() {
+    const chartCard = document.getElementById('chartCard');
+    
+    try {
+        showToast('📸 正在生成图片...');
+        
+        if (!chart) {
+            generateChart();
+        }
+        
+        setTimeout(async () => {
+            const canvas = await html2canvas(chartCard, {
+                scale: 2,
+                backgroundColor: getComputedStyle(document.body).backgroundColor,
+                allowTaint: false,
+                useCORS: true,
+                logging: false
+            });
+            
+            const link = document.createElement('a');
+            link.download = `prefect_stats_${new Date().toISOString().slice(0,10)}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            showToast('✅ 已保存到相册');
+        }, 500);
+        
+    } catch (error) {
+        console.error('保存失败:', error);
+        showToast('❌ 保存失败');
+    }
+}
+
+// ===== 初始化 =====
+document.addEventListener('DOMContentLoaded', function() {
+    updateFullPage();
+    
+    // 绑定下载按钮
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        document.getElementById('chartCard').classList.add('show');
+        generateChart();
+        generateStatsGrid();
+        showToast('📊 统计图已生成');
+    });
+    
+    // 绑定保存图表按钮
+    document.getElementById('saveChartBtn').addEventListener('click', saveChartToGallery);
+    
+    // 绑定关闭图表按钮
+    document.getElementById('closeChart').addEventListener('click', function() {
+        document.getElementById('chartCard').classList.remove('show');
+    });
+    
+    // 绑定搜索框
+    document.getElementById('search').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase().trim();
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const searchText = row.getAttribute('data-search').toLowerCase();
+            row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+        });
+    });
+    
+    // 点击外部关闭弹窗
+    document.addEventListener('click', function(e) {
+        const popup = document.getElementById('reminderPopup');
+        const btn = document.getElementById('reminderBtn');
+        if (popup && btn) {
+            if (!popup.contains(e.target) && !btn.contains(e.target)) {
+                popup.classList.remove('show');
+            }
+        }
+    });
+});
 
 // OneSignal 初始化
 window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -415,10 +562,49 @@ window.OneSignalDeferred.push(async function(OneSignal) {
     console.log('OneSignal 初始化成功');
 });
 
-// 页面加载完成后更新语言
-document.addEventListener('DOMContentLoaded', function() {
-    window.updateFullPage();
+// 双击/双空格切换深色模式
+let lastTap = 0;
+let lastSpaceTime = 0;
+let spaceCount = 0;
+
+document.addEventListener('touchstart', (e) => {
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTap;
+    
+    if (tapLength < 200 && tapLength > 0) {
+        toggleNightMode();
+        e.preventDefault();
+    }
+    lastTap = currentTime;
 });
+
+document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') {
+        e.preventDefault();
+        
+        const currentTime = new Date().getTime();
+        
+        if (currentTime - lastSpaceTime < 500) {
+            spaceCount++;
+            if (spaceCount === 2) {
+                toggleNightMode();
+                spaceCount = 0;
+            }
+        } else {
+            spaceCount = 1;
+        }
+        
+        lastSpaceTime = currentTime;
+    }
+});
+
+// 观察深色模式变化，更新图表
+const observer = new MutationObserver(() => {
+    if (chart && document.getElementById('chartCard').classList.contains('show')) {
+        generateChart();
+    }
+});
+observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
 </script>
 
     <style>
@@ -1348,6 +1534,7 @@ document.addEventListener('DOMContentLoaded', function() {
             font-size: 1rem;
             transition: all 0.3s ease;
             animation: pulse 2s infinite;
+            pointer-events: auto;
         }
 
         .reminder-btn:hover {
@@ -1500,6 +1687,7 @@ document.addEventListener('DOMContentLoaded', function() {
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            pointer-events: auto;
         }
 
         .popup-btn:hover {
@@ -1534,11 +1722,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span>📊</span>
                         <span>下载统计</span>
                     </button>
-                    <div class="lang-toggle" onclick="window.toggleLanguage()">
+                    <div class="lang-toggle" onclick="toggleLanguage()">
                         <span>🌐</span>
                         <span>EN/中文</span>
                     </div>
-                    <div class="theme-toggle" onclick="window.toggleNightMode()">
+                    <div class="theme-toggle" onclick="toggleNightMode()">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
                     </div>
@@ -1546,7 +1734,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/12 14:08</span>
+                <span class="date-badge">03/12 14:21</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -2182,7 +2370,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
 
     <!-- 开启提醒按钮 -->
-    <div class="reminder-btn" id="reminderBtn" onclick="window.showReminderPopup()">
+    <div class="reminder-btn" id="reminderBtn" onclick="showReminderPopup()">
         <span class="bell-icon">🔔</span>
         <span class="reminder-text">开启提醒</span>
     </div>
@@ -2192,7 +2380,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="popup-header">
             <span class="popup-icon">⏰</span>
             <span class="popup-title">每日提醒时间</span>
-            <span class="popup-close" onclick="window.closePopup()">✕</span>
+            <span class="popup-close" onclick="closePopup()">✕</span>
         </div>
         <div class="popup-content">
             <div class="time-item">
@@ -2217,7 +2405,7 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
         <div class="popup-footer">
-            <button class="popup-btn" onclick="window.enableReminders()">知道了，开启提醒</button>
+            <button class="popup-btn" onclick="enableReminders()">知道了，开启提醒</button>
         </div>
     </div>
 
@@ -2230,227 +2418,5 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail"></div>
     </div>
-
-    <script>
-        // 检查系统主题偏好
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('night-mode');
-        }
-        
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const saveChartBtn = document.getElementById('saveChartBtn');
-        const chartCard = document.getElementById('chartCard');
-        const closeChart = document.getElementById('closeChart');
-        const downloadToast = document.getElementById('downloadToast');
-        const toastMessage = document.getElementById('toastMessage');
-        const statsGrid = document.getElementById('statsGrid');
-        const doubleTapHint = document.getElementById('doubleTapHint');
-        const hintText = document.getElementById('hintText');
-        
-        // ===== 双击/双空格切换深色模式 =====
-        let lastTap = 0;
-        let lastSpaceTime = 0;
-        let spaceCount = 0;
-        let hintTimeout;
-
-        // 显示提示 (已经在window对象中定义了)
-        
-        // 切换深色模式 (已经在window对象中定义了)
-
-        // 监听双击（手机）
-        document.addEventListener('touchstart', (e) => {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - lastTap;
-            
-            if (tapLength < 200 && tapLength > 0) {
-                // 双击
-                window.toggleNightMode();
-                e.preventDefault();
-            }
-            lastTap = currentTime;
-        });
-
-        // 监听双空格（电脑）
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault(); // 防止页面滚动
-                
-                const currentTime = new Date().getTime();
-                
-                if (currentTime - lastSpaceTime < 500) {
-                    // 两次空格间隔小于500ms
-                    spaceCount++;
-                    if (spaceCount === 2) {
-                        // 双空格
-                        window.toggleNightMode();
-                        spaceCount = 0;
-                    }
-                } else {
-                    spaceCount = 1;
-                }
-                
-                lastSpaceTime = currentTime;
-            }
-        });
-
-        // 统计数据
-        const statsData = [
-            { group: "星穹组", total: 43, rank: 2, members: 10, avg: 4, color: "#eab308" },
-            { group: "夜曜组", total: 77, rank: 1, members: 11, avg: 7, color: "#a855f7" },
-            { group: "沧澜组", total: 36, rank: 3, members: 10, avg: 3, color: "#3b82f6" },
-        ];
-
-        // 组数据
-        const groups = ["星穹组", "夜曜组", "沧澜组"];
-        const scores = [
-            statsData.find(s => s.group === "星穹组").total,
-            statsData.find(s => s.group === "夜曜组").total,
-            statsData.find(s => s.group === "沧澜组").total
-        ];
-        const colors = ["#eab308", "#a855f7", "#3b82f6"];
-        
-        window.chart = null;
-
-        // 生成统计图
-        window.generateChart = function() {
-            const ctx = document.getElementById('groupChart').getContext('2d');
-            const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#b0b0b0' : '#5a6b7a';
-            const gridColor = isNightMode ? '#3a3f4d' : '#e1e8f0';
-            
-            if (window.chart) {
-                window.chart.destroy();
-            }
-            
-            window.chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: groups,
-                    datasets: [{
-                        label: '总分',
-                        data: scores,
-                        backgroundColor: colors,
-                        borderRadius: 6,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw;
-                                    const group = groups[context.dataIndex];
-                                    const stat = statsData.find(s => s.group === group);
-                                    return [
-                                        `总分: ${value}分`,
-                                        `排名: 第${stat.rank}名`,
-                                        `人数: ${stat.members}人`,
-                                        `平均: ${stat.avg}分`
-                                    ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: textColor }
-                        }
-                    }
-                }
-            });
-        };
-
-        // 生成统计卡片
-        function generateStatsGrid() {
-            let html = '';
-            statsData.forEach(stat => {
-                html += `
-                    <div class="stat-item">
-                        <div class="stat-label">${stat.group}</div>
-                        <div class="stat-value">${stat.total}</div>
-                        <div class="stat-rank">第${stat.rank}名 · ${stat.members}人</div>
-                    </div>
-                `;
-            });
-            statsGrid.innerHTML = html;
-        }
-
-        // 保存统计图到相册
-        async function saveChartToGallery() {
-            const chartCard = document.getElementById('chartCard');
-            
-            try {
-                window.showPageToast('📸', '正在生成图片...');
-                
-                if (!window.chart) {
-                    window.generateChart();
-                }
-                
-                setTimeout(async () => {
-                    const canvas = await html2canvas(chartCard, {
-                        scale: 2,
-                        backgroundColor: getComputedStyle(document.body).backgroundColor,
-                        allowTaint: false,
-                        useCORS: true,
-                        logging: false
-                    });
-                    
-                    const link = document.createElement('a');
-                    link.download = `prefect_stats_${new Date().toISOString().slice(0,10)}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    
-                    window.showPageToast('✅', '已保存到相册');
-                }, 500);
-                
-            } catch (error) {
-                console.error('保存失败:', error);
-                window.showPageToast('❌', '保存失败');
-            }
-        }
-
-        downloadBtn.addEventListener('click', () => {
-            chartCard.classList.add('show');
-            window.generateChart();
-            generateStatsGrid();
-            window.showPageToast('📊', '统计图已生成');
-        });
-
-        if (saveChartBtn) {
-            saveChartBtn.addEventListener('click', saveChartToGallery);
-        }
-
-        closeChart.addEventListener('click', () => {
-            chartCard.classList.remove('show');
-        });
-
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            allRows.forEach(row => {
-                const searchText = row.getAttribute('data-search').toLowerCase();
-                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-            });
-        });
-
-        const observer = new MutationObserver(() => {
-            if (window.chart && chartCard.classList.contains('show')) {
-                window.generateChart();
-            }
-        });
-        
-        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    </script>
 </body>
 </html>
