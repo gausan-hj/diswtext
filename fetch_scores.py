@@ -228,7 +228,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 添加双击/双空格切换深色模式
+# 生成HTML
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -1593,7 +1593,7 @@ html += '''
                         <span class="lang-separator">/</span>
                         <span class="lang-right">EN</span>
                     </div>
-                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                    <div class="theme-toggle" onclick="toggleNightMode()">
                         <span class="moon-icon">🌓</span>
                         <span data-i18n="dark">深色</span>
                     </div>
@@ -1887,7 +1887,7 @@ html += '''
         <div class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</div>
         <div class="toast-title">
             <span>🔔</span>
-            <span id="toastMessage" data-i18n="toast_message">通知</span>
+            <span id="toastMessageTitle" data-i18n="toast_message">通知</span>
         </div>
         <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail"></div>
     </div>
@@ -2016,6 +2016,7 @@ html += '''
         let currentLang = localStorage.getItem('prefect_lang') || 'zh';
         const langToggle = document.getElementById('langToggle');
         const body = document.body;
+        let chart = null;
 
         // 翻译函数
         function t(key) {
@@ -2036,23 +2037,21 @@ html += '''
             // 更新所有带 data-i18n 属性的元素
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                el.textContent = t(key);
+                if (key) {
+                    el.textContent = t(key);
+                }
             });
 
             // 更新所有带 data-i18n-placeholder 属性的输入框
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
-                el.placeholder = t(key);
+                if (key) {
+                    el.placeholder = t(key);
+                }
             });
 
             // 更新组名（特殊处理，因为组名是动态的）
             document.querySelectorAll('[data-group-name]').forEach(el => {
-                const group = el.getAttribute('data-group-name');
-                el.textContent = t(`group_names.${group}`);
-            });
-
-            // 更新排名卡片中的组名
-            document.querySelectorAll('.rank-card .rank-name').forEach(el => {
                 const group = el.getAttribute('data-group-name');
                 if (group) {
                     el.textContent = t(`group_names.${group}`);
@@ -2061,17 +2060,13 @@ html += '''
 
             // 更新标题
             document.title = t('title');
+            
+            // 更新图表如果有显示
+            if (chart && document.getElementById('chartCard').classList.contains('show')) {
+                generateChart();
+                generateStatsGrid();
+            }
         }
-
-        // 初始化语言
-        if (currentLang === 'en') {
-            body.classList.add('english-mode');
-            updateLangButton('en');
-        } else {
-            body.classList.remove('english-mode');
-            updateLangButton('zh');
-        }
-        updatePageLanguage();
 
         // 更新语言按钮文字
         function updateLangButton(lang) {
@@ -2086,6 +2081,16 @@ html += '''
                 rightSpan.textContent = '中';
             }
         }
+
+        // 初始化语言
+        if (currentLang === 'en') {
+            body.classList.add('english-mode');
+            updateLangButton('en');
+        } else {
+            body.classList.remove('english-mode');
+            updateLangButton('zh');
+        }
+        updatePageLanguage();
 
         // 切换语言
         function toggleLanguage() {
@@ -2118,11 +2123,6 @@ html += '''
                 
                 // 显示提示
                 showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
-                
-                // 重新生成统计图（如果有）
-                if (chart && chartCard.classList.contains('show')) {
-                    generateChart();
-                }
             }, 150);
         }
         
@@ -2162,6 +2162,7 @@ html += '''
             if (chart && chartCard.classList.contains('show')) {
                 generateChart();
             }
+            showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
         }
 
         // 监听双击（手机）
@@ -2172,7 +2173,6 @@ html += '''
             if (tapLength < 200 && tapLength > 0) {
                 // 双击
                 toggleNightMode();
-                showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
                 e.preventDefault();
             }
             lastTap = currentTime;
@@ -2191,7 +2191,6 @@ html += '''
                     if (spaceCount === 2) {
                         // 双空格
                         toggleNightMode();
-                        showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
                         spaceCount = 0;
                     }
                 } else {
@@ -2222,8 +2221,6 @@ html += '''        ];
             statsData.find(s => s.group === "沧澜组").total
         ];
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
-        
-        let chart = null;
 
         // 显示提示
         function showToast(message, isSuccess = true) {
@@ -2237,7 +2234,7 @@ html += '''        ];
         // 显示网页内提醒
         function showPageToast(title, message) {
             const toast = document.getElementById('notificationToast');
-            const titleEl = document.getElementById('toastMessage');
+            const titleEl = document.getElementById('toastMessageTitle');
             const detailEl = document.getElementById('toastDetail');
             
             titleEl.textContent = title;
@@ -2357,22 +2354,26 @@ html += '''        ];
             }
         }
 
-        downloadBtn.addEventListener('click', () => {
+        // 绑定下载按钮事件
+        downloadBtn.addEventListener('click', function() {
             chartCard.classList.add('show');
             generateChart();
             generateStatsGrid();
             showToast('📊 ' + (currentLang === 'zh' ? '统计图已生成' : 'Chart generated'));
         });
 
+        // 绑定保存图表按钮事件
         if (saveChartBtn) {
             saveChartBtn.addEventListener('click', saveChartToGallery);
         }
 
-        closeChart.addEventListener('click', () => {
+        // 绑定关闭按钮事件
+        closeChart.addEventListener('click', function() {
             chartCard.classList.remove('show');
         });
 
-        searchInput.addEventListener('input', (e) => {
+        // 绑定搜索事件
+        searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase().trim();
             allRows.forEach(row => {
                 const searchText = row.getAttribute('data-search').toLowerCase();
@@ -2380,7 +2381,8 @@ html += '''        ];
             });
         });
 
-        const observer = new MutationObserver(() => {
+        // 观察深色模式变化，更新图表
+        const observer = new MutationObserver(function() {
             if (chart && chartCard.classList.contains('show')) {
                 generateChart();
             }
@@ -2402,6 +2404,7 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
+print("✨ 修复：下载统计图和保存到相册按钮现在可以正常点击")
 print("✨ 新增：完整页面翻译功能")
 print("✨ 新增：语言切换按钮 + 姓名交换动画")
 print("✨ 新增：双击屏幕/双空格切换深色模式")
