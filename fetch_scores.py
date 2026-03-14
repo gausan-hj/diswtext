@@ -234,7 +234,7 @@ html = '''<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>训育处 - 学长团分数板 · 热力图</title>
+    <title data-i18n="title">训育处 - 学长团分数板 · 热力图</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 '''
@@ -1573,19 +1573,19 @@ html += '''
     <div class="container">
         <!-- 双击提示 -->
         <div class="double-tap-hint" id="doubleTapHint">
-            <span id="hintText">👆 双击屏幕 / 按两次空格 切换深色模式</span>
+            <span id="hintText" data-i18n="double_tap">👆 双击屏幕 / 按两次空格 切换深色模式</span>
         </div>
 
         <div class="header">
             <div class="header-top">
                 <div class="title-group">
                     <span class="school-icon">🏫</span>
-                    <h1>学长团分数板 · 热力图</h1>
+                    <h1 data-i18n="title">学长团分数板 · 热力图</h1>
                 </div>
                 <div class="action-buttons">
                     <button class="download-btn" id="downloadBtn">
                         <span>📊</span>
-                        <span>下载统计</span>
+                        <span data-i18n="download">下载统计</span>
                     </button>
                     <!-- 语言切换按钮 - 带动画交换效果 -->
                     <div class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
@@ -1595,26 +1595,26 @@ html += '''
                     </div>
                     <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                         <span class="moon-icon">🌓</span>
-                        <span>深色</span>
+                        <span data-i18n="dark">深色</span>
                     </div>
                 </div>
             </div>
             <div class="meta-info">
-                <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
+                <span data-i18n="legend_desc">Prefects' Scoreboard · 颜色越浅分数越高</span>
                 <span class="date-badge">''' + datetime.now().strftime('%m/%d %H:%M') + '''</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="search" placeholder="搜姓名/班级/学号...">
+                <input type="text" id="search" data-i18n-placeholder="search_placeholder" placeholder="搜姓名/班级/学号...">
             </div>
         </div>
 
         <!-- 热力图图例 -->
         <div class="heatmap-legend">
             <div class="legend-label">
-                <span class="low">低分 █</span>
+                <span class="low" data-i18n="legend_low">低分 █</span>
                 <span> → </span>
-                <span class="high">高分 █</span>
+                <span class="high" data-i18n="legend_high">高分 █</span>
             </div>
             <div class="legend-colors">
                 <div class="legend-color low" title="低分（深色）"></div>
@@ -1630,14 +1630,14 @@ html += '''
             <div class="chart-header">
                 <span class="chart-title">
                     <span>📊</span>
-                    各组总分对比
+                    <span data-i18n="chart_title">各组总分对比</span>
                 </span>
                 <div class="chart-actions">
                     <button class="save-chart-btn" id="saveChartBtn">
                         <span>💾</span>
-                        <span>保存到相册</span>
+                        <span data-i18n="save_chart">保存到相册</span>
                     </button>
-                    <button class="close-chart" id="closeChart">关闭</button>
+                    <button class="close-chart" id="closeChart" data-i18n="close">关闭</button>
                 </div>
             </div>
             <div class="chart-container">
@@ -1665,8 +1665,8 @@ for i, (g, total) in enumerate(sorted_groups, 1):
             <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
                 <span class="rank-icon">{rank_icons[i]}</span>
                 <div class="rank-info">
-                    <div class="rank-name">{g}</div>
-                    <div class="rank-score">{int(total)}<small>分</small></div>
+                    <div class="rank-name" data-group-name="{g}">{g}</div>
+                    <div class="rank-score">{int(total)}<small data-i18n="points">分</small></div>
                 </div>
             </div>
 '''
@@ -1709,11 +1709,11 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                 <div class="group-header">
                     <div class="group-title-wrapper">
                         <span class="group-emoji">{group_emojis[group_name]}</span>
-                        <span class="group-title">{group_name}</span>
+                        <span class="group-title" data-group-name="{group_name}">{group_name}</span>
                     </div>
                     <div class="group-stats">
-                        <span class="group-avg">平均{int(avg_score)}</span>
-                        <span class="group-badge">第{rank}名</span>
+                        <span class="group-avg"><span data-i18n="average">平均</span>{int(avg_score)}</span>
+                        <span class="group-badge"><span data-i18n="rank_prefix">第</span>{rank}<span data-i18n="rank_suffix">名</span></span>
                     </div>
                 </div>
                 <div class="table-container">
@@ -1721,12 +1721,12 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>姓名</th>
-                                <th>班</th>
-                                <th>学号</th>
-                                <th>每日得分</th>
-                                <th>总分</th>
-                                <th>奖</th>
+                                <th data-i18n="name">姓名</th>
+                                <th data-i18n="class">班</th>
+                                <th data-i18n="student_id">学号</th>
+                                <th data-i18n="daily_scores">每日得分</th>
+                                <th data-i18n="total">总分</th>
+                                <th data-i18n="reward">奖</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1786,52 +1786,52 @@ html += '''
         <div class="reward-section">
             <div class="reward-header">
                 <span class="reward-icon">🎁</span>
-                <h2>本轮奖励机制</h2>
+                <h2 data-i18n="reward_title">本轮奖励机制</h2>
             </div>
-            <div class="reward-subtitle">
+            <div class="reward-subtitle" data-i18n="reward_subtitle">
                 公平原则 · 不负每一位付出的学长
             </div>
             <div class="reward-content">
                 <div class="reward-item">
                     <div class="reward-rank">
                         <span class="rank-medal">🥇</span>
-                        <span class="rank-title">第1名</span>
+                        <span class="rank-title" data-i18n="reward_1">第1名</span>
                     </div>
                     <div>
-                        <div class="reward-condition">分数 ≥ 平均分÷2</div>
-                        <div class="reward-benefit">✨免搬椅子+减免操步</div>
+                        <div class="reward-condition" data-i18n="reward_1_condition">分数 ≥ 平均分÷2</div>
+                        <div class="reward-benefit" data-i18n="reward_1_benefit">✨免搬椅子+减免操步</div>
                     </div>
                 </div>
                 <div class="reward-item">
                     <div class="reward-rank">
                         <span class="rank-medal">🥈</span>
-                        <span class="rank-title">第2名</span>
+                        <span class="rank-title" data-i18n="reward_2">第2名</span>
                     </div>
                     <div>
-                        <div class="reward-condition">分数 ≥ 平均分</div>
-                        <div class="reward-benefit">✨免搬椅子+减免操步</div>
+                        <div class="reward-condition" data-i18n="reward_2_condition">分数 ≥ 平均分</div>
+                        <div class="reward-benefit" data-i18n="reward_2_benefit">✨免搬椅子+减免操步</div>
                     </div>
                 </div>
                 <div class="reward-item">
                     <div class="reward-rank">
                         <span class="rank-medal">🥉</span>
-                        <span class="rank-title">第3名</span>
+                        <span class="rank-title" data-i18n="reward_3">第3名</span>
                     </div>
                     <div>
-                        <div class="reward-condition">组内前三名</div>
-                        <div class="reward-benefit">✨免搬椅子+减免操步</div>
+                        <div class="reward-condition" data-i18n="reward_3_condition">组内前三名</div>
+                        <div class="reward-benefit" data-i18n="reward_3_benefit">✨免搬椅子+减免操步</div>
                     </div>
                 </div>
             </div>
             <div class="reward-note">
-                <span class="reward-extra">🎁 第1名达标者额外奖励一份</span>
+                <span class="reward-extra" data-i18n="reward_note">🎁 第1名达标者额外奖励一份</span>
             </div>
-            <div class="reward-footer">
+            <div class="reward-footer" data-i18n="reward_footer">
                 * 未达标者工作照旧 *
             </div>
         </div>
 
-        <div class="footer">
+        <div class="footer" data-i18n="footer">
             👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高
         </div>
     </div>
@@ -1839,46 +1839,46 @@ html += '''
     <!-- 下载提示 -->
     <div class="download-toast" id="downloadToast">
         <span class="toast-icon">✓</span>
-        <span id="toastMessage">统计图已生成</span>
+        <span id="toastMessage" data-i18n="toast_message">统计图已生成</span>
     </div>
 
     <!-- 开启提醒按钮 -->
     <div class="reminder-btn" id="reminderBtn" onclick="showReminderPopup()">
         <span class="bell-icon">🔔</span>
-        <span class="reminder-text">开启提醒</span>
+        <span class="reminder-text" data-i18n="reminder_btn">开启提醒</span>
     </div>
 
     <!-- 提醒时间提示框 -->
     <div class="reminder-popup" id="reminderPopup">
         <div class="popup-header">
             <span class="popup-icon">⏰</span>
-            <span class="popup-title">每日提醒时间</span>
+            <span class="popup-title" data-i18n="popup_title">每日提醒时间</span>
             <span class="popup-close" onclick="closePopup()">✕</span>
         </div>
         <div class="popup-content">
             <div class="time-item">
                 <span class="time-icon">🌅</span>
-                <span class="time-label">早上 6:00</span>
-                <span class="time-desc">起床提醒</span>
+                <span class="time-label" data-i18n="time_morning">早上 6:00</span>
+                <span class="time-desc" data-i18n="time_morning_desc">起床提醒</span>
             </div>
             <div class="time-item">
                 <span class="time-icon">🌆</span>
-                <span class="time-label">晚上 7:00</span>
-                <span class="time-desc">明天衣服提醒</span>
+                <span class="time-label" data-i18n="time_evening1">晚上 7:00</span>
+                <span class="time-desc" data-i18n="time_evening1_desc">明天衣服提醒</span>
             </div>
             <div class="time-item">
                 <span class="time-icon">🌙</span>
-                <span class="time-label">晚上 8:15</span>
-                <span class="time-desc">再次提醒</span>
+                <span class="time-label" data-i18n="time_evening2">晚上 8:15</span>
+                <span class="time-desc" data-i18n="time_evening2_desc">再次提醒</span>
             </div>
             <div class="time-item">
                 <span class="time-icon">🌃</span>
-                <span class="time-label">晚上 10:00</span>
-                <span class="time-desc">睡前提醒</span>
+                <span class="time-label" data-i18n="time_evening3">晚上 10:00</span>
+                <span class="time-desc" data-i18n="time_evening3_desc">睡前提醒</span>
             </div>
         </div>
         <div class="popup-footer">
-            <button class="popup-btn" onclick="enableReminders()">知道了，开启提醒</button>
+            <button class="popup-btn" onclick="enableReminders()" data-i18n="popup_btn">知道了，开启提醒</button>
         </div>
     </div>
 
@@ -1887,12 +1887,126 @@ html += '''
         <div class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</div>
         <div class="toast-title">
             <span>🔔</span>
-            <span id="toastMessage">通知</span>
+            <span id="toastMessage" data-i18n="toast_message">通知</span>
         </div>
         <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail"></div>
     </div>
 
     <script>
+        // ===== 翻译字典 =====
+        const translations = {
+            'zh': {
+                'title': '学长团分数板 · 热力图',
+                'download': '下载统计',
+                'dark': '深色',
+                'lang_btn': '中/EN',
+                'search_placeholder': '搜姓名/班级/学号...',
+                'legend_low': '低分 █',
+                'legend_high': '高分 █',
+                'legend_desc': 'Prefects\' Scoreboard · 颜色越浅分数越高',
+                'chart_title': '各组总分对比',
+                'save_chart': '保存到相册',
+                'close': '关闭',
+                'name': '姓名',
+                'class': '班',
+                'student_id': '学号',
+                'daily_scores': '每日得分',
+                'total': '总分',
+                'reward': '奖',
+                'points': '分',
+                'average': '平均',
+                'rank_prefix': '第',
+                'rank_suffix': '名',
+                'reward_title': '本轮奖励机制',
+                'reward_subtitle': '公平原则 · 不负每一位付出的学长',
+                'reward_1': '第1名',
+                'reward_1_condition': '分数 ≥ 平均分÷2',
+                'reward_1_benefit': '✨免搬椅子+减免操步',
+                'reward_2': '第2名',
+                'reward_2_condition': '分数 ≥ 平均分',
+                'reward_2_benefit': '✨免搬椅子+减免操步',
+                'reward_3': '第3名',
+                'reward_3_condition': '组内前三名',
+                'reward_3_benefit': '✨免搬椅子+减免操步',
+                'reward_note': '🎁 第1名达标者额外奖励一份',
+                'reward_footer': '* 未达标者工作照旧 *',
+                'footer': '👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高',
+                'reminder_btn': '开启提醒',
+                'popup_title': '每日提醒时间',
+                'time_morning': '早上 6:00',
+                'time_morning_desc': '起床提醒',
+                'time_evening1': '晚上 7:00',
+                'time_evening1_desc': '明天衣服提醒',
+                'time_evening2': '晚上 8:15',
+                'time_evening2_desc': '再次提醒',
+                'time_evening3': '晚上 10:00',
+                'time_evening3_desc': '睡前提醒',
+                'popup_btn': '知道了，开启提醒',
+                'toast_message': '通知',
+                'double_tap': '👆 双击屏幕 / 按两次空格 切换深色模式',
+                'group_names': {
+                    '星穹组': '星穹组',
+                    '夜曜组': '夜曜组',
+                    '沧澜组': '沧澜组'
+                }
+            },
+            'en': {
+                'title': 'Prefect Scoreboard · Heatmap',
+                'download': 'Download',
+                'dark': 'Dark',
+                'lang_btn': 'EN/中',
+                'search_placeholder': 'Search name/class/id...',
+                'legend_low': 'Low █',
+                'legend_high': 'High █',
+                'legend_desc': 'Prefects\' Scoreboard · Lighter = higher score',
+                'chart_title': 'Group Total Score',
+                'save_chart': 'Save',
+                'close': 'Close',
+                'name': 'Name',
+                'class': 'Class',
+                'student_id': 'ID',
+                'daily_scores': 'Daily',
+                'total': 'Total',
+                'reward': 'Reward',
+                'points': 'pts',
+                'average': 'Avg',
+                'rank_prefix': '',
+                'rank_suffix': 'th',
+                'reward_title': 'Rewards',
+                'reward_subtitle': 'Fairness · Every effort counts',
+                'reward_1': '1st Place',
+                'reward_1_condition': 'Score ≥ Avg ÷ 2',
+                'reward_1_benefit': '✨ No chairs + Reduced drills',
+                'reward_2': '2nd Place',
+                'reward_2_condition': 'Score ≥ Avg',
+                'reward_2_benefit': '✨ No chairs + Reduced drills',
+                'reward_3': '3rd Place',
+                'reward_3_condition': 'Top 3 in group',
+                'reward_3_benefit': '✨ No chairs + Reduced drills',
+                'reward_note': '🎁 Extra reward for 1st place',
+                'reward_footer': '* Others continue as usual *',
+                'footer': '👆 Double tap / Double space dark mode · 📊Download · Lighter = higher score',
+                'reminder_btn': 'Reminders',
+                'popup_title': 'Daily Reminder Times',
+                'time_morning': '6:00 AM',
+                'time_morning_desc': 'Wake up',
+                'time_evening1': '7:00 PM',
+                'time_evening1_desc': 'Tomorrow\'s uniform',
+                'time_evening2': '8:15 PM',
+                'time_evening2_desc': 'Reminder again',
+                'time_evening3': '10:00 PM',
+                'time_evening3_desc': 'Before sleep',
+                'popup_btn': 'Got it, enable',
+                'toast_message': 'Notification',
+                'double_tap': '👆 Double tap / Double space to toggle dark mode',
+                'group_names': {
+                    '星穹组': 'Starry Group',
+                    '夜曜组': 'Night Group',
+                    '沧澜组': 'Ocean Group'
+                }
+            }
+        };
+
         // 检查系统主题偏好
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
@@ -1903,6 +2017,52 @@ html += '''
         const langToggle = document.getElementById('langToggle');
         const body = document.body;
 
+        // 翻译函数
+        function t(key) {
+            const keys = key.split('.');
+            let value = translations[currentLang];
+            for (const k of keys) {
+                if (value && value[k] !== undefined) {
+                    value = value[k];
+                } else {
+                    return key;
+                }
+            }
+            return value;
+        }
+
+        // 更新页面所有文本
+        function updatePageLanguage() {
+            // 更新所有带 data-i18n 属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                el.textContent = t(key);
+            });
+
+            // 更新所有带 data-i18n-placeholder 属性的输入框
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                el.placeholder = t(key);
+            });
+
+            // 更新组名（特殊处理，因为组名是动态的）
+            document.querySelectorAll('[data-group-name]').forEach(el => {
+                const group = el.getAttribute('data-group-name');
+                el.textContent = t(`group_names.${group}`);
+            });
+
+            // 更新排名卡片中的组名
+            document.querySelectorAll('.rank-card .rank-name').forEach(el => {
+                const group = el.getAttribute('data-group-name');
+                if (group) {
+                    el.textContent = t(`group_names.${group}`);
+                }
+            });
+
+            // 更新标题
+            document.title = t('title');
+        }
+
         // 初始化语言
         if (currentLang === 'en') {
             body.classList.add('english-mode');
@@ -1911,6 +2071,7 @@ html += '''
             body.classList.remove('english-mode');
             updateLangButton('zh');
         }
+        updatePageLanguage();
 
         // 更新语言按钮文字
         function updateLangButton(lang) {
@@ -1944,6 +2105,9 @@ html += '''
                 // 更新按钮文字
                 updateLangButton(currentLang);
                 
+                // 更新页面文本
+                updatePageLanguage();
+                
                 // 保存设置
                 localStorage.setItem('prefect_lang', currentLang);
                 
@@ -1954,6 +2118,11 @@ html += '''
                 
                 // 显示提示
                 showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
+                
+                // 重新生成统计图（如果有）
+                if (chart && chartCard.classList.contains('show')) {
+                    generateChart();
+                }
             }, 150);
         }
         
@@ -2094,9 +2263,9 @@ html += '''        ];
             chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: groups,
+                    labels: groups.map(g => t(`group_names.${g}`)),
                     datasets: [{
-                        label: '总分',
+                        label: t('total'),
                         data: scores,
                         backgroundColor: colors,
                         borderRadius: 6,
@@ -2115,10 +2284,10 @@ html += '''        ];
                                     const group = groups[context.dataIndex];
                                     const stat = statsData.find(s => s.group === group);
                                     return [
-                                        `总分: ${value}分`,
-                                        `排名: 第${stat.rank}名`,
-                                        `人数: ${stat.members}人`,
-                                        `平均: ${stat.avg}分`
+                                        `${t('total')}: ${value}${t('points')}`,
+                                        `${t('rank_prefix')}${stat.rank}${t('rank_suffix')}`,
+                                        `${t('members')}: ${stat.members}`,
+                                        `${t('average')}: ${stat.avg}`
                                     ];
                                 }
                             }
@@ -2145,9 +2314,9 @@ html += '''        ];
             statsData.forEach(stat => {
                 html += `
                     <div class="stat-item">
-                        <div class="stat-label">${stat.group}</div>
+                        <div class="stat-label">${t(`group_names.${stat.group}`)}</div>
                         <div class="stat-value">${stat.total}</div>
-                        <div class="stat-rank">第${stat.rank}名 · ${stat.members}人</div>
+                        <div class="stat-rank">${t('rank_prefix')}${stat.rank}${t('rank_suffix')} · ${stat.members}人</div>
                     </div>
                 `;
             });
@@ -2159,7 +2328,7 @@ html += '''        ];
             const chartCard = document.getElementById('chartCard');
             
             try {
-                showToast('📸 正在生成图片...');
+                showToast('📸 ' + (currentLang === 'zh' ? '正在生成图片...' : 'Generating image...'));
                 
                 if (!chart) {
                     generateChart();
@@ -2175,16 +2344,16 @@ html += '''        ];
                     });
                     
                     const link = document.createElement('a');
-                    link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
+                    link.download = `prefect_stats_${new Date().toISOString().slice(0,10)}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     
-                    showToast('✅ 已保存到相册');
+                    showToast('✅ ' + (currentLang === 'zh' ? '已保存到相册' : 'Saved to gallery'));
                 }, 500);
                 
             } catch (error) {
                 console.error('保存失败:', error);
-                showToast('❌ 保存失败');
+                showToast('❌ ' + (currentLang === 'zh' ? '保存失败' : 'Save failed'));
             }
         }
 
@@ -2192,7 +2361,7 @@ html += '''        ];
             chartCard.classList.add('show');
             generateChart();
             generateStatsGrid();
-            showToast('📊 统计图已生成');
+            showToast('📊 ' + (currentLang === 'zh' ? '统计图已生成' : 'Chart generated'));
         });
 
         if (saveChartBtn) {
@@ -2233,6 +2402,7 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
+print("✨ 新增：完整页面翻译功能")
 print("✨ 新增：语言切换按钮 + 姓名交换动画")
 print("✨ 新增：双击屏幕/双空格切换深色模式")
 print("🔔 新增：开启提醒按钮 + 动画提示框")
