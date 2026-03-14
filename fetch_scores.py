@@ -529,6 +529,56 @@ html += '''
             align-items: center;
         }
 
+        /* 语言切换按钮 - 带动画交换效果 */
+        .lang-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lang-toggle:active {
+            transform: scale(0.92);
+        }
+
+        .lang-toggle span {
+            display: inline-block;
+            transition: transform 0.3s ease, opacity 0.2s ease;
+        }
+
+        .lang-toggle .lang-left {
+            order: 1;
+        }
+
+        .lang-toggle .lang-right {
+            order: 2;
+        }
+
+        .lang-toggle .lang-separator {
+            order: 1.5;
+            margin: 0 2px;
+        }
+
+        .lang-toggle.swap .lang-left {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .lang-toggle.swap .lang-right {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -969,6 +1019,7 @@ html += '''
 
         .name-cell {
             max-width: 180px;
+            min-height: 45px;
         }
 
         .name-cn {
@@ -978,6 +1029,7 @@ html += '''
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            transition: all 0.3s ease;
         }
 
         .name-en {
@@ -986,6 +1038,45 @@ html += '''
             white-space: normal;
             line-height: 1.3;
             word-break: break-word;
+            transition: all 0.3s ease;
+        }
+
+        /* 语言切换动画 - 中文模式 */
+        body:not(.english-mode) .name-cell .name-cn {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        body:not(.english-mode) .name-cell .name-en {
+            transform: translateY(0);
+            opacity: 0.8;
+        }
+
+        /* 英文模式 - 交换位置和样式 */
+        body.english-mode .name-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.english-mode .name-cell .name-en {
+            order: 1;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        body.english-mode .name-cell .name-cn {
+            order: 2;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            opacity: 0.8;
+            transform: translateY(0);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .info-cell {
@@ -1222,6 +1313,65 @@ html += '''
             color: #ffffff;
         }
 
+        /* 通知提示浮层 */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            z-index: 1002;
+            max-width: 280px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification-toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            padding: 4px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            background: var(--border-subtle);
+        }
+
+        .toast-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
         @media (max-width: 360px) {
             .rank-name { font-size: 0.7rem; }
             .rank-score { font-size: 0.9rem; }
@@ -1437,6 +1587,12 @@ html += '''
                         <span>📊</span>
                         <span>下载统计</span>
                     </button>
+                    <!-- 语言切换按钮 - 带动画交换效果 -->
+                    <div class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
+                        <span class="lang-left">中</span>
+                        <span class="lang-separator">/</span>
+                        <span class="lang-right">EN</span>
+                    </div>
                     <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
@@ -1742,6 +1898,65 @@ html += '''
             document.body.classList.add('night-mode');
         }
         
+        // ===== 语言切换功能 =====
+        let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+        const langToggle = document.getElementById('langToggle');
+        const body = document.body;
+
+        // 初始化语言
+        if (currentLang === 'en') {
+            body.classList.add('english-mode');
+            updateLangButton('en');
+        } else {
+            body.classList.remove('english-mode');
+            updateLangButton('zh');
+        }
+
+        // 更新语言按钮文字
+        function updateLangButton(lang) {
+            const leftSpan = langToggle.querySelector('.lang-left');
+            const rightSpan = langToggle.querySelector('.lang-right');
+            
+            if (lang === 'zh') {
+                leftSpan.textContent = '中';
+                rightSpan.textContent = 'EN';
+            } else {
+                leftSpan.textContent = 'EN';
+                rightSpan.textContent = '中';
+            }
+        }
+
+        // 切换语言
+        function toggleLanguage() {
+            // 添加交换动画
+            langToggle.classList.add('swap');
+            
+            setTimeout(() => {
+                // 切换语言
+                if (currentLang === 'zh') {
+                    currentLang = 'en';
+                    body.classList.add('english-mode');
+                } else {
+                    currentLang = 'zh';
+                    body.classList.remove('english-mode');
+                }
+                
+                // 更新按钮文字
+                updateLangButton(currentLang);
+                
+                // 保存设置
+                localStorage.setItem('prefect_lang', currentLang);
+                
+                // 移除动画
+                setTimeout(() => {
+                    langToggle.classList.remove('swap');
+                }, 50);
+                
+                // 显示提示
+                showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
+            }, 150);
+        }
+        
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
         const downloadBtn = document.getElementById('downloadBtn');
@@ -1848,6 +2063,21 @@ html += '''        ];
             setTimeout(() => {
                 downloadToast.classList.remove('show');
             }, 2000);
+        }
+
+        // 显示网页内提醒
+        function showPageToast(title, message) {
+            const toast = document.getElementById('notificationToast');
+            const titleEl = document.getElementById('toastMessage');
+            const detailEl = document.getElementById('toastDetail');
+            
+            titleEl.textContent = title;
+            detailEl.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
         }
 
         // 生成统计图
@@ -1988,21 +2218,6 @@ html += '''        ];
         });
         
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-
-        // 显示网页内提醒
-        function showPageToast(title, message) {
-            const toast = document.getElementById('notificationToast');
-            const titleEl = document.getElementById('toastMessage');
-            const detailEl = document.getElementById('toastDetail');
-            
-            titleEl.textContent = title;
-            detailEl.textContent = message;
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 5000);
-        }
     </script>
 </body>
 </html>'''
@@ -2018,6 +2233,6 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
+print("✨ 新增：语言切换按钮 + 姓名交换动画")
 print("✨ 新增：双击屏幕/双空格切换深色模式")
 print("🔔 新增：开启提醒按钮 + 动画提示框")
-
