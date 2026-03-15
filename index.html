@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>训育处 - 学长团分数板 · 热力图</title>
+    <title>训育处 - 学长团分数板</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -121,7 +121,7 @@ function updatePageLanguage() {
     // 更新表格表头
     updateTableHeaders();
     
-    // 更新统计图 - 使用版本2的简单方式
+    // 更新统计图
     if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
         generateChart();
     }
@@ -504,7 +504,7 @@ document.addEventListener('click', function(e) {
             margin: 0 auto;
         }
 
-        /* 双击提示 - 从版本2移植 */
+        /* 双击提示 */
         .double-tap-hint {
             position: fixed;
             bottom: 120px;
@@ -770,7 +770,7 @@ document.addEventListener('click', function(e) {
         .legend-label span.low { color: var(--heat-1); font-weight: bold; }
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
 
-        /* 统计图卡片 - 从版本2移植 */
+        /* 统计图卡片 */
         .chart-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -1672,7 +1672,7 @@ document.addEventListener('click', function(e) {
 </head>
 <body class="lang-zh">
     <div class="container">
-        <!-- 双击提示 - 从版本2移植 -->
+        <!-- 双击提示 -->
         <div class="double-tap-hint" id="doubleTapHint">
             <span id="hintText">👆 双击屏幕 / 按两次空格 切换深色模式</span>
         </div>
@@ -1702,7 +1702,7 @@ document.addEventListener('click', function(e) {
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/15 17:20</span>
+                <span class="date-badge">03/15 17:31</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1726,7 +1726,7 @@ document.addEventListener('click', function(e) {
             </div>
         </div>
 
-        <!-- 统计图卡片 - 从版本2移植 -->
+        <!-- 统计图卡片 -->
         <div class="chart-card" id="chartCard">
             <div class="chart-header">
                 <span class="chart-title">
@@ -2403,7 +2403,7 @@ document.addEventListener('click', function(e) {
         // 初始化页面文本
         updatePageLanguage();
         
-        // ===== 双击/双空格切换深色模式 - 从版本2移植 =====
+        // ===== 双击/双空格切换深色模式 =====
         let lastTap = 0;
         let lastSpaceTime = 0;
         let spaceCount = 0;
@@ -2427,7 +2427,7 @@ document.addEventListener('click', function(e) {
         // 切换深色模式
         function toggleNightMode() {
             document.body.classList.toggle('night-mode');
-            // 更新图表颜色 - 使用版本2的简单方式
+            // 更新图表颜色
             if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
                 generateChart();
             }
@@ -2501,7 +2501,7 @@ document.addEventListener('click', function(e) {
         
         let chart = null;
 
-        // 显示提示 - 从版本2移植
+        // 显示提示
         function showToast(message, isSuccess = true) {
             if (!toastMessage || !downloadToast) return;
             toastMessage.textContent = message;
@@ -2511,7 +2511,7 @@ document.addEventListener('click', function(e) {
             }, 2000);
         }
 
-        // 生成统计图 - 从版本2移植
+        // 生成统计图
         function generateChart() {
             const canvas = document.getElementById('groupChart');
             if (!canvas) return;
@@ -2577,7 +2577,7 @@ document.addEventListener('click', function(e) {
             });
         }
 
-        // 生成统计卡片 - 从版本2移植
+        // 生成统计卡片
         function generateStatsGrid() {
             if (!statsGrid) return;
             let html = '';
@@ -2593,7 +2593,7 @@ document.addEventListener('click', function(e) {
             statsGrid.innerHTML = html;
         }
 
-        // 保存统计图到相册 - 从版本2移植
+        // 保存统计图到相册
         async function saveChartToGallery() {
             const chartCard = document.getElementById('chartCard');
             if (!chartCard) return;
