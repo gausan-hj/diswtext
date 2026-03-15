@@ -1,38 +1,51 @@
 import pandas as pd
 from datetime import datetime
-import base64
-import io
 import json
+import os
 
 # ===== 你要修改的地方 =====
 SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
 SHEET_NAME = "Sheet3"
+LANGUAGES_JSON_PATH = "languages.json"  # 语言文件路径
 # ========================
 
-# ===== 2026年联课活动数据（用于服装提醒）=====
+# ===== 2026年联课活动数据（多语言）=====
 cca_data = [
-    {"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "uniform": "校服"},
-    {"date": "2026-02-26", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-03", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "uniform": "校服"},
-    {"date": "2026-03-10", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-12", "activity": "活动（行动组）", "uniform": "校服"},
-    {"date": "2026-03-17", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-31", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-02", "activity": "活动（值岗组）", "uniform": "校服"},
-    {"date": "2026-04-07", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-09", "activity": "活动（督察组）", "uniform": "校服"},
-    {"date": "2026-04-14", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-16", "activity": "活动（星穹组）", "uniform": "校服"},
-    {"date": "2026-04-21", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-23", "activity": "活动（夜曜组）", "uniform": "校服"},
-    {"date": "2026-04-28", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-30", "activity": "活动（沧澜组）", "uniform": "校服"},
-    {"date": "2026-05-05", "activity": "第一学期检讨", "uniform": "校服"},
-    {"date": "2026-05-07", "activity": "操步", "uniform": "体育衣"}
+    {"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "activity_en": "Advisor + Head Prefect + Vice Head", "activity_ms": "Penasihat + Ketua Pengawas + Timbalan", "uniform": "校服"},
+    {"date": "2026-02-26", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-03", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "activity_en": "Activity (Secretary + Treasurer + Auditor)", "activity_ms": "Aktiviti (Setiausaha + Bendahari + Juruaudit)", "uniform": "校服"},
+    {"date": "2026-03-10", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-12", "activity": "活动（行动组）", "activity_en": "Activity (Action Group)", "activity_ms": "Aktiviti (Kumpulan Tindakan)", "uniform": "校服"},
+    {"date": "2026-03-17", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-31", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-02", "activity": "活动（值岗组）", "activity_en": "Activity (Duty Group)", "activity_ms": "Aktiviti (Kumpulan Bertugas)", "uniform": "校服"},
+    {"date": "2026-04-07", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-09", "activity": "活动（督察组）", "activity_en": "Activity (Supervisory Group)", "activity_ms": "Aktiviti (Kumpulan Penyelia)", "uniform": "校服"},
+    {"date": "2026-04-14", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-16", "activity": "活动（星穹组）", "activity_en": "Activity (Star Group)", "activity_ms": "Aktiviti (Kumpulan Bintang)", "uniform": "校服"},
+    {"date": "2026-04-21", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-23", "activity": "活动（夜曜组）", "activity_en": "Activity (Moon Group)", "activity_ms": "Aktiviti (Kumpulan Bulan)", "uniform": "校服"},
+    {"date": "2026-04-28", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-30", "activity": "活动（沧澜组）", "activity_en": "Activity (Ocean Group)", "activity_ms": "Aktiviti (Kumpulan Lautan)", "uniform": "校服"},
+    {"date": "2026-05-05", "activity": "第一学期检讨", "activity_en": "First Semester Review", "activity_ms": "Semakan Semester Pertama", "uniform": "校服"},
+    {"date": "2026-05-07", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"}
 ]
 
 cca_json = json.dumps(cca_data, ensure_ascii=False)
+
+# ===== 加载语言文件 =====
+print(f"正在加载语言文件: {LANGUAGES_JSON_PATH}")
+try:
+    with open(LANGUAGES_JSON_PATH, 'r', encoding='utf-8') as f:
+        languages = json.load(f)
+    print("✅ 语言文件加载成功")
+except FileNotFoundError:
+    print(f"❌ 找不到语言文件: {LANGUAGES_JSON_PATH}")
+    print("请确保 languages.json 在正确的路径")
+    exit(1)
+
+languages_json = json.dumps(languages, ensure_ascii=False)
 
 # 生成Google Sheets的CSV导出链接
 url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
@@ -228,7 +241,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 添加双击/双空格切换深色模式
+# 生成HTML
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -239,15 +252,43 @@ html = '''<!DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 '''
 
-# 添加联课活动数据
+# 添加联课活动数据和语言数据
 html += f'''
 <!-- OneSignal SDK -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
+// 语言数据
+const LANGUAGES = {languages_json};
+
 // 联课活动数据（用于服装提醒）
 const CCA_DATA = {cca_json};
 
-// 获取明天要穿的衣服
+// 当前语言
+let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+
+// 获取翻译文本
+function t(key, params = {{}}) {{
+    const keys = key.split('.');
+    let value = LANGUAGES[currentLang];
+    for (const k of keys) {{
+        if (value && value[k] !== undefined) {{
+            value = value[k];
+        }} else {{
+            console.warn(`Translation key not found: ${{key}}`);
+            return key;
+        }}
+    }}
+    
+    // 替换参数
+    if (typeof value === 'string') {{
+        return value.replace(/\\{{([^}}]+)\\}}/g, (match, p1) => {{
+            return params[p1] !== undefined ? params[p1] : match;
+        }});
+    }}
+    return value;
+}}
+
+// 获取明天要穿的衣服（多语言）
 function getTomorrowUniform() {{
     const today = new Date();
     const tomorrow = new Date(today);
@@ -262,13 +303,191 @@ function getTomorrowUniform() {{
     
     if (tomorrowCCA) {{
         if (tomorrowCCA.uniform === "体育衣") {{
-            return `🎽 明天请穿体育衣！活动：${{tomorrowCCA.activity}}`;
+            return t('app.uniform.sports', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
         }} else {{
-            return `👔 明天穿校服，活动：${{tomorrowCCA.activity}}`;
+            return t('app.uniform.uniform', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
         }}
     }} else {{
-        return "👔 明天穿整齐校服，记得带名牌！";
+        return t('app.uniform.default');
     }}
+}}
+
+// 更新页面所有文本
+function updatePageLanguage() {{
+    // 更新标题
+    document.querySelector('h1').textContent = t('app.title');
+    document.querySelector('.meta-info span:first-child').textContent = t('app.subtitle');
+    document.getElementById('search').placeholder = t('app.search');
+    
+    // 更新按钮
+    document.getElementById('downloadBtn').innerHTML = `<span>📊</span><span>${{t('app.download')}}</span>`;
+    document.querySelector('.theme-toggle span:last-child').textContent = t('app.dark');
+    
+    // 更新热力图说明
+    document.querySelector('.heatmap-legend .legend-label span.low').innerHTML = `${{t('app.heatmap.low')}} █`;
+    document.querySelector('.heatmap-legend .legend-label span.high').innerHTML = `█ ${{t('app.heatmap.high')}}`;
+    
+    // 更新统计图卡片
+    document.querySelector('.chart-title span:last-child').textContent = t('app.chart.title');
+    document.getElementById('saveChartBtn').innerHTML = `<span>💾</span><span>${{t('app.chart.save')}}</span>`;
+    document.getElementById('closeChart').textContent = t('app.chart.close');
+    
+    // 更新组名
+    updateGroupNames();
+    
+    // 更新奖励机制卡片
+    updateRewardSection();
+    
+    // 更新提醒按钮和弹窗
+    document.querySelector('.reminder-text').textContent = t('app.reminder.button');
+    document.querySelector('.popup-title').textContent = t('app.reminder.title');
+    document.querySelector('.popup-btn').textContent = t('app.reminder.confirm');
+    
+    // 更新时间标签
+    updateTimeItems();
+    
+    // 更新footer
+    document.querySelector('.footer').innerHTML = t('app.footer');
+    
+    // 更新语言按钮
+    updateLangButton();
+    
+    // 更新表格表头
+    updateTableHeaders();
+    
+    // 更新统计图
+    if (chart && chartCard.classList.contains('show')) {{
+        generateChart();
+    }}
+}}
+
+// 更新组名
+function updateGroupNames() {{
+    // 组排名卡片
+    document.querySelectorAll('.rank-card').forEach(card => {{
+        const group = card.getAttribute('data-group');
+        const groupName = getTranslatedGroupName(group);
+        card.querySelector('.rank-name').textContent = groupName;
+    }});
+    
+    // 组卡片标题
+    document.querySelectorAll('.group-card').forEach(card => {{
+        const group = card.getAttribute('data-group');
+        const groupName = getTranslatedGroupName(group);
+        card.querySelector('.group-title').textContent = groupName;
+    }});
+}}
+
+// 获取翻译后的组名
+function getTranslatedGroupName(group) {{
+    const map = {{
+        '星穹组': 'app.groups.xingqiong',
+        '夜曜组': 'app.groups.yeyao',
+        '沧澜组': 'app.groups.canglan'
+    }};
+    return t(map[group]);
+}}
+
+// 更新奖励机制卡片
+function updateRewardSection() {{
+    const section = document.querySelector('.reward-section');
+    section.querySelector('h2').textContent = t('app.reward.title');
+    section.querySelector('.reward-subtitle').textContent = t('app.reward.subtitle');
+    
+    const items = section.querySelectorAll('.reward-item');
+    items[0].querySelector('.reward-condition').textContent = t('app.reward.first.condition');
+    items[0].querySelector('.reward-benefit').textContent = t('app.reward.first.benefit');
+    items[1].querySelector('.reward-condition').textContent = t('app.reward.second.condition');
+    items[1].querySelector('.reward-benefit').textContent = t('app.reward.second.benefit');
+    items[2].querySelector('.reward-condition').textContent = t('app.reward.third.condition');
+    items[2].querySelector('.reward-benefit').textContent = t('app.reward.third.benefit');
+    
+    section.querySelector('.reward-extra').textContent = t('app.reward.extra');
+    section.querySelector('.reward-footer').textContent = t('app.reward.footer');
+}}
+
+// 更新时间项
+function updateTimeItems() {{
+    const items = document.querySelectorAll('.time-item');
+    const descs = ['morning', 'evening', 'night', 'bedtime'];
+    items.forEach((item, index) => {{
+        if (index < descs.length) {{
+            item.querySelector('.time-desc').textContent = t(`app.reminder.${{descs[index]}}`);
+        }}
+    }});
+}}
+
+// 更新表格表头
+function updateTableHeaders() {{
+    document.querySelectorAll('.member-table thead tr').forEach(header => {{
+        const cells = header.querySelectorAll('th');
+        if (cells.length >= 7) {{
+            cells[0].textContent = t('app.table.number');
+            cells[1].textContent = t('app.table.name');
+            cells[2].textContent = t('app.table.class');
+            cells[3].textContent = t('app.table.id');
+            cells[4].textContent = t('app.table.daily');
+            cells[5].textContent = t('app.table.total');
+            cells[6].textContent = t('app.table.reward');
+        }}
+    }});
+}}
+
+// 更新语言按钮
+function updateLangButton() {{
+    const langToggle = document.getElementById('langToggle');
+    const leftSpan = langToggle.querySelector('.lang-left');
+    const rightSpan = langToggle.querySelector('.lang-right');
+    
+    if (currentLang === 'zh') {{
+        leftSpan.textContent = '中';
+        rightSpan.textContent = 'EN';
+        langToggle.querySelector('.lang-separator').textContent = '/';
+    }} else if (currentLang === 'en') {{
+        leftSpan.textContent = 'EN';
+        rightSpan.textContent = 'MS';
+        langToggle.querySelector('.lang-separator').textContent = '/';
+    }} else {{
+        leftSpan.textContent = 'MS';
+        rightSpan.textContent = '中';
+        langToggle.querySelector('.lang-separator').textContent = '/';
+    }}
+}}
+
+// 切换语言
+function toggleLanguage() {{
+    const langToggle = document.getElementById('langToggle');
+    langToggle.classList.add('swap');
+    
+    setTimeout(() => {{
+        // 轮换语言
+        if (currentLang === 'zh') {{
+            currentLang = 'en';
+        }} else if (currentLang === 'en') {{
+            currentLang = 'ms';
+        }} else {{
+            currentLang = 'zh';
+        }}
+        
+        // 保存设置
+        localStorage.setItem('prefect_lang', currentLang);
+        
+        // 更新页面
+        updatePageLanguage();
+        
+        // 更新body类
+        document.body.classList.toggle('english-mode', currentLang === 'en');
+        document.body.classList.toggle('malay-mode', currentLang === 'ms');
+        
+        // 移除动画
+        setTimeout(() => {{
+            langToggle.classList.remove('swap');
+        }}, 50);
+        
+        // 显示提示
+        const langNames = {{ zh: '中文', en: 'English', ms: 'Bahasa Melayu' }};
+        showPageToast('🌐', `Switched to ${{langNames[currentLang]}}`);
+    }}, 150);
 }}
 
 // OneSignal 初始化
@@ -283,9 +502,9 @@ OneSignalDeferred.push(async function(OneSignal) {{
             showCredit: false,
             position: 'bottom-right',
             text: {{
-                'message': '开启每日服装提醒',
-                'subscribe': '允许通知',
-                'unsubscribe': '关闭通知'
+                'message': t('app.reminder.button'),
+                'subscribe': t('app.reminder.confirm'),
+                'unsubscribe': t('app.reminder.button')
             }},
             colors: {{
                 'circle.background': '#eab308',
@@ -1042,17 +1261,17 @@ html += '''
         }
 
         /* 语言切换动画 - 中文模式 */
-        body:not(.english-mode) .name-cell .name-cn {
+        body:not(.english-mode):not(.malay-mode) .name-cell .name-cn {
             transform: translateY(0);
             opacity: 1;
         }
 
-        body:not(.english-mode) .name-cell .name-en {
+        body:not(.english-mode):not(.malay-mode) .name-cell .name-en {
             transform: translateY(0);
             opacity: 0.8;
         }
 
-        /* 英文模式 - 交换位置和样式 */
+        /* 英文模式 */
         body.english-mode .name-cell {
             display: flex;
             flex-direction: column;
@@ -1068,6 +1287,33 @@ html += '''
         }
 
         body.english-mode .name-cell .name-cn {
+            order: 2;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            opacity: 0.8;
+            transform: translateY(0);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 马来文模式（和英文类似） */
+        body.malay-mode .name-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.malay-mode .name-cell .name-en {
+            order: 1;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        body.malay-mode .name-cell .name-cn {
             order: 2;
             font-size: 0.65rem;
             color: var(--text-tertiary);
@@ -1587,7 +1833,7 @@ html += '''
                         <span>📊</span>
                         <span>下载统计</span>
                     </button>
-                    <!-- 语言切换按钮 - 带动画交换效果 -->
+                    <!-- 语言切换按钮 - 三语轮换 -->
                     <div class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
                         <span class="lang-left">中</span>
                         <span class="lang-separator">/</span>
@@ -1906,56 +2152,17 @@ html += '''
         // 初始化语言
         if (currentLang === 'en') {
             body.classList.add('english-mode');
-            updateLangButton('en');
+            updateLangButton();
+        } else if (currentLang === 'ms') {
+            body.classList.add('malay-mode');
+            updateLangButton();
         } else {
-            body.classList.remove('english-mode');
-            updateLangButton('zh');
+            body.classList.remove('english-mode', 'malay-mode');
+            updateLangButton();
         }
 
-        // 更新语言按钮文字
-        function updateLangButton(lang) {
-            const leftSpan = langToggle.querySelector('.lang-left');
-            const rightSpan = langToggle.querySelector('.lang-right');
-            
-            if (lang === 'zh') {
-                leftSpan.textContent = '中';
-                rightSpan.textContent = 'EN';
-            } else {
-                leftSpan.textContent = 'EN';
-                rightSpan.textContent = '中';
-            }
-        }
-
-        // 切换语言
-        function toggleLanguage() {
-            // 添加交换动画
-            langToggle.classList.add('swap');
-            
-            setTimeout(() => {
-                // 切换语言
-                if (currentLang === 'zh') {
-                    currentLang = 'en';
-                    body.classList.add('english-mode');
-                } else {
-                    currentLang = 'zh';
-                    body.classList.remove('english-mode');
-                }
-                
-                // 更新按钮文字
-                updateLangButton(currentLang);
-                
-                // 保存设置
-                localStorage.setItem('prefect_lang', currentLang);
-                
-                // 移除动画
-                setTimeout(() => {
-                    langToggle.classList.remove('swap');
-                }, 50);
-                
-                // 显示提示
-                showPageToast('🌐', currentLang === 'en' ? 'Switched to English' : '已切换到中文');
-            }, 150);
-        }
+        // 初始化页面文本
+        updatePageLanguage();
         
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
@@ -2094,9 +2301,9 @@ html += '''        ];
             chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: groups,
+                    labels: groups.map(g => t(`app.groups.${g === '星穹组' ? 'xingqiong' : g === '夜曜组' ? 'yeyao' : 'canglan'}`)),
                     datasets: [{
-                        label: '总分',
+                        label: t('app.chart.total'),
                         data: scores,
                         backgroundColor: colors,
                         borderRadius: 6,
@@ -2115,10 +2322,10 @@ html += '''        ];
                                     const group = groups[context.dataIndex];
                                     const stat = statsData.find(s => s.group === group);
                                     return [
-                                        `总分: ${value}分`,
-                                        `排名: 第${stat.rank}名`,
-                                        `人数: ${stat.members}人`,
-                                        `平均: ${stat.avg}分`
+                                        `${t('app.chart.total')}: ${value}`,
+                                        `${t('app.chart.rank', {rank: stat.rank})}`,
+                                        `${t('app.chart.members', {count: stat.members})}`,
+                                        `${t('app.chart.average', {avg: stat.avg})}`
                                     ];
                                 }
                             }
@@ -2145,9 +2352,9 @@ html += '''        ];
             statsData.forEach(stat => {
                 html += `
                     <div class="stat-item">
-                        <div class="stat-label">${stat.group}</div>
+                        <div class="stat-label">${t(`app.groups.${stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}`)}</div>
                         <div class="stat-value">${stat.total}</div>
-                        <div class="stat-rank">第${stat.rank}名 · ${stat.members}人</div>
+                        <div class="stat-rank">${t('app.chart.rank', {rank: stat.rank})} · ${t('app.chart.members', {count: stat.members})}</div>
                     </div>
                 `;
             });
@@ -2159,7 +2366,7 @@ html += '''        ];
             const chartCard = document.getElementById('chartCard');
             
             try {
-                showToast('📸 正在生成图片...');
+                showToast(t('app.toast.generating'));
                 
                 if (!chart) {
                     generateChart();
@@ -2175,16 +2382,16 @@ html += '''        ];
                     });
                     
                     const link = document.createElement('a');
-                    link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
+                    link.download = `prefects_score_${new Date().toISOString().slice(0,10)}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     
-                    showToast('✅ 已保存到相册');
+                    showToast(t('app.toast.saved'));
                 }, 500);
                 
             } catch (error) {
                 console.error('保存失败:', error);
-                showToast('❌ 保存失败');
+                showToast(t('app.toast.saveFailed'));
             }
         }
 
@@ -2192,7 +2399,7 @@ html += '''        ];
             chartCard.classList.add('show');
             generateChart();
             generateStatsGrid();
-            showToast('📊 统计图已生成');
+            showToast(t('app.toast.chartGenerated'));
         });
 
         if (saveChartBtn) {
@@ -2233,6 +2440,8 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 新增：语言切换按钮 + 姓名交换动画")
+print("✨ 新增：三语支持（中文/英文/马来文）")
+print("✨ 新增：语言切换按钮 + 三语轮换动画")
 print("✨ 新增：双击屏幕/双空格切换深色模式")
 print("🔔 新增：开启提醒按钮 + 动画提示框")
+print(f"📁 语言文件: {LANGUAGES_JSON_PATH}")
