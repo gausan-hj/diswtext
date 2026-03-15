@@ -241,7 +241,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 整合统计图、双击/双空格深色模式
+# 生成HTML - 从版本2移植统计图和双击/双空格功能
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -368,7 +368,7 @@ function updatePageLanguage() {{
     // 更新表格表头
     updateTableHeaders();
     
-    // 更新统计图
+    // 更新统计图 - 使用版本2的简单方式
     if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {{
         generateChart();
     }}
@@ -753,7 +753,7 @@ html += '''
             margin: 0 auto;
         }
 
-        /* 双击提示 */
+        /* 双击提示 - 从版本2移植 */
         .double-tap-hint {
             position: fixed;
             bottom: 120px;
@@ -1019,7 +1019,7 @@ html += '''
         .legend-label span.low { color: var(--heat-1); font-weight: bold; }
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
 
-        /* 统计图卡片 */
+        /* 统计图卡片 - 从版本2移植 */
         .chart-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -1921,7 +1921,7 @@ html += '''
 </head>
 <body class="lang-zh">
     <div class="container">
-        <!-- 双击提示 -->
+        <!-- 双击提示 - 从版本2移植 -->
         <div class="double-tap-hint" id="doubleTapHint">
             <span id="hintText">👆 双击屏幕 / 按两次空格 切换深色模式</span>
         </div>
@@ -1975,7 +1975,7 @@ html += '''
             </div>
         </div>
 
-        <!-- 统计图卡片 -->
+        <!-- 统计图卡片 - 从版本2移植 -->
         <div class="chart-card" id="chartCard">
             <div class="chart-header">
                 <span class="chart-title">
@@ -2258,7 +2258,7 @@ html += '''
         // 初始化页面文本
         updatePageLanguage();
         
-        // ===== 双击/双空格切换深色模式 =====
+        // ===== 双击/双空格切换深色模式 - 从版本2移植 =====
         let lastTap = 0;
         let lastSpaceTime = 0;
         let spaceCount = 0;
@@ -2282,7 +2282,7 @@ html += '''
         // 切换深色模式
         function toggleNightMode() {
             document.body.classList.toggle('night-mode');
-            // 更新图表颜色
+            // 更新图表颜色 - 使用版本2的简单方式
             if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
                 generateChart();
             }
@@ -2361,7 +2361,7 @@ html += '''        ];
         
         let chart = null;
 
-        // 显示提示
+        // 显示提示 - 从版本2移植
         function showToast(message, isSuccess = true) {
             if (!toastMessage || !downloadToast) return;
             toastMessage.textContent = message;
@@ -2371,7 +2371,7 @@ html += '''        ];
             }, 2000);
         }
 
-        // 生成统计图
+        // 生成统计图 - 从版本2移植
         function generateChart() {
             const canvas = document.getElementById('groupChart');
             if (!canvas) return;
@@ -2437,7 +2437,7 @@ html += '''        ];
             });
         }
 
-        // 生成统计卡片
+        // 生成统计卡片 - 从版本2移植
         function generateStatsGrid() {
             if (!statsGrid) return;
             let html = '';
@@ -2453,7 +2453,7 @@ html += '''        ];
             statsGrid.innerHTML = html;
         }
 
-        // 保存统计图到相册
+        // 保存统计图到相册 - 从版本2移植
         async function saveChartToGallery() {
             const chartCard = document.getElementById('chartCard');
             if (!chartCard) return;
@@ -2544,6 +2544,5 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 完整整合版：所有功能已整合")
-print("✨ 功能：三语切换 + 姓名动画 + 统计图 + 双击/双空格深色模式 + 热力图 + 提醒功能")
-print("✨ 切换语言时姓名有滑动动画")
+print("✨ 完整整合版：从版本2移植了统计图和双击/双空格功能")
+print("✨ 功能：三语切换 + 姓名动画 + 热力图 + 提醒功能 + (版本2的统计图和双击/双空格)")
