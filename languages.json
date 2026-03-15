@@ -1,0 +1,233 @@
+{
+  "zh": {
+    "app": {
+      "title": "学长团分数板 · 热力图",
+      "subtitle": "Prefects' Scoreboard · 颜色越浅分数越高",
+      "search": "搜姓名/班级/学号...",
+      "download": "下载统计",
+      "dark": "深色",
+      "heatmap": {
+        "low": "低分",
+        "high": "高分",
+        "legend": "颜色越浅分数越高"
+      },
+      "chart": {
+        "title": "各组总分对比",
+        "save": "保存到相册",
+        "close": "关闭",
+        "total": "总分",
+        "rank": "第{rank}名",
+        "members": "{count}人",
+        "average": "平均{avg}分"
+      },
+      "groups": {
+        "xingqiong": "星穹组",
+        "yeyao": "夜曜组",
+        "canglan": "沧澜组",
+        "average": "平均"
+      },
+      "table": {
+        "number": "#",
+        "name": "姓名",
+        "class": "班",
+        "id": "学号",
+        "daily": "每日得分",
+        "total": "总分",
+        "reward": "奖"
+      },
+      "reward": {
+        "title": "本轮奖励机制",
+        "subtitle": "公平原则 · 不负每一位付出的学长",
+        "first": {
+          "condition": "分数 ≥ 平均分÷2",
+          "benefit": "✨免搬椅子+减免操步"
+        },
+        "second": {
+          "condition": "分数 ≥ 平均分",
+          "benefit": "✨免搬椅子+减免操步"
+        },
+        "third": {
+          "condition": "组内前三名",
+          "benefit": "✨免搬椅子+减免操步"
+        },
+        "extra": "🎁 第1名达标者额外奖励一份",
+        "footer": "* 未达标者工作照旧 *"
+      },
+      "reminder": {
+        "button": "开启提醒",
+        "title": "每日提醒时间",
+        "morning": "起床提醒",
+        "evening": "明天衣服提醒",
+        "night": "再次提醒",
+        "bedtime": "睡前提醒",
+        "confirm": "知道了，开启提醒"
+      },
+      "footer": "👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高",
+      "toast": {
+        "chartGenerated": "统计图已生成",
+        "saved": "已保存到相册",
+        "saveFailed": "保存失败",
+        "generating": "正在生成图片..."
+      },
+      "uniform": {
+        "sports": "🎽 明天请穿体育衣！活动：{activity}",
+        "uniform": "👔 明天穿校服，活动：{activity}",
+        "default": "👔 明天穿整齐校服，记得带名牌！"
+      }
+    }
+  },
+  "en": {
+    "app": {
+      "title": "Prefects Scoreboard · Heatmap",
+      "subtitle": "Lighter color = Higher score",
+      "search": "Search name/class/ID...",
+      "download": "Download Stats",
+      "dark": "Dark",
+      "heatmap": {
+        "low": "Low",
+        "high": "High",
+        "legend": "Lighter color = Higher score"
+      },
+      "chart": {
+        "title": "Group Total Comparison",
+        "save": "Save to Gallery",
+        "close": "Close",
+        "total": "Total",
+        "rank": "Rank {rank}",
+        "members": "{count} members",
+        "average": "Avg {avg}"
+      },
+      "groups": {
+        "xingqiong": "Star Group",
+        "yeyao": "Moon Group",
+        "canglan": "Ocean Group",
+        "average": "Avg"
+      },
+      "table": {
+        "number": "#",
+        "name": "Name",
+        "class": "Class",
+        "id": "ID",
+        "daily": "Daily",
+        "total": "Total",
+        "reward": "🎁"
+      },
+      "reward": {
+        "title": "Reward System",
+        "subtitle": "Fairness · Reward Every Effort",
+        "first": {
+          "condition": "Score ≥ Average ÷ 2",
+          "benefit": "✨ No chair duty + Reduced marching"
+        },
+        "second": {
+          "condition": "Score ≥ Average",
+          "benefit": "✨ No chair duty + Reduced marching"
+        },
+        "third": {
+          "condition": "Top 3 in group",
+          "benefit": "✨ No chair duty + Reduced marching"
+        },
+        "extra": "🎁 Extra reward for 1st place achievers",
+        "footer": "* Non-achievers continue duties *"
+      },
+      "reminder": {
+        "button": "Enable Reminders",
+        "title": "Daily Reminder Times",
+        "morning": "Wake up reminder",
+        "evening": "Tomorrow's uniform",
+        "night": "Second reminder",
+        "bedtime": "Bedtime reminder",
+        "confirm": "Got it, enable reminders"
+      },
+      "footer": "👆 Double tap / Space twice for dark mode · 📊 Download stats · Lighter = Higher",
+      "toast": {
+        "chartGenerated": "Chart generated",
+        "saved": "Saved to gallery",
+        "saveFailed": "Save failed",
+        "generating": "Generating image..."
+      },
+      "uniform": {
+        "sports": "🎽 Wear sports uniform tomorrow! Activity: {activity}",
+        "uniform": "👔 Wear school uniform tomorrow. Activity: {activity}",
+        "default": "👔 Wear full school uniform tomorrow, don't forget name tag!"
+      }
+    }
+  },
+  "ms": {
+    "app": {
+      "title": "Papan Skor Pengawas · Peta Haba",
+      "subtitle": "Warna lebih cerah = Markah lebih tinggi",
+      "search": "Cari nama/kelas/ID...",
+      "download": "Muat Turun",
+      "dark": "Gelap",
+      "heatmap": {
+        "low": "Rendah",
+        "high": "Tinggi",
+        "legend": "Warna cerah = Markah tinggi"
+      },
+      "chart": {
+        "title": "Perbandingan Jumlah Kumpulan",
+        "save": "Simpan ke Galeri",
+        "close": "Tutup",
+        "total": "Jumlah",
+        "rank": "Kedudukan {rank}",
+        "members": "{count} ahli",
+        "average": "Purata {avg}"
+      },
+      "groups": {
+        "xingqiong": "Kumpulan Bintang",
+        "yeyao": "Kumpulan Bulan",
+        "canglan": "Kumpulan Lautan",
+        "average": "Purata"
+      },
+      "table": {
+        "number": "#",
+        "name": "Nama",
+        "class": "Kelas",
+        "id": "ID",
+        "daily": "Harian",
+        "total": "Jumlah",
+        "reward": "🎁"
+      },
+      "reward": {
+        "title": "Sistem Ganjaran",
+        "subtitle": "Keadilan · Menghargai Usaha",
+        "first": {
+          "condition": "Markah ≥ Purata ÷ 2",
+          "benefit": "✨ Bebas tugas kerusi + Kurang kawad"
+        },
+        "second": {
+          "condition": "Markah ≥ Purata",
+          "benefit": "✨ Bebas tugas kerusi + Kurang kawad"
+        },
+        "third": {
+          "condition": "3 teratas dalam kumpulan",
+          "benefit": "✨ Bebas tugas kerusi + Kurang kawad"
+        },
+        "extra": "🎁 Ganjaran tambahan untuk pencapaian tempat pertama",
+        "footer": "* Yang tidak capai teruskan tugas *"
+      },
+      "reminder": {
+        "button": "Hidupkan Peringatan",
+        "title": "Masa Peringatan Harian",
+        "morning": "Peringatan bangun",
+        "evening": "Pakaian esok",
+        "night": "Peringatan kedua",
+        "bedtime": "Peringatan tidur",
+        "confirm": "Faham, hidupkan"
+      },
+      "footer": "👆 Ketuk dua kali / Ruang dua kali untuk mod gelap · 📊 Muat turun · Cerah = Tinggi",
+      "toast": {
+        "chartGenerated": "Carta dihasilkan",
+        "saved": "Disimpan ke galeri",
+        "saveFailed": "Gagal simpan",
+        "generating": "Menjana gambar..."
+      },
+      "uniform": {
+        "sports": "🎽 Pakai pakaian sukan esok! Aktiviti: {activity}",
+        "uniform": "👔 Pakai uniform sekolah esok. Aktiviti: {activity}",
+        "default": "👔 Pakai uniform sekolah lengkap esok, jangan lupa tag nama!"
+      }
+    }
+  }
+}
