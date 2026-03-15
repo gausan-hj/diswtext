@@ -1,7 +1,8 @@
 import pandas as pd
 from datetime import datetime
+import base64
+import io
 import json
-import os
 
 # ===== 你要修改的地方 =====
 SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
@@ -43,7 +44,238 @@ try:
 except FileNotFoundError:
     print(f"❌ 找不到语言文件: {LANGUAGES_JSON_PATH}")
     print("请确保 languages.json 在正确的路径")
-    exit(1)
+    # 创建一个默认的语言文件
+    languages = {
+        "zh": {
+            "app": {
+                "title": "学长团分数板",
+                "subtitle": "Prefects' Scoreboard",
+                "search": "搜姓名/班级/学号...",
+                "download": "下载统计",
+                "dark": "深色",
+                "footer": "👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高",
+                "heatmap": {
+                    "low": "低分",
+                    "high": "高分"
+                },
+                "chart": {
+                    "title": "各组总分对比",
+                    "save": "保存到相册",
+                    "close": "关闭",
+                    "total": "总分",
+                    "rank": "第{rank}名",
+                    "members": "{count}人",
+                    "average": "平均{avg}分"
+                },
+                "groups": {
+                    "xingqiong": "星穹组",
+                    "yeyao": "夜曜组",
+                    "canglan": "沧澜组",
+                    "average": "平均"
+                },
+                "table": {
+                    "number": "#",
+                    "name": "姓名",
+                    "class": "班",
+                    "id": "学号",
+                    "daily": "每日得分",
+                    "total": "总分",
+                    "reward": "奖"
+                },
+                "reward": {
+                    "title": "本轮奖励机制",
+                    "subtitle": "公平原则 · 不负每一位付出的学长",
+                    "first": {
+                        "condition": "分数 ≥ 平均分÷2",
+                        "benefit": "✨免搬椅子+减免操步"
+                    },
+                    "second": {
+                        "condition": "分数 ≥ 平均分",
+                        "benefit": "✨免搬椅子+减免操步"
+                    },
+                    "third": {
+                        "condition": "组内前三名",
+                        "benefit": "✨免搬椅子+减免操步"
+                    },
+                    "extra": "🎁 第1名达标者额外奖励一份",
+                    "footer": "* 未达标者工作照旧 *"
+                },
+                "reminder": {
+                    "button": "开启提醒",
+                    "title": "每日提醒时间",
+                    "confirm": "知道了，开启提醒",
+                    "morning": "起床提醒",
+                    "evening": "明天衣服提醒",
+                    "night": "再次提醒",
+                    "bedtime": "睡前提醒"
+                },
+                "uniform": {
+                    "sports": "明天穿体育衣 - {activity}",
+                    "uniform": "明天穿校服 - {activity}",
+                    "default": "明天没有联课活动"
+                },
+                "toast": {
+                    "generating": "📸 正在生成图片...",
+                    "saved": "✅ 已保存到相册",
+                    "saveFailed": "❌ 保存失败",
+                    "chartGenerated": "📊 统计图已生成"
+                }
+            }
+        },
+        "en": {
+            "app": {
+                "title": "Prefects' Scoreboard",
+                "subtitle": "Prefects' Scoreboard",
+                "search": "Search name/class/id...",
+                "download": "Download Chart",
+                "dark": "Dark",
+                "footer": "👆 Double tap / double space for dark mode · 📊Download chart · Lighter color = higher score",
+                "heatmap": {
+                    "low": "Low",
+                    "high": "High"
+                },
+                "chart": {
+                    "title": "Group Total Comparison",
+                    "save": "Save to Gallery",
+                    "close": "Close",
+                    "total": "Total",
+                    "rank": "Rank {rank}",
+                    "members": "{count} members",
+                    "average": "Avg {avg}"
+                },
+                "groups": {
+                    "xingqiong": "Star Group",
+                    "yeyao": "Moon Group",
+                    "canglan": "Ocean Group",
+                    "average": "Avg"
+                },
+                "table": {
+                    "number": "#",
+                    "name": "Name",
+                    "class": "Class",
+                    "id": "ID",
+                    "daily": "Daily",
+                    "total": "Total",
+                    "reward": "Reward"
+                },
+                "reward": {
+                    "title": "Reward System",
+                    "subtitle": "Fairness · Every effort counts",
+                    "first": {
+                        "condition": "Score ≥ Avg ÷ 2",
+                        "benefit": "✨No chair moving + Less marching"
+                    },
+                    "second": {
+                        "condition": "Score ≥ Avg",
+                        "benefit": "✨No chair moving + Less marching"
+                    },
+                    "third": {
+                        "condition": "Top 3 in group",
+                        "benefit": "✨No chair moving + Less marching"
+                    },
+                    "extra": "🎁 Extra reward for 1st place achievers",
+                    "footer": "* Others continue duties *"
+                },
+                "reminder": {
+                    "button": "Enable Reminders",
+                    "title": "Daily Reminder Times",
+                    "confirm": "Got it, enable",
+                    "morning": "Wake up",
+                    "evening": "Tomorrow's uniform",
+                    "night": "Reminder again",
+                    "bedtime": "Bedtime"
+                },
+                "uniform": {
+                    "sports": "Tomorrow: Sports uniform - {activity}",
+                    "uniform": "Tomorrow: School uniform - {activity}",
+                    "default": "No CCA tomorrow"
+                },
+                "toast": {
+                    "generating": "📸 Generating image...",
+                    "saved": "✅ Saved to gallery",
+                    "saveFailed": "❌ Save failed",
+                    "chartGenerated": "📊 Chart generated"
+                }
+            }
+        },
+        "ms": {
+            "app": {
+                "title": "Papan Skor Pengawas",
+                "subtitle": "Papan Skor Pengawas",
+                "search": "Cari nama/kelas/id...",
+                "download": "Muat Turun",
+                "dark": "Gelap",
+                "footer": "👆 Ketuk dua kali / ruang dua kali untuk mod gelap · 📊Muat turun · Warna cerah = skor tinggi",
+                "heatmap": {
+                    "low": "Rendah",
+                    "high": "Tinggi"
+                },
+                "chart": {
+                    "title": "Perbandingan Jumlah Kumpulan",
+                    "save": "Simpan ke Galeri",
+                    "close": "Tutup",
+                    "total": "Jumlah",
+                    "rank": "Kedudukan {rank}",
+                    "members": "{count} ahli",
+                    "average": "Purata {avg}"
+                },
+                "groups": {
+                    "xingqiong": "Kumpulan Bintang",
+                    "yeyao": "Kumpulan Bulan",
+                    "canglan": "Kumpulan Lautan",
+                    "average": "Purata"
+                },
+                "table": {
+                    "number": "#",
+                    "name": "Nama",
+                    "class": "Kelas",
+                    "id": "ID",
+                    "daily": "Harian",
+                    "total": "Jumlah",
+                    "reward": "Ganjaran"
+                },
+                "reward": {
+                    "title": "Sistem Ganjaran",
+                    "subtitle": "Keadilan · Setiap usaha dihargai",
+                    "first": {
+                        "condition": "Skor ≥ Purata ÷ 2",
+                        "benefit": "✨Tiada kerusi + Kurang kawad"
+                    },
+                    "second": {
+                        "condition": "Skor ≥ Purata",
+                        "benefit": "✨Tiada kerusi + Kurang kawad"
+                    },
+                    "third": {
+                        "condition": "3 teratas dalam kumpulan",
+                        "benefit": "✨Tiada kerusi + Kurang kawad"
+                    },
+                    "extra": "🎁 Ganjaran tambahan untuk tempat pertama",
+                    "footer": "* Yang lain terus bertugas *"
+                },
+                "reminder": {
+                    "button": "Aktifkan Peringatan",
+                    "title": "Masa Peringatan Harian",
+                    "confirm": "Faham, aktifkan",
+                    "morning": "Bangun tidur",
+                    "evening": "Pakaian esok",
+                    "night": "Peringatan lagi",
+                    "bedtime": "Waktu tidur"
+                },
+                "uniform": {
+                    "sports": "Esok: Pakaian sukan - {activity}",
+                    "uniform": "Esok: Pakaian sekolah - {activity}",
+                    "default": "Tiada CCA esok"
+                },
+                "toast": {
+                    "generating": "📸 Menjana imej...",
+                    "saved": "✅ Disimpan ke galeri",
+                    "saveFailed": "❌ Gagal menyimpan",
+                    "chartGenerated": "📊 Carta dijana"
+                }
+            }
+        }
+    }
+    print("✅ 使用默认语言配置")
 
 languages_json = json.dumps(languages, ensure_ascii=False)
 
@@ -241,13 +473,13 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 从版本2移植统计图和双击/双空格功能
+# 生成HTML - 基于版本2，添加版本1的特色功能
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>训育处 - 学长团分数板 · 热力图</title>
+    <title>训育处 - 学长团分数板</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 '''
@@ -368,7 +600,7 @@ function updatePageLanguage() {{
     // 更新表格表头
     updateTableHeaders();
     
-    // 更新统计图 - 使用版本2的简单方式
+    // 更新统计图
     if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {{
         generateChart();
     }}
@@ -753,7 +985,7 @@ html += '''
             margin: 0 auto;
         }
 
-        /* 双击提示 - 从版本2移植 */
+        /* 双击提示 */
         .double-tap-hint {
             position: fixed;
             bottom: 120px;
@@ -1019,7 +1251,7 @@ html += '''
         .legend-label span.low { color: var(--heat-1); font-weight: bold; }
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
 
-        /* 统计图卡片 - 从版本2移植 */
+        /* 统计图卡片 */
         .chart-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -1921,7 +2153,7 @@ html += '''
 </head>
 <body class="lang-zh">
     <div class="container">
-        <!-- 双击提示 - 从版本2移植 -->
+        <!-- 双击提示 -->
         <div class="double-tap-hint" id="doubleTapHint">
             <span id="hintText">👆 双击屏幕 / 按两次空格 切换深色模式</span>
         </div>
@@ -1975,7 +2207,7 @@ html += '''
             </div>
         </div>
 
-        <!-- 统计图卡片 - 从版本2移植 -->
+        <!-- 统计图卡片 -->
         <div class="chart-card" id="chartCard">
             <div class="chart-header">
                 <span class="chart-title">
@@ -2052,7 +2284,6 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
     # 获取该组的最高分和最低分
     group_max = group_max_scores[group_name]
     group_min = group_min_scores[group_name]
-    score_range = group_max - group_min if group_max > group_min else 1
     
     html += f'''
             <div class="group-card" data-group="{group_name}" id="{group_id}">
@@ -2258,7 +2489,7 @@ html += '''
         // 初始化页面文本
         updatePageLanguage();
         
-        // ===== 双击/双空格切换深色模式 - 从版本2移植 =====
+        // ===== 双击/双空格切换深色模式 =====
         let lastTap = 0;
         let lastSpaceTime = 0;
         let spaceCount = 0;
@@ -2282,7 +2513,7 @@ html += '''
         // 切换深色模式
         function toggleNightMode() {
             document.body.classList.toggle('night-mode');
-            // 更新图表颜色 - 使用版本2的简单方式
+            // 更新图表颜色
             if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
                 generateChart();
             }
@@ -2361,7 +2592,7 @@ html += '''        ];
         
         let chart = null;
 
-        // 显示提示 - 从版本2移植
+        // 显示提示
         function showToast(message, isSuccess = true) {
             if (!toastMessage || !downloadToast) return;
             toastMessage.textContent = message;
@@ -2371,7 +2602,7 @@ html += '''        ];
             }, 2000);
         }
 
-        // 生成统计图 - 从版本2移植
+        // 生成统计图
         function generateChart() {
             const canvas = document.getElementById('groupChart');
             if (!canvas) return;
@@ -2437,7 +2668,7 @@ html += '''        ];
             });
         }
 
-        // 生成统计卡片 - 从版本2移植
+        // 生成统计卡片
         function generateStatsGrid() {
             if (!statsGrid) return;
             let html = '';
@@ -2453,7 +2684,7 @@ html += '''        ];
             statsGrid.innerHTML = html;
         }
 
-        // 保存统计图到相册 - 从版本2移植
+        // 保存统计图到相册
         async function saveChartToGallery() {
             const chartCard = document.getElementById('chartCard');
             if (!chartCard) return;
@@ -2544,5 +2775,5 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 完整整合版：从版本2移植了统计图和双击/双空格功能")
-print("✨ 功能：三语切换 + 姓名动画 + 热力图 + 提醒功能 + (版本2的统计图和双击/双空格)")
+print("✨ 基于版本2的稳定核心，添加了版本1的特色功能")
+print("✨ 功能：三语切换 + 姓名动画 + 热力图 + 提醒功能 + (版本2的正常工作的统计图和双击/双空格)")
