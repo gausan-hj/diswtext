@@ -3,7 +3,6 @@ from datetime import datetime
 import base64
 import io
 import json
-import numpy as np
 
 # ===== 你要修改的地方 =====
 SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
@@ -429,15 +428,13 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 添加统计图表和双击/双空格切换深色模式
+# 生成HTML - 删除统计图和双击/双空格功能
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 - 学长团分数板</title>
-    <!-- Chart.js 轻量级图表库 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 '''
 
 # 添加联课活动数据和语言数据
@@ -453,11 +450,6 @@ const CCA_DATA = {cca_json};
 
 // 当前语言
 let currentLang = localStorage.getItem('prefect_lang') || 'zh';
-
-// 双击/双空格检测变量
-let lastTap = 0;
-let spaceCount = 0;
-let lastSpace = 0;
 
 // 获取翻译文本
 function t(key, params = {{}}) {{
@@ -480,62 +472,6 @@ function t(key, params = {{}}) {{
     }}
     return value;
 }}
-
-// 切换深色模式（带动画）
-function toggleDarkMode() {{
-    document.body.classList.toggle('night-mode');
-    // 显示提示
-    const isDark = document.body.classList.contains('night-mode');
-    showPageToast('🌓', isDark ? '深色模式已开启' : '浅色模式已开启');
-    
-    // 重新渲染图表（因为颜色变了）
-    setTimeout(() => {{
-        if (window.groupChart) {{
-            window.groupChart.destroy();
-            window.groupChart = null;
-        }}
-        if (window.trendChart) {{
-            window.trendChart.destroy();
-            window.trendChart = null;
-        }}
-        initCharts();
-    }}, 100);
-}}
-
-// 1. 移动端/鼠标双击检测
-document.addEventListener('touchend', function(e) {{
-    const now = Date.now();
-    if (now - lastTap < 300) {{
-        e.preventDefault(); // 阻止缩放，只执行切换
-        toggleDarkMode();
-    }}
-    lastTap = now;
-}});
-
-// 同时支持鼠标双击（用于电脑测试）
-document.addEventListener('dblclick', function(e) {{
-    e.preventDefault();
-    toggleDarkMode();
-}});
-
-// 2. 键盘双空格检测
-document.addEventListener('keydown', function(e) {{
-    if (e.code === 'Space') {{
-        e.preventDefault(); // 防止页面滚动
-        const now = Date.now();
-        
-        if (now - lastSpace < 400) {{
-            spaceCount++;
-            if (spaceCount >= 1) {{ // 第二次按下时触发
-                toggleDarkMode();
-                spaceCount = 0;
-            }}
-        }} else {{
-            spaceCount = 0;
-        }}
-        lastSpace = now;
-    }}
-}});
 
 // 获取明天要穿的衣服（多语言）
 function getTomorrowUniform() {{
@@ -869,201 +805,6 @@ document.addEventListener('click', function(e) {{
         }}
     }}
 }});
-
-// 图表数据（由Python生成）
-const groupNames = ['星穹组', '夜曜组', '沧澜组'];
-const groupTotals = [''' + str(int(group_totals["星穹组"])) + ''', ''' + str(int(group_totals["夜曜组"])) + ''', ''' + str(int(group_totals["沧澜组"])) + '''];
-const groupAverages = [''' + f"{group_averages['星穹组']:.1f}" + ''', ''' + f"{group_averages['夜曜组']:.1f}" + ''', ''' + f"{group_averages['沧澜组']:.1f}" + '''];
-const groupMembers = [''' + str(len(group_data["星穹组"])) + ''', ''' + str(len(group_data["夜曜组"])) + ''', ''' + str(len(group_data["沧澜组"])) + '''];
-
-// 初始化图表
-function initCharts() {{
-    // 确保canvas元素存在
-    const ctx1 = document.getElementById('groupChart');
-    const ctx2 = document.getElementById('trendChart');
-    
-    if (!ctx1 || !ctx2) {{
-        console.error('Canvas elements not found');
-        return;
-    }}
-    
-    const isDark = document.body.classList.contains('night-mode');
-    const textColor = isDark ? '#e6edf5' : '#1a2b3c';
-    const gridColor = isDark ? '#2d3a4d' : '#e1e8f0';
-    
-    // 柱状图 - 组别总分对比
-    if (window.groupChart) {{
-        window.groupChart.destroy();
-    }}
-    window.groupChart = new Chart(ctx1, {{
-        type: 'bar',
-        data: {{
-            labels: groupNames,
-            datasets: [{{
-                label: '总分',
-                data: groupTotals,
-                backgroundColor: [
-                    'rgba(234, 179, 8, 0.8)',
-                    'rgba(168, 85, 247, 0.8)',
-                    'rgba(59, 130, 246, 0.8)'
-                ],
-                borderColor: [
-                    '#eab308',
-                    '#a855f7',
-                    '#3b82f6'
-                ],
-                borderWidth: 1
-            }}]
-        }},
-        options: {{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {{
-                legend: {{
-                    display: false
-                }},
-                tooltip: {{
-                    backgroundColor: isDark ? '#1f2c3d' : '#ffffff',
-                    titleColor: textColor,
-                    bodyColor: textColor,
-                    borderColor: gridColor,
-                    borderWidth: 1
-                }}
-            }},
-            scales: {{
-                y: {{
-                    beginAtZero: true,
-                    grid: {{
-                        color: gridColor
-                    }},
-                    ticks: {{
-                        color: textColor
-                    }}
-                }},
-                x: {{
-                    grid: {{
-                        display: false
-                    }},
-                    ticks: {{
-                        color: textColor
-                    }}
-                }}
-            }}
-        }}
-    }});
-
-    // 折线图 - 人均分数趋势
-    if (window.trendChart) {{
-        window.trendChart.destroy();
-    }}
-    window.trendChart = new Chart(ctx2, {{
-        type: 'line',
-        data: {{
-            labels: groupNames,
-            datasets: [{{
-                label: '平均分',
-                data: groupAverages,
-                borderColor: '#eab308',
-                backgroundColor: 'rgba(234, 179, 8, 0.1)',
-                tension: 0.4,
-                fill: true,
-                pointBackgroundColor: [
-                    '#eab308',
-                    '#a855f7',
-                    '#3b82f6'
-                ],
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8
-            }}]
-        }},
-        options: {{
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {{
-                legend: {{
-                    display: false
-                }},
-                tooltip: {{
-                    backgroundColor: isDark ? '#1f2c3d' : '#ffffff',
-                    titleColor: textColor,
-                    bodyColor: textColor,
-                    borderColor: gridColor,
-                    borderWidth: 1,
-                    callbacks: {{
-                        label: function(context) {{
-                            return `平均分: ${{context.raw.toFixed(1)}}`;
-                        }}
-                    }}
-                }}
-            }},
-            scales: {{
-                y: {{
-                    beginAtZero: true,
-                    grid: {{
-                        color: gridColor
-                    }},
-                    ticks: {{
-                        color: textColor,
-                        callback: function(value) {{
-                            return value + '分';
-                        }}
-                    }}
-                }},
-                x: {{
-                    grid: {{
-                        display: false
-                    }},
-                    ticks: {{
-                        color: textColor
-                    }}
-                }}
-            }}
-        }}
-    }});
-}}
-
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {{
-    // 检查系统主题偏好
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {{
-        document.body.classList.add('night-mode');
-    }}
-    
-    // 初始化语言
-    currentLang = localStorage.getItem('prefect_lang') || 'zh';
-    document.body.classList.add(`lang-${{currentLang}}`);
-    
-    // 更新语言按钮
-    updateLangButton();
-    
-    // 初始化页面文本
-    updatePageLanguage();
-    
-    // 初始化图表
-    setTimeout(initCharts, 100);
-}});
-
-// 搜索功能
-const searchInput = document.getElementById('search');
-const allRows = document.querySelectorAll('tbody tr');
-
-if (searchInput) {{
-    searchInput.addEventListener('input', (e) => {{
-        const searchTerm = e.target.value.toLowerCase().trim();
-        allRows.forEach(row => {{
-            const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
-            row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-        }});
-    }});
-}}
-
-// 监听窗口大小变化，重新调整图表
-window.addEventListener('resize', function() {{
-    if (window.groupChart) window.groupChart.resize();
-    if (window.trendChart) window.trendChart.resize();
-}});
 </script>
 '''
 
@@ -1391,60 +1132,6 @@ html += '''
 
         .legend-label span.low { color: var(--heat-1); font-weight: bold; }
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
-
-        /* 统计图表区域 */
-        .stats-section {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-subtle);
-        }
-
-        .stats-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border-subtle);
-        }
-
-        .stats-icon {
-            font-size: 1.4rem;
-        }
-
-        .stats-header h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .chart-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 200px;
-            width: 100%;
-        }
-
-        .chart-title {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-align: center;
-        }
-
-        @media (max-width: 600px) {
-            .chart-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
 
         /* 组排名卡片 */
         .rank-grid {
@@ -2207,14 +1894,14 @@ html += '''
                         <span class="lang-separator">/</span>
                         <span class="lang-right">EN</span>
                     </div>
-                    <div class="theme-toggle" onclick="toggleDarkMode()">
+                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
                     </div>
                 </div>
             </div>
             <div class="meta-info">
-                <span>Prefects' Scoreboard · 双击屏幕/双空格切换深色模式</span>
+                <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
                 <span class="date-badge">''' + datetime.now().strftime('%m/%d %H:%M') + '''</span>
             </div>
             <div class="search-wrapper">
@@ -2265,28 +1952,6 @@ for i, (g, total) in enumerate(sorted_groups, 1):
 '''
 
 html += '''
-        </div>
-
-        <!-- 统计图表区域 -->
-        <div class="stats-section">
-            <div class="stats-header">
-                <span class="stats-icon">📊</span>
-                <h2>组别统计分析</h2>
-            </div>
-            <div class="chart-grid">
-                <div>
-                    <div class="chart-title">总分对比 (柱状图)</div>
-                    <div class="chart-container">
-                        <canvas id="groupChart"></canvas>
-                    </div>
-                </div>
-                <div>
-                    <div class="chart-title">人均分数趋势 (折线图)</div>
-                    <div class="chart-container">
-                        <canvas id="trendChart"></canvas>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- 组别详情 -->
@@ -2483,9 +2148,39 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 双击屏幕/双空格切换深色模式 · 颜色越浅分数越高
+            👆 点击排名卡片跳转 · 🌓切换深色 · 颜色越浅分数越高
         </div>
     </div>
+
+    <script>
+        // 检查系统主题偏好
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('night-mode');
+        }
+        
+        // 初始化语言
+        let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+        document.body.classList.add(`lang-${{currentLang}}`);
+        
+        // 更新语言按钮
+        updateLangButton();
+        
+        // 初始化页面文本
+        updatePageLanguage();
+        
+        const searchInput = document.getElementById('search');
+        const allRows = document.querySelectorAll('tbody tr');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                allRows.forEach(row => {
+                    const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
+                    row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+    </script>
 </body>
 </html>'''
 
@@ -2500,9 +2195,4 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("\n✨ 新增功能：")
-print("   1. 📊 统计图表 - 组别总分柱状图 + 人均分数折线图")
-print("   2. 👆 双击屏幕切换深色模式")
-print("   3. ␣␣ 连续按两次空格键切换深色模式")
-print("   4. 🌓 深色模式图表自动适配颜色")
-print("   5. ✨ 保留原有功能：三语切换 + 姓名动画 + 热力图 + 提醒功能")
+print("✨ 保留功能：三语切换 + 姓名动画 + 热力图 + 提醒功能 + 深色模式按钮")
