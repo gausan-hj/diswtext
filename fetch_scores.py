@@ -454,10 +454,10 @@ const CCA_DATA = {cca_json};
 // 当前语言
 let currentLang = localStorage.getItem('prefect_lang') || 'zh';
 
-// 双击/双空格检测
-let lastTapTime = 0;
-let spacePressCount = 0;
-let lastSpaceTime = 0;
+// 双击/双空格检测变量
+let lastTap = 0;
+let spaceCount = 0;
+let lastSpace = 0;
 
 // 获取翻译文本
 function t(key, params = {{}}) {{
@@ -490,44 +490,50 @@ function toggleDarkMode() {{
     
     // 重新渲染图表（因为颜色变了）
     setTimeout(() => {{
-        if (window.groupChart) window.groupChart.destroy();
-        if (window.trendChart) window.trendChart.destroy();
+        if (window.groupChart) {{
+            window.groupChart.destroy();
+            window.groupChart = null;
+        }}
+        if (window.trendChart) {{
+            window.trendChart.destroy();
+            window.trendChart = null;
+        }}
         initCharts();
     }}, 100);
 }}
 
-// 检测双击屏幕
-document.addEventListener('touchstart', function(e) {{
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTapTime;
-    
-    if (tapLength < 300 && tapLength > 0) {{
-        // 双击屏幕
-        e.preventDefault();
+// 1. 移动端/鼠标双击检测
+document.addEventListener('touchend', function(e) {{
+    const now = Date.now();
+    if (now - lastTap < 300) {{
+        e.preventDefault(); // 阻止缩放，只执行切换
         toggleDarkMode();
     }}
-    lastTapTime = currentTime;
+    lastTap = now;
 }});
 
-// 检测双空格
+// 同时支持鼠标双击（用于电脑测试）
+document.addEventListener('dblclick', function(e) {{
+    e.preventDefault();
+    toggleDarkMode();
+}});
+
+// 2. 键盘双空格检测
 document.addEventListener('keydown', function(e) {{
     if (e.code === 'Space') {{
         e.preventDefault(); // 防止页面滚动
+        const now = Date.now();
         
-        const currentTime = new Date().getTime();
-        
-        if (currentTime - lastSpaceTime < 500) {{
-            spacePressCount++;
-            if (spacePressCount >= 2) {{
-                // 双空格
+        if (now - lastSpace < 400) {{
+            spaceCount++;
+            if (spaceCount >= 1) {{ // 第二次按下时触发
                 toggleDarkMode();
-                spacePressCount = 0;
+                spaceCount = 0;
             }}
         }} else {{
-            spacePressCount = 1;
+            spaceCount = 0;
         }}
-        
-        lastSpaceTime = currentTime;
+        lastSpace = now;
     }}
 }});
 
@@ -872,13 +878,23 @@ const groupMembers = [''' + str(len(group_data["星穹组"])) + ''', ''' + str(l
 
 // 初始化图表
 function initCharts() {{
+    // 确保canvas元素存在
+    const ctx1 = document.getElementById('groupChart');
+    const ctx2 = document.getElementById('trendChart');
+    
+    if (!ctx1 || !ctx2) {{
+        console.error('Canvas elements not found');
+        return;
+    }}
+    
     const isDark = document.body.classList.contains('night-mode');
     const textColor = isDark ? '#e6edf5' : '#1a2b3c';
     const gridColor = isDark ? '#2d3a4d' : '#e1e8f0';
     
     // 柱状图 - 组别总分对比
-    const ctx1 = document.getElementById('groupChart').getContext('2d');
-    if (window.groupChart) window.groupChart.destroy();
+    if (window.groupChart) {{
+        window.groupChart.destroy();
+    }}
     window.groupChart = new Chart(ctx1, {{
         type: 'bar',
         data: {{
@@ -937,8 +953,9 @@ function initCharts() {{
     }});
 
     // 折线图 - 人均分数趋势
-    const ctx2 = document.getElementById('trendChart').getContext('2d');
-    if (window.trendChart) window.trendChart.destroy();
+    if (window.trendChart) {{
+        window.trendChart.destroy();
+    }}
     window.trendChart = new Chart(ctx2, {{
         type: 'line',
         data: {{
@@ -950,9 +967,11 @@ function initCharts() {{
                 backgroundColor: 'rgba(234, 179, 8, 0.1)',
                 tension: 0.4,
                 fill: true,
-                pointBackgroundColor: groupNames.map((_, i) => 
-                    i === 0 ? '#eab308' : i === 1 ? '#a855f7' : '#3b82f6'
-                ),
+                pointBackgroundColor: [
+                    '#eab308',
+                    '#a855f7',
+                    '#3b82f6'
+                ],
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 2,
                 pointRadius: 6,
@@ -1004,6 +1023,47 @@ function initCharts() {{
         }}
     }});
 }}
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', function() {{
+    // 检查系统主题偏好
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {{
+        document.body.classList.add('night-mode');
+    }}
+    
+    // 初始化语言
+    currentLang = localStorage.getItem('prefect_lang') || 'zh';
+    document.body.classList.add(`lang-${{currentLang}}`);
+    
+    // 更新语言按钮
+    updateLangButton();
+    
+    // 初始化页面文本
+    updatePageLanguage();
+    
+    // 初始化图表
+    setTimeout(initCharts, 100);
+}});
+
+// 搜索功能
+const searchInput = document.getElementById('search');
+const allRows = document.querySelectorAll('tbody tr');
+
+if (searchInput) {{
+    searchInput.addEventListener('input', (e) => {{
+        const searchTerm = e.target.value.toLowerCase().trim();
+        allRows.forEach(row => {{
+            const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
+            row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+        }});
+    }});
+}}
+
+// 监听窗口大小变化，重新调整图表
+window.addEventListener('resize', function() {{
+    if (window.groupChart) window.groupChart.resize();
+    if (window.trendChart) window.trendChart.resize();
+}});
 </script>
 '''
 
@@ -2426,47 +2486,6 @@ html += '''
             👆 点击排名卡片跳转 · 双击屏幕/双空格切换深色模式 · 颜色越浅分数越高
         </div>
     </div>
-
-    <script>
-        // 检查系统主题偏好
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('night-mode');
-        }
-        
-        // 初始化语言
-        let currentLang = localStorage.getItem('prefect_lang') || 'zh';
-        document.body.classList.add(`lang-${{currentLang}}`);
-        
-        // 更新语言按钮
-        updateLangButton();
-        
-        // 初始化页面文本
-        updatePageLanguage();
-        
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                allRows.forEach(row => {
-                    const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
-                    row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
-
-        // 等待DOM加载完成后初始化图表
-        document.addEventListener('DOMContentLoaded', function() {
-            initCharts();
-        });
-
-        // 监听窗口大小变化，重新调整图表
-        window.addEventListener('resize', function() {
-            if (window.groupChart) window.groupChart.resize();
-            if (window.trendChart) window.trendChart.resize();
-        });
-    </script>
 </body>
 </html>'''
 
