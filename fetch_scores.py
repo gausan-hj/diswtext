@@ -53,10 +53,19 @@ except FileNotFoundError:
                 "search": "搜姓名/班级/学号...",
                 "download": "下载统计",
                 "dark": "深色",
-                "footer": "👆 点击排名卡片跳转 · 🌓切换深色 · 颜色越浅分数越高",
+                "footer": "👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高",
                 "heatmap": {
                     "low": "低分",
                     "high": "高分"
+                },
+                "chart": {
+                    "title": "各组总分对比",
+                    "save": "保存到相册",
+                    "close": "关闭",
+                    "total": "总分",
+                    "rank": "第{rank}名",
+                    "members": "{count}人",
+                    "average": "平均{avg}分"
                 },
                 "groups": {
                     "xingqiong": "星穹组",
@@ -104,6 +113,12 @@ except FileNotFoundError:
                     "sports": "明天穿体育衣 - {activity}",
                     "uniform": "明天穿校服 - {activity}",
                     "default": "明天没有联课活动"
+                },
+                "toast": {
+                    "generating": "📸 正在生成图片...",
+                    "saved": "✅ 已保存到相册",
+                    "saveFailed": "❌ 保存失败",
+                    "chartGenerated": "📊 统计图已生成"
                 }
             }
         },
@@ -112,12 +127,21 @@ except FileNotFoundError:
                 "title": "Prefects' Scoreboard",
                 "subtitle": "Prefects' Scoreboard",
                 "search": "Search name/class/id...",
-                "download": "Download",
+                "download": "Download Chart",
                 "dark": "Dark",
-                "footer": "👆 Click rank card to jump · 🌓Toggle dark · Lighter = higher score",
+                "footer": "👆 Double tap / double space for dark mode · 📊Download chart · Lighter color = higher score",
                 "heatmap": {
                     "low": "Low",
                     "high": "High"
+                },
+                "chart": {
+                    "title": "Group Total Comparison",
+                    "save": "Save to Gallery",
+                    "close": "Close",
+                    "total": "Total",
+                    "rank": "Rank {rank}",
+                    "members": "{count} members",
+                    "average": "Avg {avg}"
                 },
                 "groups": {
                     "xingqiong": "Star Group",
@@ -165,6 +189,12 @@ except FileNotFoundError:
                     "sports": "Tomorrow: Sports uniform - {activity}",
                     "uniform": "Tomorrow: School uniform - {activity}",
                     "default": "No CCA tomorrow"
+                },
+                "toast": {
+                    "generating": "📸 Generating image...",
+                    "saved": "✅ Saved to gallery",
+                    "saveFailed": "❌ Save failed",
+                    "chartGenerated": "📊 Chart generated"
                 }
             }
         },
@@ -175,10 +205,19 @@ except FileNotFoundError:
                 "search": "Cari nama/kelas/id...",
                 "download": "Muat Turun",
                 "dark": "Gelap",
-                "footer": "👆 Klik kad pangkat · 🌓Tukar mod gelap · Warna cerah = skor tinggi",
+                "footer": "👆 Ketuk dua kali / ruang dua kali untuk mod gelap · 📊Muat turun · Warna cerah = skor tinggi",
                 "heatmap": {
                     "low": "Rendah",
                     "high": "Tinggi"
+                },
+                "chart": {
+                    "title": "Perbandingan Jumlah Kumpulan",
+                    "save": "Simpan ke Galeri",
+                    "close": "Tutup",
+                    "total": "Jumlah",
+                    "rank": "Kedudukan {rank}",
+                    "members": "{count} ahli",
+                    "average": "Purata {avg}"
                 },
                 "groups": {
                     "xingqiong": "Kumpulan Bintang",
@@ -226,6 +265,12 @@ except FileNotFoundError:
                     "sports": "Esok: Pakaian sukan - {activity}",
                     "uniform": "Esok: Pakaian sekolah - {activity}",
                     "default": "Tiada CCA esok"
+                },
+                "toast": {
+                    "generating": "📸 Menjana imej...",
+                    "saved": "✅ Disimpan ke galeri",
+                    "saveFailed": "❌ Gagal menyimpan",
+                    "chartGenerated": "📊 Carta dijana"
                 }
             }
         }
@@ -428,13 +473,15 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 删除统计图和双击/双空格功能
+# 生成HTML - 基于版本2，添加版本1的特色功能
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 - 学长团分数板</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 '''
 
 # 添加联课活动数据和语言数据
@@ -505,6 +552,7 @@ function updatePageLanguage() {{
     document.getElementById('search').placeholder = t('app.search');
     
     // 更新按钮
+    document.getElementById('downloadBtn').innerHTML = `<span>📊</span><span>${{t('app.download')}}</span>`;
     document.querySelector('.theme-toggle span:last-child').textContent = t('app.dark');
     
     // 更新热力图说明
@@ -512,6 +560,16 @@ function updatePageLanguage() {{
     const heatHigh = document.querySelector('.heatmap-legend .legend-label span.high');
     if (heatLow) heatLow.innerHTML = `${{t('app.heatmap.low')}} █`;
     if (heatHigh) heatHigh.innerHTML = `█ ${{t('app.heatmap.high')}}`;
+    
+    // 更新统计图卡片
+    const chartTitle = document.querySelector('.chart-title span:last-child');
+    if (chartTitle) chartTitle.textContent = t('app.chart.title');
+    
+    const saveChartBtn = document.getElementById('saveChartBtn');
+    if (saveChartBtn) saveChartBtn.innerHTML = `<span>💾</span><span>${{t('app.chart.save')}}</span>`;
+    
+    const closeChart = document.getElementById('closeChart');
+    if (closeChart) closeChart.textContent = t('app.chart.close');
     
     // 更新组名
     updateGroupNames();
@@ -541,6 +599,11 @@ function updatePageLanguage() {{
     
     // 更新表格表头
     updateTableHeaders();
+    
+    // 更新统计图
+    if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {{
+        generateChart();
+    }}
 }}
 
 // 更新组名
@@ -922,6 +985,35 @@ html += '''
             margin: 0 auto;
         }
 
+        /* 双击提示 */
+        .double-tap-hint {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .double-tap-hint.show {
+            opacity: 0.9;
+        }
+
+        body.night-mode .double-tap-hint {
+            background: #2d313e;
+            color: white;
+        }
+
         /* 头部 */
         .header {
             background: var(--card-bg);
@@ -1048,6 +1140,32 @@ html += '''
             transform: rotate(180deg);
         }
 
+        /* 下载按钮 */
+        .download-btn {
+            background: var(--star-primary);
+            border: none;
+            border-radius: 30px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: #1a2b3c;
+            font-weight: 500;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .download-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        body.night-mode .download-btn {
+            color: #ffffff;
+        }
+
         .meta-info {
             display: flex;
             justify-content: space-between;
@@ -1132,6 +1250,120 @@ html += '''
 
         .legend-label span.low { color: var(--heat-1); font-weight: bold; }
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
+
+        /* 统计图卡片 */
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-subtle);
+            display: none;
+        }
+
+        .chart-card.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chart-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .save-chart-btn {
+            background: var(--star-primary);
+            border: none;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: #1a2b3c;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        body.night-mode .save-chart-btn {
+            color: #ffffff;
+        }
+
+        .close-chart {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .stat-rank {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
 
         /* 组排名卡片 */
         .rank-grid {
@@ -1623,6 +1855,46 @@ html += '''
             border-top: 1px solid var(--border-subtle);
         }
 
+        /* 下载提示 */
+        .download-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            font-size: 0.8rem;
+        }
+
+        .download-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #eab308;
+            color: #1a2b3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        body.night-mode .toast-icon {
+            color: #ffffff;
+        }
+
         /* 通知提示浮层 */
         .notification-toast {
             position: fixed;
@@ -1881,6 +2153,11 @@ html += '''
 </head>
 <body class="lang-zh">
     <div class="container">
+        <!-- 双击提示 -->
+        <div class="double-tap-hint" id="doubleTapHint">
+            <span id="hintText">👆 双击屏幕 / 按两次空格 切换深色模式</span>
+        </div>
+
         <div class="header">
             <div class="header-top">
                 <div class="title-group">
@@ -1888,6 +2165,10 @@ html += '''
                     <h1>学长团分数板 · 热力图</h1>
                 </div>
                 <div class="action-buttons">
+                    <button class="download-btn" id="downloadBtn">
+                        <span>📊</span>
+                        <span>下载统计</span>
+                    </button>
                     <!-- 语言切换按钮 - 三语轮换 -->
                     <div class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
                         <span class="lang-left">中</span>
@@ -1926,6 +2207,27 @@ html += '''
             </div>
         </div>
 
+        <!-- 统计图卡片 -->
+        <div class="chart-card" id="chartCard">
+            <div class="chart-header">
+                <span class="chart-title">
+                    <span>📊</span>
+                    各组总分对比
+                </span>
+                <div class="chart-actions">
+                    <button class="save-chart-btn" id="saveChartBtn">
+                        <span>💾</span>
+                        <span>保存到相册</span>
+                    </button>
+                    <button class="close-chart" id="closeChart">关闭</button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="groupChart"></canvas>
+            </div>
+            <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
         <!-- 组排名卡片 -->
         <div class="rank-grid">
 '''
@@ -1950,6 +2252,19 @@ for i, (g, total) in enumerate(sorted_groups, 1):
                 </div>
             </div>
 '''
+
+# 准备统计数据
+stats_data = []
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        stats_data.append({
+            "group": g,
+            "total": int(group_totals[g]),
+            "rank": group_rank[g],
+            "members": len(group_data[g]),
+            "avg": int(group_averages[g]),
+            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
+        })
 
 html += '''
         </div>
@@ -2148,8 +2463,14 @@ html += '''
         </div>
 
         <div class="footer">
-            👆 点击排名卡片跳转 · 🌓切换深色 · 颜色越浅分数越高
+            👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高
         </div>
+    </div>
+
+    <!-- 下载提示 -->
+    <div class="download-toast" id="downloadToast">
+        <span class="toast-icon">✓</span>
+        <span id="toastMessage">统计图已生成</span>
     </div>
 
     <script>
@@ -2168,8 +2489,258 @@ html += '''
         // 初始化页面文本
         updatePageLanguage();
         
+        // ===== 双击/双空格切换深色模式 =====
+        let lastTap = 0;
+        let lastSpaceTime = 0;
+        let spaceCount = 0;
+        let hintTimeout;
+
+        const doubleTapHint = document.getElementById('doubleTapHint');
+        const hintText = document.getElementById('hintText');
+
+        // 显示提示
+        function showHint(message) {
+            if (!hintText || !doubleTapHint) return;
+            hintText.textContent = message;
+            doubleTapHint.classList.add('show');
+            
+            clearTimeout(hintTimeout);
+            hintTimeout = setTimeout(() => {
+                doubleTapHint.classList.remove('show');
+            }, 1500);
+        }
+
+        // 切换深色模式
+        function toggleNightMode() {
+            document.body.classList.toggle('night-mode');
+            // 更新图表颜色
+            if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
+                generateChart();
+            }
+        }
+
+        // 监听双击（手机）
+        document.addEventListener('touchstart', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            
+            if (tapLength < 200 && tapLength > 0) {
+                // 双击
+                toggleNightMode();
+                const isNight = document.body.classList.contains('night-mode');
+                showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
+                e.preventDefault();
+            }
+            lastTap = currentTime;
+        });
+
+        // 监听双空格（电脑）
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault(); // 防止页面滚动
+                
+                const currentTime = new Date().getTime();
+                
+                if (currentTime - lastSpaceTime < 500) {
+                    // 两次空格间隔小于500ms
+                    spaceCount++;
+                    if (spaceCount === 2) {
+                        // 双空格
+                        toggleNightMode();
+                        const isNight = document.body.classList.contains('night-mode');
+                        showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
+                        spaceCount = 0;
+                    }
+                } else {
+                    spaceCount = 1;
+                }
+                
+                lastSpaceTime = currentTime;
+            }
+        });
+
         const searchInput = document.getElementById('search');
         const allRows = document.querySelectorAll('tbody tr');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const saveChartBtn = document.getElementById('saveChartBtn');
+        const chartCard = document.getElementById('chartCard');
+        const closeChart = document.getElementById('closeChart');
+        const downloadToast = document.getElementById('downloadToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const statsGrid = document.getElementById('statsGrid');
+        
+        // 统计数据
+        const statsData = [
+'''
+
+# 按固定顺序输出统计图数据
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    for stat in stats_data:
+        if stat["group"] == g:
+            html += f'''            {{ group: "{stat['group']}", total: {stat['total']}, rank: {stat['rank']}, members: {stat['members']}, avg: {stat['avg']}, color: "{stat['color']}" }},\n'''
+
+html += '''        ];
+
+        // 组数据
+        const groups = ["星穹组", "夜曜组", "沧澜组"];
+        const scores = [
+            statsData.find(s => s.group === "星穹组").total,
+            statsData.find(s => s.group === "夜曜组").total,
+            statsData.find(s => s.group === "沧澜组").total
+        ];
+        const colors = ["#eab308", "#a855f7", "#3b82f6"];
+        
+        let chart = null;
+
+        // 显示提示
+        function showToast(message, isSuccess = true) {
+            if (!toastMessage || !downloadToast) return;
+            toastMessage.textContent = message;
+            downloadToast.classList.add('show');
+            setTimeout(() => {
+                downloadToast.classList.remove('show');
+            }, 2000);
+        }
+
+        // 生成统计图
+        function generateChart() {
+            const canvas = document.getElementById('groupChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            const isNightMode = document.body.classList.contains('night-mode');
+            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
+            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: groups.map(g => {
+                        if (g === "星穹组") return t('app.groups.xingqiong');
+                        if (g === "夜曜组") return t('app.groups.yeyao');
+                        return t('app.groups.canglan');
+                    }),
+                    datasets: [{
+                        label: t('app.chart.total'),
+                        data: scores,
+                        backgroundColor: colors,
+                        borderRadius: 6,
+                        barPercentage: 0.6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const group = groups[context.dataIndex];
+                                    const stat = statsData.find(s => s.group === group);
+                                    return [
+                                        `${t('app.chart.total')}: ${value}`,
+                                        `${t('app.chart.rank', {rank: stat.rank})}`,
+                                        `${t('app.chart.members', {count: stat.members})}`,
+                                        `${t('app.chart.average', {avg: stat.avg})}`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: gridColor },
+                            ticks: { color: textColor }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 生成统计卡片
+        function generateStatsGrid() {
+            if (!statsGrid) return;
+            let html = '';
+            statsData.forEach(stat => {
+                html += `
+                    <div class="stat-item">
+                        <div class="stat-label">${t(`app.groups.${stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}`)}</div>
+                        <div class="stat-value">${stat.total}</div>
+                        <div class="stat-rank">${t('app.chart.rank', {rank: stat.rank})} · ${t('app.chart.members', {count: stat.members})}</div>
+                    </div>
+                `;
+            });
+            statsGrid.innerHTML = html;
+        }
+
+        // 保存统计图到相册
+        async function saveChartToGallery() {
+            const chartCard = document.getElementById('chartCard');
+            if (!chartCard) return;
+            
+            try {
+                showToast(t('app.toast.generating'));
+                
+                if (!chart) {
+                    generateChart();
+                }
+                
+                setTimeout(async () => {
+                    const canvas = await html2canvas(chartCard, {
+                        scale: 2,
+                        backgroundColor: getComputedStyle(document.body).backgroundColor,
+                        allowTaint: false,
+                        useCORS: true,
+                        logging: false
+                    });
+                    
+                    const link = document.createElement('a');
+                    link.download = `prefects_score_${new Date().toISOString().slice(0,10)}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    
+                    showToast(t('app.toast.saved'));
+                }, 500);
+                
+            } catch (error) {
+                console.error('保存失败:', error);
+                showToast(t('app.toast.saveFailed'));
+            }
+        }
+
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                if (chartCard) {
+                    chartCard.classList.add('show');
+                    generateChart();
+                    generateStatsGrid();
+                    showToast(t('app.toast.chartGenerated'));
+                }
+            });
+        }
+
+        if (saveChartBtn) {
+            saveChartBtn.addEventListener('click', saveChartToGallery);
+        }
+
+        if (closeChart) {
+            closeChart.addEventListener('click', () => {
+                if (chartCard) {
+                    chartCard.classList.remove('show');
+                }
+            });
+        }
 
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
@@ -2180,6 +2751,15 @@ html += '''
                 });
             });
         }
+
+        // 监听深色模式变化，更新图表
+        const observer = new MutationObserver(() => {
+            if (chart && chartCard?.classList.contains('show')) {
+                generateChart();
+            }
+        });
+        
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     </script>
 </body>
 </html>'''
@@ -2195,4 +2775,6 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 保留功能：三语切换 + 姓名动画 + 热力图 + 提醒功能 + 深色模式按钮")
+print("✨ 基于版本2的稳定核心，添加了版本1的特色功能")
+print("✨ 功能：三语切换 + 姓名动画 + 热力图 + 提醒功能 + (版本2的正常工作的统计图和双击/双空格)")
+
