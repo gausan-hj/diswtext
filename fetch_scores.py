@@ -473,7 +473,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 完整版（包含你提供的HTML）
+# 生成HTML - 修复按钮点击问题
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -591,6 +591,8 @@ html = '''<!DOCTYPE html>
         .container {
             max-width: 100%;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .double-tap-hint {
@@ -623,6 +625,8 @@ html = '''<!DOCTYPE html>
             margin-bottom: 16px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
+            position: relative;
+            z-index: 10;
         }
 
         .header-top {
@@ -654,6 +658,8 @@ html = '''<!DOCTYPE html>
             display: flex;
             gap: 8px;
             align-items: center;
+            position: relative;
+            z-index: 20;
         }
 
         .lang-toggle {
@@ -669,6 +675,9 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             transition: all 0.2s ease;
             white-space: nowrap;
+            position: relative;
+            z-index: 30;
+            pointer-events: auto !important;
         }
 
         .lang-toggle:active {
@@ -688,6 +697,9 @@ html = '''<!DOCTYPE html>
             color: var(--text-primary);
             transition: background 0.15s ease;
             white-space: nowrap;
+            position: relative;
+            z-index: 30;
+            pointer-events: auto !important;
         }
 
         .theme-toggle:active {
@@ -723,6 +735,9 @@ html = '''<!DOCTYPE html>
             font-weight: 500;
             transition: all 0.15s ease;
             white-space: nowrap;
+            position: relative;
+            z-index: 30;
+            pointer-events: auto !important;
         }
 
         .download-btn:active {
@@ -826,6 +841,8 @@ html = '''<!DOCTYPE html>
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
             display: none;
+            position: relative;
+            z-index: 100;
         }
 
         .chart-card.show {
@@ -876,6 +893,9 @@ html = '''<!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 4px;
+            position: relative;
+            z-index: 110;
+            pointer-events: auto !important;
         }
 
         body.night-mode .save-chart-btn {
@@ -890,6 +910,9 @@ html = '''<!DOCTYPE html>
             font-size: 0.7rem;
             cursor: pointer;
             color: var(--text-secondary);
+            position: relative;
+            z-index: 110;
+            pointer-events: auto !important;
         }
 
         .chart-container {
@@ -1425,7 +1448,7 @@ html = '''<!DOCTYPE html>
             align-items: center;
             gap: 8px;
             transition: transform 0.3s ease;
-            z-index: 1000;
+            z-index: 2000;
             font-size: 0.8rem;
         }
 
@@ -1458,7 +1481,7 @@ html = '''<!DOCTYPE html>
             padding: 16px;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
-            z-index: 1002;
+            z-index: 3000;
             max-width: 280px;
             display: none;
             animation: slideIn 0.3s ease;
@@ -1569,7 +1592,7 @@ html = '''<!DOCTYPE html>
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             width: 300px;
-            z-index: 1001;
+            z-index: 2000;
             display: none;
             animation: slideUp 0.4s ease;
         }
@@ -1677,6 +1700,7 @@ html = '''<!DOCTYPE html>
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            pointer-events: auto !important;
         }
 
         .popup-btn:hover {
@@ -1951,7 +1975,7 @@ html = '''<!DOCTYPE html>
 
         // 开启提醒
         function enableReminders() {
-            showNotification('🔔 提醒已开启', '你将在以下时间收到通知：\n早上6:00 · 晚上7:00 · 晚上8:15 · 晚上10:00');
+            showNotification('🔔 提醒已开启', '你将在以下时间收到通知：\\n早上6:00 · 晚上7:00 · 晚上8:15 · 晚上10:00');
             closePopup();
         }
 
@@ -1977,7 +2001,7 @@ html = '''<!DOCTYPE html>
             const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
             const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
             
-            // 模拟数据
+            // 数据 - 会被Python替换
             const groups = ['星穹组', '夜曜组', '沧澜组'];
             const scores = [1234, 1156, 1089];
             const colors = ['#eab308', '#a855f7', '#3b82f6'];
@@ -2080,13 +2104,17 @@ html = '''<!DOCTYPE html>
             // 深色模式切换
             const themeToggle = document.getElementById('themeToggle');
             if (themeToggle) {
-                themeToggle.addEventListener('click', toggleNightMode);
+                themeToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleNightMode();
+                });
             }
 
             // 语言切换
             const langToggle = document.getElementById('langToggle');
             if (langToggle) {
-                langToggle.addEventListener('click', function() {
+                langToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     const body = document.body;
                     if (body.classList.contains('lang-zh')) {
                         body.classList.remove('lang-zh');
@@ -2114,7 +2142,8 @@ html = '''<!DOCTYPE html>
             const closeChart = document.getElementById('closeChart');
             
             if (downloadBtn && chartCard) {
-                downloadBtn.addEventListener('click', function() {
+                downloadBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     chartCard.classList.add('show');
                     generateChart();
                     showToast('📊 统计图已生成');
@@ -2124,12 +2153,16 @@ html = '''<!DOCTYPE html>
             // 保存图表按钮
             const saveChartBtn = document.getElementById('saveChartBtn');
             if (saveChartBtn) {
-                saveChartBtn.addEventListener('click', saveChartToGallery);
+                saveChartBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    saveChartToGallery();
+                });
             }
 
             // 关闭图表
             if (closeChart && chartCard) {
-                closeChart.addEventListener('click', function() {
+                closeChart.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     chartCard.classList.remove('show');
                 });
             }
@@ -2151,7 +2184,10 @@ html = '''<!DOCTYPE html>
             // 提醒按钮
             const reminderBtn = document.getElementById('reminderBtn');
             if (reminderBtn) {
-                reminderBtn.addEventListener('click', showReminderPopup);
+                reminderBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showReminderPopup();
+                });
             }
 
             // 点击外部关闭弹窗
@@ -2346,8 +2382,6 @@ html = html.replace('<!-- 组别详情区域 -->', groups_html)
 # 替换JavaScript中的数据
 html = html.replace('const groups = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'const groups = {json.dumps(group_list)};')
 html = html.replace('const scores = [1234, 1156, 1089];', f'const scores = {json.dumps(total_list)};')
-html = html.replace('statsGrid.innerHTML = groups.map((g, i) => `\n                    <div class="stat-item">\n                        <div class="stat-label">${g}</div>\n                        <div class="stat-value">${scores[i]}</div>\n                        <div class="stat-rank">第${i+1}名 · 10人</div>\n                    </div>\n                `).join(\'\');', 
-                    f'statsGrid.innerHTML = groups.map((g, i) => `\n                    <div class="stat-item">\n                        <div class="stat-label">${{g}}</div>\n                        <div class="stat-value">${{scores[i]}}</div>\n                        <div class="stat-rank">第${{i+1}}名 · {len(group_data[group_list[0]]) if group_list else 0}人</div>\n                    </div>\n                `).join(\'\');')
 
 # 替换日期
 html = html.replace('{datetime.now().strftime(\'%m/%d %H:%M\')}', datetime.now().strftime('%m/%d %H:%M'))
