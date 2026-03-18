@@ -115,6 +115,8 @@
         .container {
             max-width: 100%;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .double-tap-hint {
@@ -147,6 +149,8 @@
             margin-bottom: 16px;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
+            position: relative;
+            z-index: 10;
         }
 
         .header-top {
@@ -178,6 +182,8 @@
             display: flex;
             gap: 8px;
             align-items: center;
+            position: relative;
+            z-index: 20;
         }
 
         .lang-toggle {
@@ -193,6 +199,9 @@
             color: var(--text-primary);
             transition: all 0.2s ease;
             white-space: nowrap;
+            position: relative;
+            z-index: 30;
+            pointer-events: auto !important;
         }
 
         .lang-toggle:active {
@@ -212,6 +221,9 @@
             color: var(--text-primary);
             transition: background 0.15s ease;
             white-space: nowrap;
+            position: relative;
+            z-index: 30;
+            pointer-events: auto !important;
         }
 
         .theme-toggle:active {
@@ -247,6 +259,9 @@
             font-weight: 500;
             transition: all 0.15s ease;
             white-space: nowrap;
+            position: relative;
+            z-index: 30;
+            pointer-events: auto !important;
         }
 
         .download-btn:active {
@@ -350,6 +365,8 @@
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-subtle);
             display: none;
+            position: relative;
+            z-index: 100;
         }
 
         .chart-card.show {
@@ -400,6 +417,9 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            position: relative;
+            z-index: 110;
+            pointer-events: auto !important;
         }
 
         body.night-mode .save-chart-btn {
@@ -414,6 +434,9 @@
             font-size: 0.7rem;
             cursor: pointer;
             color: var(--text-secondary);
+            position: relative;
+            z-index: 110;
+            pointer-events: auto !important;
         }
 
         .chart-container {
@@ -949,7 +972,7 @@
             align-items: center;
             gap: 8px;
             transition: transform 0.3s ease;
-            z-index: 1000;
+            z-index: 2000;
             font-size: 0.8rem;
         }
 
@@ -982,7 +1005,7 @@
             padding: 16px;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
-            z-index: 1002;
+            z-index: 3000;
             max-width: 280px;
             display: none;
             animation: slideIn 0.3s ease;
@@ -1093,7 +1116,7 @@
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             width: 300px;
-            z-index: 1001;
+            z-index: 2000;
             display: none;
             animation: slideUp 0.4s ease;
         }
@@ -1201,6 +1224,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            pointer-events: auto !important;
         }
 
         .popup-btn:hover {
@@ -1256,7 +1280,7 @@
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/18 07:22</span>
+                <span class="date-badge">03/18 07:39</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1995,8 +2019,7 @@
 
         // 开启提醒
         function enableReminders() {
-            showNotification('🔔 提醒已开启', '你将在以下时间收到通知：
-早上6:00 · 晚上7:00 · 晚上8:15 · 晚上10:00');
+            showNotification('🔔 提醒已开启', '你将在以下时间收到通知：\n早上6:00 · 晚上7:00 · 晚上8:15 · 晚上10:00');
             closePopup();
         }
 
@@ -2022,7 +2045,7 @@
             const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
             const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
             
-            // 模拟数据
+            // 数据 - 会被Python替换
             const groups = ["\u591c\u66dc\u7ec4", "\u661f\u7a79\u7ec4", "\u6ca7\u6f9c\u7ec4"];
             const scores = [110, 57, 56];
             const colors = ['#eab308', '#a855f7', '#3b82f6'];
@@ -2078,7 +2101,7 @@
                     <div class="stat-item">
                         <div class="stat-label">${g}</div>
                         <div class="stat-value">${scores[i]}</div>
-                        <div class="stat-rank">第${i+1}名 · 11人</div>
+                        <div class="stat-rank">第${i+1}名 · 10人</div>
                     </div>
                 `).join('');
             }
@@ -2125,13 +2148,17 @@
             // 深色模式切换
             const themeToggle = document.getElementById('themeToggle');
             if (themeToggle) {
-                themeToggle.addEventListener('click', toggleNightMode);
+                themeToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleNightMode();
+                });
             }
 
             // 语言切换
             const langToggle = document.getElementById('langToggle');
             if (langToggle) {
-                langToggle.addEventListener('click', function() {
+                langToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     const body = document.body;
                     if (body.classList.contains('lang-zh')) {
                         body.classList.remove('lang-zh');
@@ -2159,7 +2186,8 @@
             const closeChart = document.getElementById('closeChart');
             
             if (downloadBtn && chartCard) {
-                downloadBtn.addEventListener('click', function() {
+                downloadBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     chartCard.classList.add('show');
                     generateChart();
                     showToast('📊 统计图已生成');
@@ -2169,12 +2197,16 @@
             // 保存图表按钮
             const saveChartBtn = document.getElementById('saveChartBtn');
             if (saveChartBtn) {
-                saveChartBtn.addEventListener('click', saveChartToGallery);
+                saveChartBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    saveChartToGallery();
+                });
             }
 
             // 关闭图表
             if (closeChart && chartCard) {
-                closeChart.addEventListener('click', function() {
+                closeChart.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     chartCard.classList.remove('show');
                 });
             }
@@ -2196,7 +2228,10 @@
             // 提醒按钮
             const reminderBtn = document.getElementById('reminderBtn');
             if (reminderBtn) {
-                reminderBtn.addEventListener('click', showReminderPopup);
+                reminderBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    showReminderPopup();
+                });
             }
 
             // 点击外部关闭弹窗
