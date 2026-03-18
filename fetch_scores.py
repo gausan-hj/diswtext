@@ -7,32 +7,295 @@ import json
 # ===== 你要修改的地方 =====
 SHEET_ID = "1YVa3nLUBW80j2nA4mudEqLH91RJ0FSRytmoDqmbyUJk"
 SHEET_NAME = "Sheet3"
+LANGUAGES_JSON_PATH = "languages.json"  # 语言文件路径
 # ========================
 
-# ===== 2026年联课活动数据（用于服装提醒）=====
+# ===== 2026年联课活动数据（多语言）=====
 cca_data = [
-    {"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "uniform": "校服"},
-    {"date": "2026-02-26", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-03", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "uniform": "校服"},
-    {"date": "2026-03-10", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-12", "activity": "活动（行动组）", "uniform": "校服"},
-    {"date": "2026-03-17", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-03-31", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-02", "activity": "活动（值岗组）", "uniform": "校服"},
-    {"date": "2026-04-07", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-09", "activity": "活动（督察组）", "uniform": "校服"},
-    {"date": "2026-04-14", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-16", "activity": "活动（星穹组）", "uniform": "校服"},
-    {"date": "2026-04-21", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-23", "activity": "活动（夜曜组）", "uniform": "校服"},
-    {"date": "2026-04-28", "activity": "操步", "uniform": "体育衣"},
-    {"date": "2026-04-30", "activity": "活动（沧澜组）", "uniform": "校服"},
-    {"date": "2026-05-05", "activity": "第一学期检讨", "uniform": "校服"},
-    {"date": "2026-05-07", "activity": "操步", "uniform": "体育衣"}
+    {"date": "2026-02-24", "activity": "活动顾问+总学长+副总学长", "activity_en": "Advisor + Head Prefect + Vice Head", "activity_ms": "Penasihat + Ketua Pengawas + Timbalan", "uniform": "校服"},
+    {"date": "2026-02-26", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-03", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-05", "activity": "活动（文书+财政+查账）", "activity_en": "Activity (Secretary + Treasurer + Auditor)", "activity_ms": "Aktiviti (Setiausaha + Bendahari + Juruaudit)", "uniform": "校服"},
+    {"date": "2026-03-10", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-12", "activity": "活动（行动组）", "activity_en": "Activity (Action Group)", "activity_ms": "Aktiviti (Kumpulan Tindakan)", "uniform": "校服"},
+    {"date": "2026-03-17", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-03-31", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-02", "activity": "活动（值岗组）", "activity_en": "Activity (Duty Group)", "activity_ms": "Aktiviti (Kumpulan Bertugas)", "uniform": "校服"},
+    {"date": "2026-04-07", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-09", "activity": "活动（督察组）", "activity_en": "Activity (Supervisory Group)", "activity_ms": "Aktiviti (Kumpulan Penyelia)", "uniform": "校服"},
+    {"date": "2026-04-14", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-16", "activity": "活动（星穹组）", "activity_en": "Activity (Star Group)", "activity_ms": "Aktiviti (Kumpulan Bintang)", "uniform": "校服"},
+    {"date": "2026-04-21", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-23", "activity": "活动（夜曜组）", "activity_en": "Activity (Moon Group)", "activity_ms": "Aktiviti (Kumpulan Bulan)", "uniform": "校服"},
+    {"date": "2026-04-28", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"},
+    {"date": "2026-04-30", "activity": "活动（沧澜组）", "activity_en": "Activity (Ocean Group)", "activity_ms": "Aktiviti (Kumpulan Lautan)", "uniform": "校服"},
+    {"date": "2026-05-05", "activity": "第一学期检讨", "activity_en": "First Semester Review", "activity_ms": "Semakan Semester Pertama", "uniform": "校服"},
+    {"date": "2026-05-07", "activity": "操步", "activity_en": "Marching", "activity_ms": "Kawad", "uniform": "体育衣"}
 ]
 
 cca_json = json.dumps(cca_data, ensure_ascii=False)
+
+# ===== 加载语言文件 =====
+print(f"正在加载语言文件: {LANGUAGES_JSON_PATH}")
+try:
+    with open(LANGUAGES_JSON_PATH, 'r', encoding='utf-8') as f:
+        languages = json.load(f)
+    print("✅ 语言文件加载成功")
+except FileNotFoundError:
+    print(f"❌ 找不到语言文件: {LANGUAGES_JSON_PATH}")
+    print("请确保 languages.json 在正确的路径")
+    # 创建一个默认的语言文件
+    languages = {
+        "zh": {
+            "app": {
+                "title": "学长团分数板",
+                "subtitle": "Prefects' Scoreboard",
+                "search": "搜姓名/班级/学号...",
+                "download": "下载统计",
+                "dark": "深色",
+                "footer": "👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高",
+                "heatmap": {
+                    "low": "低分",
+                    "high": "高分"
+                },
+                "chart": {
+                    "title": "各组总分对比",
+                    "save": "保存到相册",
+                    "close": "关闭",
+                    "total": "总分",
+                    "rank": "第{rank}名",
+                    "members": "{count}人",
+                    "average": "平均{avg}分"
+                },
+                "groups": {
+                    "xingqiong": "星穹组",
+                    "yeyao": "夜曜组",
+                    "canglan": "沧澜组",
+                    "average": "平均"
+                },
+                "table": {
+                    "number": "#",
+                    "name": "姓名",
+                    "class": "班",
+                    "id": "学号",
+                    "daily": "每日得分",
+                    "total": "总分",
+                    "reward": "奖"
+                },
+                "reward": {
+                    "title": "本轮奖励机制",
+                    "subtitle": "公平原则 · 不负每一位付出的学长",
+                    "first": {
+                        "condition": "分数 ≥ 平均分÷2",
+                        "benefit": "✨免搬椅子+减免操步"
+                    },
+                    "second": {
+                        "condition": "分数 ≥ 平均分",
+                        "benefit": "✨免搬椅子+减免操步"
+                    },
+                    "third": {
+                        "condition": "组内前三名",
+                        "benefit": "✨免搬椅子+减免操步"
+                    },
+                    "extra": "🎁 第1名达标者额外奖励一份",
+                    "footer": "* 未达标者工作照旧 *"
+                },
+                "reminder": {
+                    "button": "开启提醒",
+                    "title": "每日提醒时间",
+                    "confirm": "知道了，开启提醒",
+                    "morning": "起床提醒",
+                    "evening": "明天衣服提醒",
+                    "night": "再次提醒",
+                    "bedtime": "睡前提醒"
+                },
+                "uniform": {
+                    "sports": "明天穿体育衣 - {activity}",
+                    "uniform": "明天穿校服 - {activity}",
+                    "default": "明天没有联课活动"
+                },
+                "toast": {
+                    "generating": "📸 正在生成图片...",
+                    "saved": "✅ 已保存到相册",
+                    "saveFailed": "❌ 保存失败",
+                    "chartGenerated": "📊 统计图已生成",
+                    "not_supported": "❌ 不支持",
+                    "not_supported_detail": "您的浏览器不支持网页通知",
+                    "permission_granted": "✅ 权限已开启",
+                    "permission_granted_detail": "您已成功订阅联课提醒",
+                    "permission_denied": "⚠️ 权限被拒绝",
+                    "permission_denied_detail": "请在浏览器设置中手动开启通知"
+                }
+            }
+        },
+        "en": {
+            "app": {
+                "title": "Prefects' Scoreboard",
+                "subtitle": "Prefects' Scoreboard",
+                "search": "Search name/class/id...",
+                "download": "Download Chart",
+                "dark": "Dark",
+                "footer": "👆 Double tap / double space for dark mode · 📊Download chart · Lighter color = higher score",
+                "heatmap": {
+                    "low": "Low",
+                    "high": "High"
+                },
+                "chart": {
+                    "title": "Group Total Comparison",
+                    "save": "Save to Gallery",
+                    "close": "Close",
+                    "total": "Total",
+                    "rank": "Rank {rank}",
+                    "members": "{count} members",
+                    "average": "Avg {avg}"
+                },
+                "groups": {
+                    "xingqiong": "Star Group",
+                    "yeyao": "Moon Group",
+                    "canglan": "Ocean Group",
+                    "average": "Avg"
+                },
+                "table": {
+                    "number": "#",
+                    "name": "Name",
+                    "class": "Class",
+                    "id": "ID",
+                    "daily": "Daily",
+                    "total": "Total",
+                    "reward": "Reward"
+                },
+                "reward": {
+                    "title": "Reward System",
+                    "subtitle": "Fairness · Every effort counts",
+                    "first": {
+                        "condition": "Score ≥ Avg ÷ 2",
+                        "benefit": "✨No chair moving + Less marching"
+                    },
+                    "second": {
+                        "condition": "Score ≥ Avg",
+                        "benefit": "✨No chair moving + Less marching"
+                    },
+                    "third": {
+                        "condition": "Top 3 in group",
+                        "benefit": "✨No chair moving + Less marching"
+                    },
+                    "extra": "🎁 Extra reward for 1st place achievers",
+                    "footer": "* Others continue duties *"
+                },
+                "reminder": {
+                    "button": "Enable Reminders",
+                    "title": "Daily Reminder Times",
+                    "confirm": "Got it, enable",
+                    "morning": "Wake up",
+                    "evening": "Tomorrow's uniform",
+                    "night": "Reminder again",
+                    "bedtime": "Bedtime"
+                },
+                "uniform": {
+                    "sports": "Tomorrow: Sports uniform - {activity}",
+                    "uniform": "Tomorrow: School uniform - {activity}",
+                    "default": "No CCA tomorrow"
+                },
+                "toast": {
+                    "generating": "📸 Generating image...",
+                    "saved": "✅ Saved to gallery",
+                    "saveFailed": "❌ Save failed",
+                    "chartGenerated": "📊 Chart generated",
+                    "not_supported": "❌ Not supported",
+                    "not_supported_detail": "Your browser does not support web notifications",
+                    "permission_granted": "✅ Permission granted",
+                    "permission_granted_detail": "You have successfully subscribed to CCA reminders",
+                    "permission_denied": "⚠️ Permission denied",
+                    "permission_denied_detail": "Please enable notifications in your browser settings"
+                }
+            }
+        },
+        "ms": {
+            "app": {
+                "title": "Papan Skor Pengawas",
+                "subtitle": "Papan Skor Pengawas",
+                "search": "Cari nama/kelas/id...",
+                "download": "Muat Turun",
+                "dark": "Gelap",
+                "footer": "👆 Ketuk dua kali / ruang dua kali untuk mod gelap · 📊Muat turun · Warna cerah = skor tinggi",
+                "heatmap": {
+                    "low": "Rendah",
+                    "high": "Tinggi"
+                },
+                "chart": {
+                    "title": "Perbandingan Jumlah Kumpulan",
+                    "save": "Simpan ke Galeri",
+                    "close": "Tutup",
+                    "total": "Jumlah",
+                    "rank": "Kedudukan {rank}",
+                    "members": "{count} ahli",
+                    "average": "Purata {avg}"
+                },
+                "groups": {
+                    "xingqiong": "Kumpulan Bintang",
+                    "yeyao": "Kumpulan Bulan",
+                    "canglan": "Kumpulan Lautan",
+                    "average": "Purata"
+                },
+                "table": {
+                    "number": "#",
+                    "name": "Nama",
+                    "class": "Kelas",
+                    "id": "ID",
+                    "daily": "Harian",
+                    "total": "Jumlah",
+                    "reward": "Ganjaran"
+                },
+                "reward": {
+                    "title": "Sistem Ganjaran",
+                    "subtitle": "Keadilan · Setiap usaha dihargai",
+                    "first": {
+                        "condition": "Skor ≥ Purata ÷ 2",
+                        "benefit": "✨Tiada kerusi + Kurang kawad"
+                    },
+                    "second": {
+                        "condition": "Skor ≥ Purata",
+                        "benefit": "✨Tiada kerusi + Kurang kawad"
+                    },
+                    "third": {
+                        "condition": "3 teratas dalam kumpulan",
+                        "benefit": "✨Tiada kerusi + Kurang kawad"
+                    },
+                    "extra": "🎁 Ganjaran tambahan untuk tempat pertama",
+                    "footer": "* Yang lain terus bertugas *"
+                },
+                "reminder": {
+                    "button": "Aktifkan Peringatan",
+                    "title": "Masa Peringatan Harian",
+                    "confirm": "Faham, aktifkan",
+                    "morning": "Bangun tidur",
+                    "evening": "Pakaian esok",
+                    "night": "Peringatan lagi",
+                    "bedtime": "Waktu tidur"
+                },
+                "uniform": {
+                    "sports": "Esok: Pakaian sukan - {activity}",
+                    "uniform": "Esok: Pakaian sekolah - {activity}",
+                    "default": "Tiada CCA esok"
+                },
+                "toast": {
+                    "generating": "📸 Menjana imej...",
+                    "saved": "✅ Disimpan ke galeri",
+                    "saveFailed": "❌ Gagal menyimpan",
+                    "chartGenerated": "📊 Carta dijana",
+                    "not_supported": "❌ Tidak disokong",
+                    "not_supported_detail": "Pelayar anda tidak menyokong pemberitahuan web",
+                    "permission_granted": "✅ Kebenaran diberikan",
+                    "permission_granted_detail": "Anda telah berjaya melanggan peringatan CCA",
+                    "permission_denied": "⚠️ Kebenaran ditolak",
+                    "permission_denied_detail": "Sila dayakan pemberitahuan dalam tetapan pelayar anda"
+                }
+            }
+        }
+    }
+    print("✅ 使用默认语言配置")
+
+languages_json = json.dumps(languages, ensure_ascii=False)
 
 # 生成Google Sheets的CSV导出链接
 url = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/gviz/tq?tqx=out:csv&sheet={SHEET_NAME}"
@@ -228,26 +491,55 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 添加双击/双空格切换深色模式
+# 生成HTML - 添加OneSignal通知权限（保持原有三语功能）
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>训育处 - 学长团分数板 · 热力图</title>
+    <title>训育处 - 学长团分数板</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- OneSignal SDK - 用于通知权限 -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 '''
 
-# 添加联课活动数据
+# 添加联课活动数据和语言数据
 html += f'''
-<!-- OneSignal SDK -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
+// 语言数据
+const LANGUAGES = {languages_json};
+
 // 联课活动数据（用于服装提醒）
 const CCA_DATA = {cca_json};
 
-// 获取明天要穿的衣服
+// 当前语言
+let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+
+// 获取翻译文本
+function t(key, params = {{}}) {{
+    const keys = key.split('.');
+    let value = LANGUAGES[currentLang];
+    for (const k of keys) {{
+        if (value && value[k] !== undefined) {{
+            value = value[k];
+        }} else {{
+            console.warn(`Translation key not found: ${{key}}`);
+            return key;
+        }}
+    }}
+    
+    // 替换参数
+    if (typeof value === 'string') {{
+        return value.replace(/\\{{([^}}]+)\\}}/g, (match, p1) => {{
+            return params[p1] !== undefined ? params[p1] : match;
+        }});
+    }}
+    return value;
+}}
+
+// 获取明天要穿的衣服（多语言）
 function getTomorrowUniform() {{
     const today = new Date();
     const tomorrow = new Date(today);
@@ -262,56 +554,316 @@ function getTomorrowUniform() {{
     
     if (tomorrowCCA) {{
         if (tomorrowCCA.uniform === "体育衣") {{
-            return `🎽 明天请穿体育衣！活动：${{tomorrowCCA.activity}}`;
+            return t('app.uniform.sports', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
         }} else {{
-            return `👔 明天穿校服，活动：${{tomorrowCCA.activity}}`;
+            return t('app.uniform.uniform', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
         }}
     }} else {{
-        return "👔 明天穿整齐校服，记得带名牌！";
+        return t('app.uniform.default');
     }}
 }}
 
-// OneSignal 初始化
+// ===== OneSignal 初始化 - 专业的通知权限处理 =====
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {{
     await OneSignal.init({{
         appId: "137d66ce-9746-4206-9861-a1c368a0b548",
         allowLocalhostAsSecureOrigin: true,
         notifyButton: {{
-            enable: true,
-            size: 'medium',
-            showCredit: false,
-            position: 'bottom-right',
-            text: {{
-                'message': '开启每日服装提醒',
-                'subscribe': '允许通知',
-                'unsubscribe': '关闭通知'
-            }},
-            colors: {{
-                'circle.background': '#eab308',
-                'circle.foreground': '#1a2b3c',
-                'badge.background': '#eab308',
-                'badge.foreground': '#1a2b3c',
-                'badge.bordercolor': '#e2e8f0',
-                'button.background': '#eab308',
-                'button.foreground': '#1a2b3c',
-                'button.hover.background': '#ca8a04'
-            }}
+            enable: false, // 关掉自带按钮，用我们自己的
         }},
-        serviceWorkerParam: {{ scope: '/' }},
-        serviceWorkerPath: 'OneSignalSDKWorker.js',
-        serviceWorkerUpdaterPath: 'OneSignalSDKUpdaterWorker.js'
     }});
     console.log('OneSignal 初始化成功');
 }});
 
-// 检查订阅状态
-async function checkSubscription() {{
-    const isSubscribed = await OneSignalDeferred.push(async function(OneSignal) {{
-        return await OneSignal.User.PushSubscription.optedIn;
+// 强化激活函数
+async function enableReminders() {{
+    OneSignalDeferred.push(async function(OneSignal) {{
+        // 1. 检查浏览器是否支持
+        if (!OneSignal.Notifications.isPushSupported()) {{
+            showPageToast(t('app.toast.not_supported'), t('app.toast.not_supported_detail'));
+            return;
+        }}
+
+        // 2. 弹出系统原生权限请求
+        try {{
+            await OneSignal.Notifications.requestPermission();
+            
+            // 3. 检查是否成功获取权限
+            if (OneSignal.Notifications.permission) {{
+                showPageToast(t('app.toast.permission_granted'), t('app.toast.permission_granted_detail'));
+                
+                // 可以在这里给用户打标签，方便后台定向推送
+                OneSignal.User.addTag("role", "prefect"); 
+                
+                closePopup();
+            }} else {{
+                showPageToast(t('app.toast.permission_denied'), t('app.toast.permission_denied_detail'));
+            }}
+        }} catch (err) {{
+            console.error("Permission error:", err);
+        }}
     }});
-    console.log('订阅状态:', isSubscribed);
-    return isSubscribed;
+}}
+
+// 更新页面所有文本
+function updatePageLanguage() {{
+    // 更新标题
+    document.querySelector('h1').textContent = t('app.title');
+    document.querySelector('.meta-info span:first-child').textContent = t('app.subtitle');
+    document.getElementById('search').placeholder = t('app.search');
+    
+    // 更新按钮
+    document.getElementById('downloadBtn').innerHTML = `<span>📊</span><span>${{t('app.download')}}</span>`;
+    document.querySelector('.theme-toggle span:last-child').textContent = t('app.dark');
+    
+    // 更新热力图说明
+    const heatLow = document.querySelector('.heatmap-legend .legend-label span.low');
+    const heatHigh = document.querySelector('.heatmap-legend .legend-label span.high');
+    if (heatLow) heatLow.innerHTML = `${{t('app.heatmap.low')}} █`;
+    if (heatHigh) heatHigh.innerHTML = `█ ${{t('app.heatmap.high')}}`;
+    
+    // 更新统计图卡片
+    const chartTitle = document.querySelector('.chart-title span:last-child');
+    if (chartTitle) chartTitle.textContent = t('app.chart.title');
+    
+    const saveChartBtn = document.getElementById('saveChartBtn');
+    if (saveChartBtn) saveChartBtn.innerHTML = `<span>💾</span><span>${{t('app.chart.save')}}</span>`;
+    
+    const closeChart = document.getElementById('closeChart');
+    if (closeChart) closeChart.textContent = t('app.chart.close');
+    
+    // 更新组名
+    updateGroupNames();
+    
+    // 更新奖励机制卡片
+    updateRewardSection();
+    
+    // 更新提醒按钮和弹窗
+    const reminderText = document.querySelector('.reminder-text');
+    if (reminderText) reminderText.textContent = t('app.reminder.button');
+    
+    const popupTitle = document.querySelector('.popup-title');
+    if (popupTitle) popupTitle.textContent = t('app.reminder.title');
+    
+    const popupBtn = document.querySelector('.popup-btn');
+    if (popupBtn) popupBtn.textContent = t('app.reminder.confirm');
+    
+    // 更新时间标签
+    updateTimeItems();
+    
+    // 更新footer
+    const footer = document.querySelector('.footer');
+    if (footer) footer.innerHTML = t('app.footer');
+    
+    // 更新语言按钮
+    updateLangButton();
+    
+    // 更新表格表头
+    updateTableHeaders();
+    
+    // 更新统计图
+    if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {{
+        generateChart();
+    }}
+}}
+
+// 更新组名
+function updateGroupNames() {{
+    // 组排名卡片
+    document.querySelectorAll('.rank-card').forEach(card => {{
+        const group = card.getAttribute('data-group');
+        const groupName = getTranslatedGroupName(group);
+        const nameEl = card.querySelector('.rank-name');
+        if (nameEl) nameEl.textContent = groupName;
+    }});
+    
+    // 组卡片标题
+    document.querySelectorAll('.group-card').forEach(card => {{
+        const group = card.getAttribute('data-group');
+        const groupName = getTranslatedGroupName(group);
+        const titleEl = card.querySelector('.group-title');
+        if (titleEl) titleEl.textContent = groupName;
+        
+        const avgEl = card.querySelector('.group-avg');
+        if (avgEl) {{
+            const score = avgEl.textContent.match(/\\d+/)?.[0] || '';
+            avgEl.innerHTML = t('app.groups.average') + ' ' + score;
+        }}
+    }});
+}}
+
+// 获取翻译后的组名
+function getTranslatedGroupName(group) {{
+    const map = {{
+        '星穹组': 'app.groups.xingqiong',
+        '夜曜组': 'app.groups.yeyao',
+        '沧澜组': 'app.groups.canglan'
+    }};
+    return t(map[group]);
+}}
+
+// 更新奖励机制卡片
+function updateRewardSection() {{
+    const section = document.querySelector('.reward-section');
+    if (!section) return;
+    
+    const title = section.querySelector('h2');
+    if (title) title.textContent = t('app.reward.title');
+    
+    const subtitle = section.querySelector('.reward-subtitle');
+    if (subtitle) subtitle.textContent = t('app.reward.subtitle');
+    
+    const items = section.querySelectorAll('.reward-item');
+    if (items.length >= 3) {{
+        const conditions = items[0].querySelectorAll('.reward-condition');
+        const benefits = items[0].querySelectorAll('.reward-benefit');
+        
+        if (conditions[0]) conditions[0].textContent = t('app.reward.first.condition');
+        if (benefits[0]) benefits[0].textContent = t('app.reward.first.benefit');
+        
+        if (conditions[1]) conditions[1].textContent = t('app.reward.second.condition');
+        if (benefits[1]) benefits[1].textContent = t('app.reward.second.benefit');
+        
+        if (conditions[2]) conditions[2].textContent = t('app.reward.third.condition');
+        if (benefits[2]) benefits[2].textContent = t('app.reward.third.benefit');
+    }}
+    
+    const extra = section.querySelector('.reward-extra');
+    if (extra) extra.textContent = t('app.reward.extra');
+    
+    const footer = section.querySelector('.reward-footer');
+    if (footer) footer.textContent = t('app.reward.footer');
+}}
+
+// 更新时间项
+function updateTimeItems() {{
+    const items = document.querySelectorAll('.time-item');
+    const descs = ['morning', 'evening', 'night', 'bedtime'];
+    items.forEach((item, index) => {{
+        if (index < descs.length) {{
+            const desc = item.querySelector('.time-desc');
+            if (desc) desc.textContent = t(`app.reminder.${{descs[index]}}`);
+        }}
+    }});
+}}
+
+// 更新表格表头
+function updateTableHeaders() {{
+    document.querySelectorAll('.member-table thead tr').forEach(header => {{
+        const cells = header.querySelectorAll('th');
+        if (cells.length >= 7) {{
+            cells[0].textContent = t('app.table.number');
+            cells[1].textContent = t('app.table.name');
+            cells[2].textContent = t('app.table.class');
+            cells[3].textContent = t('app.table.id');
+            cells[4].textContent = t('app.table.daily');
+            cells[5].textContent = t('app.table.total');
+            cells[6].textContent = t('app.table.reward');
+        }}
+    }});
+}}
+
+// 更新语言按钮
+function updateLangButton() {{
+    const langToggle = document.getElementById('langToggle');
+    if (!langToggle) return;
+    
+    const leftSpan = langToggle.querySelector('.lang-left');
+    const rightSpan = langToggle.querySelector('.lang-right');
+    const separator = langToggle.querySelector('.lang-separator');
+    
+    if (currentLang === 'zh') {{
+        if (leftSpan) leftSpan.textContent = '中';
+        if (rightSpan) rightSpan.textContent = 'EN';
+        if (separator) separator.textContent = '/';
+    }} else if (currentLang === 'en') {{
+        if (leftSpan) leftSpan.textContent = 'EN';
+        if (rightSpan) rightSpan.textContent = 'MS';
+        if (separator) separator.textContent = '/';
+    }} else {{
+        if (leftSpan) leftSpan.textContent = 'MS';
+        if (rightSpan) rightSpan.textContent = '中';
+        if (separator) separator.textContent = '/';
+    }}
+}}
+
+// 切换语言动画
+function animateLanguageChange(newLang) {{
+    const nameCells = document.querySelectorAll('.name-cell');
+    
+    // 添加动画类
+    nameCells.forEach(cell => {{
+        cell.classList.add('lang-switching');
+    }});
+    
+    setTimeout(() => {{
+        // 更新语言
+        currentLang = newLang;
+        localStorage.setItem('prefect_lang', currentLang);
+        
+        // 更新body类
+        document.body.classList.remove('lang-zh', 'lang-en', 'lang-ms');
+        document.body.classList.add(`lang-${{currentLang}}`);
+        
+        // 更新页面文本
+        updatePageLanguage();
+        
+        // 移除动画类
+        setTimeout(() => {{
+            nameCells.forEach(cell => {{
+                cell.classList.remove('lang-switching');
+            }});
+        }}, 50);
+    }}, 150);
+}}
+
+// 切换语言
+function toggleLanguage() {{
+    const langToggle = document.getElementById('langToggle');
+    if (!langToggle) return;
+    
+    langToggle.classList.add('swap');
+    
+    setTimeout(() => {{
+        // 轮换语言
+        let newLang;
+        if (currentLang === 'zh') {{
+            newLang = 'en';
+        }} else if (currentLang === 'en') {{
+            newLang = 'ms';
+        }} else {{
+            newLang = 'zh';
+        }}
+        
+        animateLanguageChange(newLang);
+        
+        // 移除动画
+        setTimeout(() => {{
+            langToggle.classList.remove('swap');
+        }}, 50);
+        
+        // 显示提示
+        const langNames = {{ zh: '中文', en: 'English', ms: 'Bahasa Melayu' }};
+        showPageToast('🌐', `已切换到 ${{langNames[newLang]}}`);
+    }}, 150);
+}}
+
+// 显示网页内提醒
+function showPageToast(title, message) {{
+    const toast = document.getElementById('notificationToast');
+    if (!toast) return;
+    
+    const titleEl = document.getElementById('toastMessage');
+    const detailEl = document.getElementById('toastDetail');
+    
+    if (titleEl) titleEl.textContent = title;
+    if (detailEl) detailEl.textContent = message;
+    toast.classList.add('show');
+    
+    setTimeout(() => {{
+        toast.classList.remove('show');
+    }}, 3000);
 }}
 
 // 开启提醒
@@ -324,12 +876,14 @@ function enableReminders() {{
 
 // 显示提示框
 function showReminderPopup() {{
-    document.getElementById('reminderPopup').classList.add('show');
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.add('show');
 }}
 
 // 关闭提示框
 function closePopup() {{
-    document.getElementById('reminderPopup').classList.remove('show');
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.remove('show');
 }}
 
 // 点击外部关闭提示框
@@ -354,21 +908,19 @@ html += '''
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* ===== 日间模式 ===== */
         :root {
-            --bg-primary: #f8fafc;
+            --bg-primary: #f5f7fc;
             --bg-secondary: #ffffff;
             --card-bg: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #475569;
-            --text-tertiary: #64748b;
-            --border-light: #e2e8f0;
-            --border-subtle: #f1f5f9;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05);
+            --text-primary: #1a2b3c;
+            --text-secondary: #2c3e50;
+            --text-tertiary: #5a6b7a;
+            --border-light: #e1e8f0;
+            --border-subtle: #eef2f6;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.04);
+            --shadow-lg: 0 8px 20px rgba(0,0,0,0.06);
             
-            /* 组颜色 */
             --star-primary: #eab308;
             --star-light: #fef9c3;
             --star-bg: #fefae8;
@@ -388,8 +940,7 @@ html += '''
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
             
-            /* 热力图颜色 - 越浅越高分（高分用浅色，低分用深色） */
-            --heat-1: #083344;  /* 最低分 - 最深 */
+            --heat-1: #083344;
             --heat-2: #164e63;
             --heat-3: #155e75;
             --heat-4: #0369a1;
@@ -397,40 +948,41 @@ html += '''
             --heat-6: #38bdf8;
             --heat-7: #7dd3fc;
             --heat-8: #bae6fd;
-            --heat-9: #e0f2fe;  /* 最高分 - 最浅 */
+            --heat-9: #e0f2fe;
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
-        /* ===== 深色模式 ===== */
         body.night-mode {
-            --bg-primary: #1a1e2a;
-            --bg-secondary: #242836;
-            --card-bg: #2d313e;
-            --text-primary: #ffffff;
-            --text-secondary: #e0e0e0;
-            --text-tertiary: #b0b0b0;
-            --border-light: #3a3f4d;
-            --border-subtle: #323644;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+            --bg-primary: #0f1825;
+            --bg-secondary: #1e2a3a;
+            --card-bg: #1f2c3d;
+            --text-primary: #e6edf5;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --border-light: #2d3a4d;
+            --border-subtle: #253141;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg: 0 8px 20px rgba(0,0,0,0.5);
             
+            --star-light: #423d2a;
             --star-bg: #2f2a1f;
-            --night-bg: #2a1f3a;
-            --ocean-bg: #1f2a3a;
+            --night-light: #2f2740;
+            --night-bg: #252033;
+            --ocean-light: #1f3045;
+            --ocean-bg: #1c2638;
             
-            --score-bg: #2d3240;
-            --score-text: #ffffff;
-            --score-highlight: #1e3a6a;
-            --score-highlight-text: #b0d0ff;
-            --reward-pass: #1a3a1a;
-            --reward-pass-text: #a0ffa0;
-            --reward-fail: #3a1a1a;
-            --reward-fail-text: #ffa0a0;
+            --score-bg: #2d3a4f;
+            --score-text: #cbd5e1;
+            --score-highlight: #1e3a6f;
+            --score-highlight-text: #9ac7ff;
+            --reward-pass: #1f4a3a;
+            --reward-pass-text: #bbf7d0;
+            --reward-fail: #562b2b;
+            --reward-fail-text: #fecaca;
             
-            /* 深色模式热力图 - 同样越浅越高分 */
             --heat-1: #000814;
             --heat-2: #001d3d;
             --heat-3: #003566;
@@ -459,7 +1011,6 @@ html += '''
             margin: 0 auto;
         }
 
-        /* 双击提示 */
         .double-tap-hint {
             position: fixed;
             bottom: 120px;
@@ -483,12 +1034,6 @@ html += '''
             opacity: 0.9;
         }
 
-        body.night-mode .double-tap-hint {
-            background: #2d313e;
-            color: white;
-        }
-
-        /* 头部 */
         .header {
             background: var(--card-bg);
             border-radius: 24px;
@@ -529,6 +1074,55 @@ html += '''
             align-items: center;
         }
 
+        .lang-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 30px;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lang-toggle:active {
+            transform: scale(0.92);
+        }
+
+        .lang-toggle span {
+            display: inline-block;
+            transition: transform 0.3s ease, opacity 0.2s ease;
+        }
+
+        .lang-toggle .lang-left {
+            order: 1;
+        }
+
+        .lang-toggle .lang-right {
+            order: 2;
+        }
+
+        .lang-toggle .lang-separator {
+            order: 1.5;
+            margin: 0 2px;
+        }
+
+        .lang-toggle.swap .lang-left {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .lang-toggle.swap .lang-right {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -540,12 +1134,27 @@ html += '''
             gap: 4px;
             font-size: 0.8rem;
             color: var(--text-primary);
-            transition: all 0.15s ease;
+            transition: background 0.15s ease;
             white-space: nowrap;
         }
 
         .theme-toggle:active {
+            background: var(--border-light);
             transform: scale(0.98);
+        }
+
+        .moon-icon {
+            display: inline-block;
+            font-size: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        body.night-mode .moon-icon {
+            transform: rotate(0deg);
+        }
+
+        body:not(.night-mode) .moon-icon {
+            transform: rotate(180deg);
         }
 
         .download-btn {
@@ -564,22 +1173,13 @@ html += '''
             white-space: nowrap;
         }
 
+        .download-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
         body.night-mode .download-btn {
             color: #ffffff;
-        }
-
-        .moon-icon {
-            display: inline-block;
-            font-size: 1rem;
-            transition: transform 0.2s ease;
-        }
-
-        body.night-mode .moon-icon {
-            transform: rotate(0deg);
-        }
-
-        body:not(.night-mode) .moon-icon {
-            transform: rotate(180deg);
         }
 
         .meta-info {
@@ -631,7 +1231,6 @@ html += '''
             border-color: var(--text-tertiary);
         }
 
-        /* 热力图说明 */
         .heatmap-legend {
             display: flex;
             align-items: center;
@@ -667,7 +1266,6 @@ html += '''
         .legend-label span.low { color: var(--heat-1); font-weight: bold; }
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
 
-        /* 统计图卡片 */
         .chart-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -781,7 +1379,6 @@ html += '''
             margin-top: 2px;
         }
 
-        /* 组排名卡片 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -848,7 +1445,6 @@ html += '''
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 */
         .groups {
             display: flex;
             flex-direction: column;
@@ -921,7 +1517,6 @@ html += '''
         .group-card[data-group="夜曜组"] .group-badge { background: #a855f7; }
         .group-card[data-group="沧澜组"] .group-badge { background: #3b82f6; }
 
-        /* 表格 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -969,6 +1564,12 @@ html += '''
 
         .name-cell {
             max-width: 180px;
+            min-height: 45px;
+            position: relative;
+        }
+
+        .name-cn, .name-en {
+            transition: all 0.3s ease;
         }
 
         .name-cn {
@@ -988,12 +1589,90 @@ html += '''
             word-break: break-word;
         }
 
+        .name-cell.lang-switching .name-cn {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+
+        .name-cell.lang-switching .name-en {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        body.lang-zh .name-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.lang-zh .name-cell .name-cn {
+            order: 1;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        body.lang-zh .name-cell .name-en {
+            order: 2;
+            transform: translateY(0);
+            opacity: 0.8;
+        }
+
+        body.lang-en .name-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.lang-en .name-cell .name-en {
+            order: 1;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        body.lang-en .name-cell .name-cn {
+            order: 2;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            opacity: 0.8;
+            transform: translateY(0);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        body.lang-ms .name-cell {
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.lang-ms .name-cell .name-en {
+            order: 1;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        body.lang-ms .name-cell .name-cn {
+            order: 2;
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            opacity: 0.8;
+            transform: translateY(0);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .info-cell {
             font-size: 0.7rem;
             color: var(--text-secondary);
         }
 
-        /* 热力图分数标签 */
         .score-tags {
             display: flex;
             gap: 2px;
@@ -1024,7 +1703,6 @@ html += '''
         .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
-        /* 总分热力图 */
         .total-heat {
             font-weight: 700;
             font-size: 0.9rem;
@@ -1042,7 +1720,6 @@ html += '''
             text-shadow: 0 1px 3px rgba(0,0,0,0.5);
         }
 
-        /* 奖励标记 */
         .reward-pass, .reward-fail {
             padding: 2px 5px;
             border-radius: 12px;
@@ -1063,7 +1740,6 @@ html += '''
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
             border-radius: 20px;
@@ -1182,7 +1858,6 @@ html += '''
             border-top: 1px solid var(--border-subtle);
         }
 
-        /* 下载提示 */
         .download-toast {
             position: fixed;
             bottom: 20px;
@@ -1198,7 +1873,7 @@ html += '''
             align-items: center;
             gap: 8px;
             transition: transform 0.3s ease;
-            z-index: 1000;
+            z-index: 2000;
             font-size: 0.8rem;
         }
 
@@ -1222,16 +1897,64 @@ html += '''
             color: #ffffff;
         }
 
-        @media (max-width: 360px) {
-            .rank-name { font-size: 0.7rem; }
-            .rank-score { font-size: 0.9rem; }
-            .group-title { font-size: 1rem; }
-            .member-table { min-width: 650px; }
-            .name-en { font-size: 0.6rem; }
-            .action-buttons { width: 100%; justify-content: flex-end; }
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-light);
+            z-index: 3000;
+            max-width: 280px;
+            display: none;
+            animation: slideIn 0.3s ease;
         }
 
-        /* ===== 开启提醒按钮 ===== */
+        .notification-toast.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            cursor: pointer;
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            padding: 4px;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            background: var(--border-subtle);
+        }
+
+        .toast-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
         .reminder-btn {
             position: fixed;
             bottom: 20px;
@@ -1285,7 +2008,6 @@ html += '''
             20%, 40%, 60%, 80% { transform: rotate(-10deg); }
         }
 
-        /* 提醒时间提示框 */
         .reminder-popup {
             position: fixed;
             bottom: 100px;
@@ -1295,7 +2017,7 @@ html += '''
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             width: 300px;
-            z-index: 1001;
+            z-index: 2000;
             display: none;
             animation: slideUp 0.4s ease;
         }
@@ -1417,9 +2139,18 @@ html += '''
         body.night-mode .popup-btn {
             color: #ffffff;
         }
+
+        @media (max-width: 360px) {
+            .rank-name { font-size: 0.7rem; }
+            .rank-score { font-size: 0.9rem; }
+            .group-title { font-size: 1rem; }
+            .member-table { min-width: 650px; }
+            .name-en { font-size: 0.6rem; }
+            .action-buttons { width: 100%; justify-content: flex-end; }
+        }
     </style>
 </head>
-<body>
+<body class="lang-zh">
     <div class="container">
         <!-- 双击提示 -->
         <div class="double-tap-hint" id="doubleTapHint">
@@ -1437,6 +2168,12 @@ html += '''
                         <span>📊</span>
                         <span>下载统计</span>
                     </button>
+                    <!-- 语言切换按钮 - 三语轮换 -->
+                    <div class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
+                        <span class="lang-left">中</span>
+                        <span class="lang-separator">/</span>
+                        <span class="lang-right">EN</span>
+                    </div>
                     <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
@@ -1492,138 +2229,12 @@ html += '''
 
         <!-- 组排名卡片 -->
         <div class="rank-grid">
-'''
-
-# 添加组排名卡片
-rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
-group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
-group_list = []
-total_list = []
-
-for i, (g, total) in enumerate(sorted_groups, 1):
-    group_id = group_ids[g]
-    group_list.append(g)
-    total_list.append(int(total))
-    
-    html += f'''
-            <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
-                <span class="rank-icon">{rank_icons[i]}</span>
-                <div class="rank-info">
-                    <div class="rank-name">{g}</div>
-                    <div class="rank-score">{int(total)}<small>分</small></div>
-                </div>
-            </div>
-'''
-
-# 准备统计数据
-stats_data = []
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    if g in group_data:
-        stats_data.append({
-            "group": g,
-            "total": int(group_totals[g]),
-            "rank": group_rank[g],
-            "members": len(group_data[g]),
-            "avg": int(group_averages[g]),
-            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
-        })
-
-html += '''
+            <!-- 组排名卡片区域 -->
         </div>
 
         <!-- 组别详情 -->
         <div class="groups">
-'''
-
-# 添加三个组
-group_emojis = {"星穹组": "✨", "夜曜组": "🌙", "沧澜组": "🌊"}
-for group_name in ["星穹组", "夜曜组", "沧澜组"]:
-    members = group_data[group_name]
-    rank = group_rank[group_name]
-    group_id = group_ids[group_name]
-    avg_score = group_averages[group_name]
-    
-    # 获取该组的最高分和最低分
-    group_max = group_max_scores[group_name]
-    group_min = group_min_scores[group_name]
-    score_range = group_max - group_min if group_max > group_min else 1
-    
-    html += f'''
-            <div class="group-card" data-group="{group_name}" id="{group_id}">
-                <div class="group-header">
-                    <div class="group-title-wrapper">
-                        <span class="group-emoji">{group_emojis[group_name]}</span>
-                        <span class="group-title">{group_name}</span>
-                    </div>
-                    <div class="group-stats">
-                        <span class="group-avg">平均{int(avg_score)}</span>
-                        <span class="group-badge">第{rank}名</span>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="member-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>姓名</th>
-                                <th>班</th>
-                                <th>学号</th>
-                                <th>每日得分</th>
-                                <th>总分</th>
-                                <th>奖</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-'''
-
-    for member in members:
-        # 生成每日得分标签
-        score_tags = ""
-        sorted_dates = sorted(member["score_dict"].keys())
-        for date in sorted_dates[-5:]:
-            if date:
-                score = member["score_dict"][date]
-                score_tags += f'<span class="score-item has-score"><span class="score-date">{date}</span><span class="score-value">{int(score)}</span></span>'
-        
-        if not score_tags:
-            score_tags = '<span class="score-item">—</span>'
-        
-        # 完整显示英文名
-        name_en_full = member['name_en']
-        
-        # 计算热力图颜色 - 越浅越高分
-        total_score = member['total']
-        if group_max > group_min:
-            relative_score = (total_score - group_min) / (group_max - group_min)
-            heat_level = min(9, max(1, int(relative_score * 9) + 1))
-        else:
-            heat_level = 5
-        
-        total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level});">{int(total_score)}</span>'
-        
-        html += f'''
-                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
-                            <td>{member['order']}</td>
-                            <td class="name-cell">
-                                <div class="name-cn">{member['name_cn']}</div>
-                                <div class="name-en">{name_en_full}</div>
-                            </td>
-                            <td class="info-cell">{member['class']}</td>
-                            <td class="info-cell">{member['student_id']}</td>
-                            <td><div class="score-tags">{score_tags}</div></td>
-                            <td>{total_cell}</td>
-                            <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
-                        </tr>
-'''
-
-    html += '''
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-'''
-
-html += '''
+            <!-- 组别详情区域 -->
         </div>
 
         <!-- 奖励机制卡片 -->
@@ -1675,6 +2286,56 @@ html += '''
             </div>
         </div>
 
+        <!-- 开启提醒按钮 -->
+        <div class="reminder-btn" id="reminderBtn" onclick="showReminderPopup()">
+            <span class="bell-icon">🔔</span>
+            <span class="reminder-text">开启提醒</span>
+        </div>
+
+        <!-- 提醒时间提示框 -->
+        <div class="reminder-popup" id="reminderPopup">
+            <div class="popup-header">
+                <span class="popup-icon">⏰</span>
+                <span class="popup-title">每日提醒时间</span>
+                <span class="popup-close" onclick="closePopup()">✕</span>
+            </div>
+            <div class="popup-content">
+                <div class="time-item">
+                    <span class="time-icon">🌅</span>
+                    <span class="time-label">早上 6:00</span>
+                    <span class="time-desc">起床提醒</span>
+                </div>
+                <div class="time-item">
+                    <span class="time-icon">🌆</span>
+                    <span class="time-label">晚上 7:00</span>
+                    <span class="time-desc">明天衣服提醒</span>
+                </div>
+                <div class="time-item">
+                    <span class="time-icon">🌙</span>
+                    <span class="time-label">晚上 8:15</span>
+                    <span class="time-desc">再次提醒</span>
+                </div>
+                <div class="time-item">
+                    <span class="time-icon">🌃</span>
+                    <span class="time-label">晚上 10:00</span>
+                    <span class="time-desc">睡前提醒</span>
+                </div>
+            </div>
+            <div class="popup-footer">
+                <button class="popup-btn" onclick="enableReminders()">知道了，开启提醒</button>
+            </div>
+        </div>
+
+        <!-- 提示浮层 -->
+        <div class="notification-toast" id="notificationToast">
+            <div class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</div>
+            <div class="toast-title">
+                <span>🔔</span>
+                <span id="toastMessage">通知</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail"></div>
+        </div>
+
         <div class="footer">
             👆 双击屏幕 / 按两次空格切换深色 · 📊下载统计 · 颜色越浅分数越高
         </div>
@@ -1686,73 +2347,21 @@ html += '''
         <span id="toastMessage">统计图已生成</span>
     </div>
 
-    <!-- 开启提醒按钮 -->
-    <div class="reminder-btn" id="reminderBtn" onclick="showReminderPopup()">
-        <span class="bell-icon">🔔</span>
-        <span class="reminder-text">开启提醒</span>
-    </div>
-
-    <!-- 提醒时间提示框 -->
-    <div class="reminder-popup" id="reminderPopup">
-        <div class="popup-header">
-            <span class="popup-icon">⏰</span>
-            <span class="popup-title">每日提醒时间</span>
-            <span class="popup-close" onclick="closePopup()">✕</span>
-        </div>
-        <div class="popup-content">
-            <div class="time-item">
-                <span class="time-icon">🌅</span>
-                <span class="time-label">早上 6:00</span>
-                <span class="time-desc">起床提醒</span>
-            </div>
-            <div class="time-item">
-                <span class="time-icon">🌆</span>
-                <span class="time-label">晚上 7:00</span>
-                <span class="time-desc">明天衣服提醒</span>
-            </div>
-            <div class="time-item">
-                <span class="time-icon">🌙</span>
-                <span class="time-label">晚上 8:15</span>
-                <span class="time-desc">再次提醒</span>
-            </div>
-            <div class="time-item">
-                <span class="time-icon">🌃</span>
-                <span class="time-label">晚上 10:00</span>
-                <span class="time-desc">睡前提醒</span>
-            </div>
-        </div>
-        <div class="popup-footer">
-            <button class="popup-btn" onclick="enableReminders()">知道了，开启提醒</button>
-        </div>
-    </div>
-
-    <!-- 提示浮层 -->
-    <div class="notification-toast" id="notificationToast">
-        <div class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</div>
-        <div class="toast-title">
-            <span>🔔</span>
-            <span id="toastMessage">通知</span>
-        </div>
-        <div style="font-size: 0.8rem; color: var(--text-secondary);" id="toastDetail"></div>
-    </div>
-
     <script>
         // 检查系统主题偏好
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
         
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const saveChartBtn = document.getElementById('saveChartBtn');
-        const chartCard = document.getElementById('chartCard');
-        const closeChart = document.getElementById('closeChart');
-        const downloadToast = document.getElementById('downloadToast');
-        const toastMessage = document.getElementById('toastMessage');
-        const statsGrid = document.getElementById('statsGrid');
-        const doubleTapHint = document.getElementById('doubleTapHint');
-        const hintText = document.getElementById('hintText');
+        // 初始化语言
+        let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+        document.body.classList.add(`lang-${{currentLang}}`);
+        
+        // 更新语言按钮
+        updateLangButton();
+        
+        // 初始化页面文本
+        updatePageLanguage();
         
         // ===== 双击/双空格切换深色模式 =====
         let lastTap = 0;
@@ -1760,8 +2369,12 @@ html += '''
         let spaceCount = 0;
         let hintTimeout;
 
+        const doubleTapHint = document.getElementById('doubleTapHint');
+        const hintText = document.getElementById('hintText');
+
         // 显示提示
         function showHint(message) {
+            if (!hintText || !doubleTapHint) return;
             hintText.textContent = message;
             doubleTapHint.classList.add('show');
             
@@ -1775,7 +2388,7 @@ html += '''
         function toggleNightMode() {
             document.body.classList.toggle('night-mode');
             // 更新图表颜色
-            if (chart && chartCard.classList.contains('show')) {
+            if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
                 generateChart();
             }
         }
@@ -1788,7 +2401,8 @@ html += '''
             if (tapLength < 200 && tapLength > 0) {
                 // 双击
                 toggleNightMode();
-                showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+                const isNight = document.body.classList.contains('night-mode');
+                showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
                 e.preventDefault();
             }
             lastTap = currentTime;
@@ -1807,7 +2421,8 @@ html += '''
                     if (spaceCount === 2) {
                         // 双空格
                         toggleNightMode();
-                        showHint(document.body.classList.contains('night-mode') ? '🌙 深色模式' : '☀️ 日间模式');
+                        const isNight = document.body.classList.contains('night-mode');
+                        showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
                         spaceCount = 0;
                     }
                 } else {
@@ -1818,6 +2433,16 @@ html += '''
             }
         });
 
+        const searchInput = document.getElementById('search');
+        const allRows = document.querySelectorAll('tbody tr');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const saveChartBtn = document.getElementById('saveChartBtn');
+        const chartCard = document.getElementById('chartCard');
+        const closeChart = document.getElementById('closeChart');
+        const downloadToast = document.getElementById('downloadToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const statsGrid = document.getElementById('statsGrid');
+        
         // 统计数据
         const statsData = [
 '''
@@ -1843,6 +2468,7 @@ html += '''        ];
 
         // 显示提示
         function showToast(message, isSuccess = true) {
+            if (!toastMessage || !downloadToast) return;
             toastMessage.textContent = message;
             downloadToast.classList.add('show');
             setTimeout(() => {
@@ -1852,10 +2478,13 @@ html += '''        ];
 
         // 生成统计图
         function generateChart() {
-            const ctx = document.getElementById('groupChart').getContext('2d');
+            const canvas = document.getElementById('groupChart');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
             const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#b0b0b0' : '#5a6b7a';
-            const gridColor = isNightMode ? '#3a3f4d' : '#e1e8f0';
+            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
+            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
             
             if (chart) {
                 chart.destroy();
@@ -1864,9 +2493,13 @@ html += '''        ];
             chart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: groups,
+                    labels: groups.map(g => {
+                        if (g === "星穹组") return t('app.groups.xingqiong');
+                        if (g === "夜曜组") return t('app.groups.yeyao');
+                        return t('app.groups.canglan');
+                    }),
                     datasets: [{
-                        label: '总分',
+                        label: t('app.chart.total'),
                         data: scores,
                         backgroundColor: colors,
                         borderRadius: 6,
@@ -1885,10 +2518,10 @@ html += '''        ];
                                     const group = groups[context.dataIndex];
                                     const stat = statsData.find(s => s.group === group);
                                     return [
-                                        `总分: ${value}分`,
-                                        `排名: 第${stat.rank}名`,
-                                        `人数: ${stat.members}人`,
-                                        `平均: ${stat.avg}分`
+                                        `${t('app.chart.total')}: ${value}`,
+                                        `${t('app.chart.rank', {rank: stat.rank})}`,
+                                        `${t('app.chart.members', {count: stat.members})}`,
+                                        `${t('app.chart.average', {avg: stat.avg})}`
                                     ];
                                 }
                             }
@@ -1911,13 +2544,14 @@ html += '''        ];
 
         // 生成统计卡片
         function generateStatsGrid() {
+            if (!statsGrid) return;
             let html = '';
             statsData.forEach(stat => {
                 html += `
                     <div class="stat-item">
-                        <div class="stat-label">${stat.group}</div>
+                        <div class="stat-label">${t(`app.groups.${stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}`)}</div>
                         <div class="stat-value">${stat.total}</div>
-                        <div class="stat-rank">第${stat.rank}名 · ${stat.members}人</div>
+                        <div class="stat-rank">${t('app.chart.rank', {rank: stat.rank})} · ${t('app.chart.members', {count: stat.members})}</div>
                     </div>
                 `;
             });
@@ -1927,9 +2561,10 @@ html += '''        ];
         // 保存统计图到相册
         async function saveChartToGallery() {
             const chartCard = document.getElementById('chartCard');
+            if (!chartCard) return;
             
             try {
-                showToast('📸 正在生成图片...');
+                showToast(t('app.toast.generating'));
                 
                 if (!chart) {
                     generateChart();
@@ -1945,67 +2580,199 @@ html += '''        ];
                     });
                     
                     const link = document.createElement('a');
-                    link.download = `学长团统计_${new Date().toISOString().slice(0,10)}.png`;
+                    link.download = `prefects_score_${new Date().toISOString().slice(0,10)}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     
-                    showToast('✅ 已保存到相册');
+                    showToast(t('app.toast.saved'));
                 }, 500);
                 
             } catch (error) {
                 console.error('保存失败:', error);
-                showToast('❌ 保存失败');
+                showToast(t('app.toast.saveFailed'));
             }
         }
 
-        downloadBtn.addEventListener('click', () => {
-            chartCard.classList.add('show');
-            generateChart();
-            generateStatsGrid();
-            showToast('📊 统计图已生成');
-        });
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', () => {
+                if (chartCard) {
+                    chartCard.classList.add('show');
+                    generateChart();
+                    generateStatsGrid();
+                    showToast(t('app.toast.chartGenerated'));
+                }
+            });
+        }
 
         if (saveChartBtn) {
             saveChartBtn.addEventListener('click', saveChartToGallery);
         }
 
-        closeChart.addEventListener('click', () => {
-            chartCard.classList.remove('show');
-        });
-
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            allRows.forEach(row => {
-                const searchText = row.getAttribute('data-search').toLowerCase();
-                row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+        if (closeChart) {
+            closeChart.addEventListener('click', () => {
+                if (chartCard) {
+                    chartCard.classList.remove('show');
+                }
             });
-        });
+        }
 
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                allRows.forEach(row => {
+                    const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
+                    row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+                });
+            });
+        }
+
+        // 监听深色模式变化，更新图表
         const observer = new MutationObserver(() => {
-            if (chart && chartCard.classList.contains('show')) {
+            if (chart && chartCard?.classList.contains('show')) {
                 generateChart();
             }
         });
         
         observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
-
-        // 显示网页内提醒
-        function showPageToast(title, message) {
-            const toast = document.getElementById('notificationToast');
-            const titleEl = document.getElementById('toastMessage');
-            const detailEl = document.getElementById('toastDetail');
-            
-            titleEl.textContent = title;
-            detailEl.textContent = message;
-            toast.classList.add('show');
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 5000);
-        }
     </script>
 </body>
 </html>'''
+
+# 添加组排名卡片
+rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
+group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
+group_list = []
+total_list = []
+
+rank_cards_html = ""
+for i, (g, total) in enumerate(sorted_groups, 1):
+    group_id = group_ids[g]
+    group_list.append(g)
+    total_list.append(int(total))
+    
+    rank_cards_html += f'''
+            <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
+                <span class="rank-icon">{rank_icons[i]}</span>
+                <div class="rank-info">
+                    <div class="rank-name">{g}</div>
+                    <div class="rank-score">{int(total)}<small>分</small></div>
+                </div>
+            </div>
+'''
+
+# 准备统计数据
+stats_data = []
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        stats_data.append({
+            "group": g,
+            "total": int(group_totals[g]),
+            "rank": group_rank[g],
+            "members": len(group_data[g]),
+            "avg": int(group_averages[g]),
+            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
+        })
+
+# 添加组别详情
+group_emojis = {"星穹组": "✨", "夜曜组": "🌙", "沧澜组": "🌊"}
+groups_html = ""
+for group_name in ["星穹组", "夜曜组", "沧澜组"]:
+    members = group_data[group_name]
+    rank = group_rank[group_name]
+    group_id = group_ids[group_name]
+    avg_score = group_averages[group_name]
+    
+    # 获取该组的最高分和最低分
+    group_max = group_max_scores[group_name]
+    group_min = group_min_scores[group_name]
+    
+    group_html = f'''
+            <div class="group-card" data-group="{group_name}" id="{group_id}">
+                <div class="group-header">
+                    <div class="group-title-wrapper">
+                        <span class="group-emoji">{group_emojis[group_name]}</span>
+                        <span class="group-title">{group_name}</span>
+                    </div>
+                    <div class="group-stats">
+                        <span class="group-avg">平均 {int(avg_score)}</span>
+                        <span class="group-badge">第{rank}名</span>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="member-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>姓名</th>
+                                <th>班</th>
+                                <th>学号</th>
+                                <th>每日得分</th>
+                                <th>总分</th>
+                                <th>奖</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+'''
+    for member in members:
+        # 生成每日得分标签
+        score_tags = ""
+        sorted_dates = sorted(member["score_dict"].keys())
+        for date in sorted_dates[-5:]:
+            if date:
+                score = member["score_dict"][date]
+                score_tags += f'<span class="score-item has-score"><span class="score-date">{date}</span><span class="score-value">{int(score)}</span></span>'
+        
+        if not score_tags:
+            score_tags = '<span class="score-item">—</span>'
+        
+        # 完整显示英文名
+        name_en_full = member['name_en']
+        
+        # 计算热力图颜色 - 越浅越高分
+        total_score = member['total']
+        if group_max > group_min:
+            relative_score = (total_score - group_min) / (group_max - group_min)
+            heat_level = min(9, max(1, int(relative_score * 9) + 1))
+        else:
+            heat_level = 5
+        
+        total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level});">{int(total_score)}</span>'
+        
+        group_html += f'''
+                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
+                            <td>{member['order']}</td>
+                            <td class="name-cell">
+                                <div class="name-cn">{member['name_cn']}</div>
+                                <div class="name-en">{name_en_full}</div>
+                            </td>
+                            <td class="info-cell">{member['class']}</td>
+                            <td class="info-cell">{member['student_id']}</td>
+                            <td><div class="score-tags">{score_tags}</div></td>
+                            <td>{total_cell}</td>
+                            <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
+                        </tr>
+'''
+    group_html += '''
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+'''
+    groups_html += group_html
+
+# 添加统计数据JSON
+stats_json = json.dumps(stats_data, ensure_ascii=False)
+
+# 替换HTML中的占位符
+html = html.replace('<!-- 组排名卡片区域 -->', rank_cards_html)
+html = html.replace('<!-- 组别详情区域 -->', groups_html)
+
+# 替换JavaScript中的数据
+html = html.replace('const groups = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'const groups = {json.dumps(group_list)};')
+html = html.replace('const scores = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'const scores = {json.dumps(total_list)};')
+
+# 替换日期
+html = html.replace('{datetime.now().strftime(\'%m/%d %H:%M\')}', datetime.now().strftime('%m/%d %H:%M'))
 
 # 保存HTML文件
 with open("index.html", "w", encoding="utf-8") as f:
@@ -2018,5 +2785,3 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 新增：双击屏幕/双空格切换深色模式")
-print("🔔 新增：开启提醒按钮 + 动画提示框")
