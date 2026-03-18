@@ -473,7 +473,25 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 只更换通知部分
+# 准备统计数据
+stats_data = []
+group_list = []
+total_list = []
+
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        stats_data.append({
+            "group": g,
+            "total": int(group_totals[g]),
+            "rank": group_rank[g],
+            "members": len(group_data[g]),
+            "avg": int(group_averages[g]),
+            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
+        })
+        group_list.append(g)
+        total_list.append(int(group_totals[g]))
+
+# 生成HTML - 修复语法错误
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -482,12 +500,13 @@ html = '''<!DOCTYPE html>
     <title>训育处 - 学长团分数板</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- OneSignal SDK - 用于通知权限 -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 '''
 
 # 添加联课活动数据和语言数据
 html += f'''
-<!-- OneSignal SDK (可选) -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 // 语言数据
 const LANGUAGES = {languages_json};
@@ -499,21 +518,21 @@ const CCA_DATA = {cca_json};
 let currentLang = localStorage.getItem('prefect_lang') || 'zh';
 
 // 获取翻译文本
-function t(key, params = {{}}) {{
+function t(key, params) {{
+    if (!params) params = {{}};
     const keys = key.split('.');
     let value = LANGUAGES[currentLang];
     for (const k of keys) {{
         if (value && value[k] !== undefined) {{
             value = value[k];
         }} else {{
-            console.warn(`Translation key not found: ${{key}}`);
+            console.warn('Translation key not found: ' + key);
             return key;
         }}
     }}
     
-    // 替换参数
     if (typeof value === 'string') {{
-        return value.replace(/\\{{([^}}]+)\\}}/g, (match, p1) => {{
+        return value.replace(/\\{{([^}}]+)\\}}/g, function(match, p1) {{
             return params[p1] !== undefined ? params[p1] : match;
         }});
     }}
@@ -529,34 +548,35 @@ function getTomorrowUniform() {{
     const year = tomorrow.getFullYear();
     const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
     const day = String(tomorrow.getDate()).padStart(2, '0');
-    const dateStr = `${{year}}-${{month}}-${{day}}`;
+    const dateStr = year + '-' + month + '-' + day;
     
-    const tomorrowCCA = CCA_DATA.find(item => item.date === dateStr);
+    const tomorrowCCA = CCA_DATA.find(function(item) {{ return item.date === dateStr; }});
     
     if (tomorrowCCA) {{
         if (tomorrowCCA.uniform === "体育衣") {{
-            return t('app.uniform.sports', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
+            return t('app.uniform.sports', {{ activity: tomorrowCCA['activity_' + currentLang] || tomorrowCCA.activity }});
         }} else {{
-            return t('app.uniform.uniform', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
+            return t('app.uniform.uniform', {{ activity: tomorrowCCA['activity_' + currentLang] || tomorrowCCA.activity }});
         }}
     }} else {{
         return t('app.uniform.default');
     }}
 }}
 
-// ===== 替换原有的 OneSignal 初始化部分 =====
+// ===== OneSignal 初始化 - 专业的通知权限处理 =====
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {{
     await OneSignal.init({{
         appId: "137d66ce-9746-4206-9861-a1c368a0b548",
         allowLocalhostAsSecureOrigin: true,
         notifyButton: {{
-            enable: false, // 用我们自己的bell-icon按钮触发，关掉自带的
+            enable: false, // 关掉自带按钮，用我们自己的
         }},
     }});
+    console.log('OneSignal 初始化成功');
 }});
 
-// ===== 强化激活函数 =====
+// 强化激活函数
 async function enableReminders() {{
     OneSignalDeferred.push(async function(OneSignal) {{
         // 1. 检查浏览器是否支持
@@ -589,28 +609,36 @@ async function enableReminders() {{
 // 更新页面所有文本
 function updatePageLanguage() {{
     // 更新标题
-    document.querySelector('h1').textContent = t('app.title');
-    document.querySelector('.meta-info span:first-child').textContent = t('app.subtitle');
-    document.getElementById('search').placeholder = t('app.search');
+    var titleEl = document.querySelector('h1');
+    if (titleEl) titleEl.textContent = t('app.title');
+    
+    var subtitleEl = document.querySelector('.meta-info span:first-child');
+    if (subtitleEl) subtitleEl.textContent = t('app.subtitle');
+    
+    var searchEl = document.getElementById('search');
+    if (searchEl) searchEl.placeholder = t('app.search');
     
     // 更新按钮
-    document.getElementById('downloadBtn').innerHTML = `<span>📊</span><span>${{t('app.download')}}</span>`;
-    document.querySelector('.theme-toggle span:last-child').textContent = t('app.dark');
+    var downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) downloadBtn.innerHTML = '<span>📊</span><span>' + t('app.download') + '</span>';
+    
+    var darkSpan = document.querySelector('.theme-toggle span:last-child');
+    if (darkSpan) darkSpan.textContent = t('app.dark');
     
     // 更新热力图说明
-    const heatLow = document.querySelector('.heatmap-legend .legend-label span.low');
-    const heatHigh = document.querySelector('.heatmap-legend .legend-label span.high');
-    if (heatLow) heatLow.innerHTML = `${{t('app.heatmap.low')}} █`;
-    if (heatHigh) heatHigh.innerHTML = `█ ${{t('app.heatmap.high')}}`;
+    var heatLow = document.querySelector('.heatmap-legend .legend-label span.low');
+    var heatHigh = document.querySelector('.heatmap-legend .legend-label span.high');
+    if (heatLow) heatLow.innerHTML = t('app.heatmap.low') + ' █';
+    if (heatHigh) heatHigh.innerHTML = '█ ' + t('app.heatmap.high');
     
     // 更新统计图卡片
-    const chartTitle = document.querySelector('.chart-title span:last-child');
+    var chartTitle = document.querySelector('.chart-title span:last-child');
     if (chartTitle) chartTitle.textContent = t('app.chart.title');
     
-    const saveChartBtn = document.getElementById('saveChartBtn');
-    if (saveChartBtn) saveChartBtn.innerHTML = `<span>💾</span><span>${{t('app.chart.save')}}</span>`;
+    var saveChartBtn = document.getElementById('saveChartBtn');
+    if (saveChartBtn) saveChartBtn.innerHTML = '<span>💾</span><span>' + t('app.chart.save') + '</span>';
     
-    const closeChart = document.getElementById('closeChart');
+    var closeChart = document.getElementById('closeChart');
     if (closeChart) closeChart.textContent = t('app.chart.close');
     
     // 更新组名
@@ -620,20 +648,20 @@ function updatePageLanguage() {{
     updateRewardSection();
     
     // 更新提醒按钮和弹窗
-    const reminderText = document.querySelector('.reminder-text');
+    var reminderText = document.querySelector('.reminder-text');
     if (reminderText) reminderText.textContent = t('app.reminder.button');
     
-    const popupTitle = document.querySelector('.popup-title');
+    var popupTitle = document.querySelector('.popup-title');
     if (popupTitle) popupTitle.textContent = t('app.reminder.title');
     
-    const popupBtn = document.querySelector('.popup-btn');
+    var popupBtn = document.querySelector('.popup-btn');
     if (popupBtn) popupBtn.textContent = t('app.reminder.confirm');
     
     // 更新时间标签
     updateTimeItems();
     
     // 更新footer
-    const footer = document.querySelector('.footer');
+    var footer = document.querySelector('.footer');
     if (footer) footer.innerHTML = t('app.footer');
     
     // 更新语言按钮
@@ -643,7 +671,7 @@ function updatePageLanguage() {{
     updateTableHeaders();
     
     // 更新统计图
-    if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {{
+    if (window.chart && document.getElementById('chartCard') && document.getElementById('chartCard').classList.contains('show')) {{
         generateChart();
     }}
 }}
@@ -651,23 +679,27 @@ function updatePageLanguage() {{
 // 更新组名
 function updateGroupNames() {{
     // 组排名卡片
-    document.querySelectorAll('.rank-card').forEach(card => {{
-        const group = card.getAttribute('data-group');
-        const groupName = getTranslatedGroupName(group);
-        const nameEl = card.querySelector('.rank-name');
+    var rankCards = document.querySelectorAll('.rank-card');
+    rankCards.forEach(function(card) {{
+        var group = card.getAttribute('data-group');
+        var groupName = getTranslatedGroupName(group);
+        var nameEl = card.querySelector('.rank-name');
         if (nameEl) nameEl.textContent = groupName;
     }});
     
     // 组卡片标题
-    document.querySelectorAll('.group-card').forEach(card => {{
-        const group = card.getAttribute('data-group');
-        const groupName = getTranslatedGroupName(group);
-        const titleEl = card.querySelector('.group-title');
+    var groupCards = document.querySelectorAll('.group-card');
+    groupCards.forEach(function(card) {{
+        var group = card.getAttribute('data-group');
+        var groupName = getTranslatedGroupName(group);
+        var titleEl = card.querySelector('.group-title');
         if (titleEl) titleEl.textContent = groupName;
         
-        const avgEl = card.querySelector('.group-avg');
+        var avgEl = card.querySelector('.group-avg');
         if (avgEl) {{
-            const score = avgEl.textContent.match(/\\d+/)?.[0] || '';
+            var score = avgEl.textContent.match(/\\d+/);
+            if (score) score = score[0];
+            else score = '';
             avgEl.innerHTML = t('app.groups.average') + ' ' + score;
         }}
     }});
@@ -675,29 +707,27 @@ function updateGroupNames() {{
 
 // 获取翻译后的组名
 function getTranslatedGroupName(group) {{
-    const map = {{
-        '星穹组': 'app.groups.xingqiong',
-        '夜曜组': 'app.groups.yeyao',
-        '沧澜组': 'app.groups.canglan'
-    }};
-    return t(map[group]);
+    if (group === '星穹组') return t('app.groups.xingqiong');
+    if (group === '夜曜组') return t('app.groups.yeyao');
+    if (group === '沧澜组') return t('app.groups.canglan');
+    return group;
 }}
 
 // 更新奖励机制卡片
 function updateRewardSection() {{
-    const section = document.querySelector('.reward-section');
+    var section = document.querySelector('.reward-section');
     if (!section) return;
     
-    const title = section.querySelector('h2');
+    var title = section.querySelector('h2');
     if (title) title.textContent = t('app.reward.title');
     
-    const subtitle = section.querySelector('.reward-subtitle');
+    var subtitle = section.querySelector('.reward-subtitle');
     if (subtitle) subtitle.textContent = t('app.reward.subtitle');
     
-    const items = section.querySelectorAll('.reward-item');
+    var items = section.querySelectorAll('.reward-item');
     if (items.length >= 3) {{
-        const conditions = items[0].querySelectorAll('.reward-condition');
-        const benefits = items[0].querySelectorAll('.reward-benefit');
+        var conditions = items[0].querySelectorAll('.reward-condition');
+        var benefits = items[0].querySelectorAll('.reward-benefit');
         
         if (conditions[0]) conditions[0].textContent = t('app.reward.first.condition');
         if (benefits[0]) benefits[0].textContent = t('app.reward.first.benefit');
@@ -709,49 +739,50 @@ function updateRewardSection() {{
         if (benefits[2]) benefits[2].textContent = t('app.reward.third.benefit');
     }}
     
-    const extra = section.querySelector('.reward-extra');
+    var extra = section.querySelector('.reward-extra');
     if (extra) extra.textContent = t('app.reward.extra');
     
-    const footer = section.querySelector('.reward-footer');
+    var footer = section.querySelector('.reward-footer');
     if (footer) footer.textContent = t('app.reward.footer');
 }}
 
 // 更新时间项
 function updateTimeItems() {{
-    const items = document.querySelectorAll('.time-item');
-    const descs = ['morning', 'evening', 'night', 'bedtime'];
-    items.forEach((item, index) => {{
+    var items = document.querySelectorAll('.time-item');
+    var descs = ['morning', 'evening', 'night', 'bedtime'];
+    items.forEach(function(item, index) {{
         if (index < descs.length) {{
-            const desc = item.querySelector('.time-desc');
-            if (desc) desc.textContent = t(`app.reminder.${{descs[index]}}`);
+            var desc = item.querySelector('.time-desc');
+            if (desc) desc.textContent = t('app.reminder.' + descs[index]);
         }}
     }});
 }}
 
 // 更新表格表头
 function updateTableHeaders() {{
-    document.querySelectorAll('.member-table thead tr').forEach(header => {{
-        const cells = header.querySelectorAll('th');
+    var headers = document.querySelectorAll('.member-table thead tr');
+    headers.forEach(function(header) {{
+        var cells = header.querySelectorAll('th');
         if (cells.length >= 7) {{
-            cells[0].textContent = t('app.table.number');
-            cells[1].textContent = t('app.table.name');
-            cells[2].textContent = t('app.table.class');
-            cells[3].textContent = t('app.table.id');
-            cells[4].textContent = t('app.table.daily');
-            cells[5].textContent = t('app.table.total');
-            cells[6].textContent = t('app.table.reward');
+            if (cells[0]) cells[0].textContent = t('app.table.number');
+            if (cells[1]) cells[1].textContent = t('app.table.name');
+            if (cells[2]) cells[2].textContent = t('app.table.class');
+            if (cells[3]) cells[3].textContent = t('app.table.id');
+            if (cells[4]) cells[4].textContent = t('app.table.daily');
+            if (cells[5]) cells[5].textContent = t('app.table.total');
+            if (cells[6]) cells[6].textContent = t('app.table.reward');
         }}
     }});
 }}
 
 // 更新语言按钮
 function updateLangButton() {{
-    const langToggle = document.getElementById('langToggle');
+    var langToggle = document.getElementById('langToggle');
     if (!langToggle) return;
     
-    const leftSpan = langToggle.querySelector('.lang-left');
-    const rightSpan = langToggle.querySelector('.lang-right');
-    const separator = langToggle.querySelector('.lang-separator');
+    var leftSpan = langToggle.querySelector('.lang-left');
+    var rightSpan = langToggle.querySelector('.lang-right');
+    var separator = langToggle.querySelector('.lang-separator');
     
     if (currentLang === 'zh') {{
         if (leftSpan) leftSpan.textContent = '中';
@@ -770,28 +801,28 @@ function updateLangButton() {{
 
 // 切换语言动画
 function animateLanguageChange(newLang) {{
-    const nameCells = document.querySelectorAll('.name-cell');
+    var nameCells = document.querySelectorAll('.name-cell');
     
     // 添加动画类
-    nameCells.forEach(cell => {{
+    nameCells.forEach(function(cell) {{
         cell.classList.add('lang-switching');
     }});
     
-    setTimeout(() => {{
+    setTimeout(function() {{
         // 更新语言
         currentLang = newLang;
         localStorage.setItem('prefect_lang', currentLang);
         
         // 更新body类
         document.body.classList.remove('lang-zh', 'lang-en', 'lang-ms');
-        document.body.classList.add(`lang-${{currentLang}}`);
+        document.body.classList.add('lang-' + currentLang);
         
         // 更新页面文本
         updatePageLanguage();
         
         // 移除动画类
-        setTimeout(() => {{
-            nameCells.forEach(cell => {{
+        setTimeout(function() {{
+            nameCells.forEach(function(cell) {{
                 cell.classList.remove('lang-switching');
             }});
         }}, 50);
@@ -800,14 +831,14 @@ function animateLanguageChange(newLang) {{
 
 // 切换语言
 function toggleLanguage() {{
-    const langToggle = document.getElementById('langToggle');
+    var langToggle = document.getElementById('langToggle');
     if (!langToggle) return;
     
     langToggle.classList.add('swap');
     
-    setTimeout(() => {{
+    setTimeout(function() {{
         // 轮换语言
-        let newLang;
+        var newLang;
         if (currentLang === 'zh') {{
             newLang = 'en';
         }} else if (currentLang === 'en') {{
@@ -819,57 +850,54 @@ function toggleLanguage() {{
         animateLanguageChange(newLang);
         
         // 移除动画
-        setTimeout(() => {{
+        setTimeout(function() {{
             langToggle.classList.remove('swap');
         }}, 50);
         
         // 显示提示
-        const langNames = {{ zh: '中文', en: 'English', ms: 'Bahasa Melayu' }};
-        showPageToast('🌐', `已切换到 ${{langNames[newLang]}}`);
+        var langNames = {{ zh: '中文', en: 'English', ms: 'Bahasa Melayu' }};
+        showPageToast('🌐', '已切换到 ' + langNames[newLang]);
     }}, 150);
 }}
 
 // 显示网页内提醒
 function showPageToast(title, message) {{
-    const toast = document.getElementById('notificationToast');
+    var toast = document.getElementById('notificationToast');
     if (!toast) return;
     
-    const titleEl = document.getElementById('toastMessage');
-    const detailEl = document.getElementById('toastDetail');
+    var titleEl = document.getElementById('toastMessage');
+    var detailEl = document.getElementById('toastDetail');
     
     if (titleEl) titleEl.textContent = title;
     if (detailEl) detailEl.textContent = message;
     toast.classList.add('show');
     
-    setTimeout(() => {{
+    setTimeout(function() {{
         toast.classList.remove('show');
     }}, 3000);
 }}
 
 // 开启提醒
 function enableReminders() {{
-    OneSignalDeferred.push(function(OneSignal) {{
-        OneSignal.Notifications.requestPermission();
-    }});
-    closePopup();
+    enableReminders();
 }}
 
 // 显示提示框
 function showReminderPopup() {{
-    const popup = document.getElementById('reminderPopup');
+    var popup = document.getElementById('reminderPopup');
     if (popup) popup.classList.add('show');
 }}
 
 // 关闭提示框
 function closePopup() {{
-    const popup = document.getElementById('reminderPopup');
+    var popup = document.getElementById('reminderPopup');
     if (popup) popup.classList.remove('show');
 }}
 
 // 点击外部关闭提示框
 document.addEventListener('click', function(e) {{
-    const popup = document.getElementById('reminderPopup');
-    const btn = document.getElementById('reminderBtn');
+    var popup = document.getElementById('reminderPopup');
+    var btn = document.getElementById('reminderBtn');
     if (popup && btn) {{
         if (!popup.contains(e.target) && !btn.contains(e.target)) {{
             popup.classList.remove('show');
@@ -920,8 +948,7 @@ html += '''
             --reward-fail: #fee2e2;
             --reward-fail-text: #991b1b;
             
-            /* 热力图颜色 - 越浅越高分 */
-            --heat-1: #083344;  /* 最低分 - 最深 */
+            --heat-1: #083344;
             --heat-2: #164e63;
             --heat-3: #155e75;
             --heat-4: #0369a1;
@@ -929,7 +956,7 @@ html += '''
             --heat-6: #38bdf8;
             --heat-7: #7dd3fc;
             --heat-8: #bae6fd;
-            --heat-9: #e0f2fe;  /* 最高分 - 最浅 */
+            --heat-9: #e0f2fe;
             
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
@@ -964,7 +991,6 @@ html += '''
             --reward-fail: #562b2b;
             --reward-fail-text: #fecaca;
             
-            /* 深色模式热力图 */
             --heat-1: #000814;
             --heat-2: #001d3d;
             --heat-3: #003566;
@@ -993,7 +1019,6 @@ html += '''
             margin: 0 auto;
         }
 
-        /* 双击提示 */
         .double-tap-hint {
             position: fixed;
             bottom: 120px;
@@ -1017,12 +1042,6 @@ html += '''
             opacity: 0.9;
         }
 
-        body.night-mode .double-tap-hint {
-            background: #2d313e;
-            color: white;
-        }
-
-        /* 头部 */
         .header {
             background: var(--card-bg);
             border-radius: 24px;
@@ -1063,7 +1082,6 @@ html += '''
             align-items: center;
         }
 
-        /* 语言切换按钮 - 带动画交换效果 */
         .lang-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -1113,7 +1131,6 @@ html += '''
             opacity: 0;
         }
 
-        /* 深色模式按钮 */
         .theme-toggle {
             background: var(--bg-primary);
             border: 1px solid var(--border-light);
@@ -1148,7 +1165,6 @@ html += '''
             transform: rotate(180deg);
         }
 
-        /* 下载按钮 */
         .download-btn {
             background: var(--star-primary);
             border: none;
@@ -1223,7 +1239,6 @@ html += '''
             border-color: var(--text-tertiary);
         }
 
-        /* 热力图说明 */
         .heatmap-legend {
             display: flex;
             align-items: center;
@@ -1259,7 +1274,6 @@ html += '''
         .legend-label span.low { color: var(--heat-1); font-weight: bold; }
         .legend-label span.high { color: var(--heat-9); font-weight: bold; }
 
-        /* 统计图卡片 */
         .chart-card {
             background: var(--card-bg);
             border-radius: 20px;
@@ -1373,7 +1387,6 @@ html += '''
             margin-top: 2px;
         }
 
-        /* 组排名卡片 */
         .rank-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -1440,7 +1453,6 @@ html += '''
             color: var(--text-tertiary);
         }
 
-        /* 组卡片 */
         .groups {
             display: flex;
             flex-direction: column;
@@ -1513,7 +1525,6 @@ html += '''
         .group-card[data-group="夜曜组"] .group-badge { background: #a855f7; }
         .group-card[data-group="沧澜组"] .group-badge { background: #3b82f6; }
 
-        /* 表格 */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -1559,7 +1570,6 @@ html += '''
         .member-table td:nth-child(6) { text-align: right; font-weight: 600; }
         .member-table td:nth-child(7) { text-align: center; }
 
-        /* ===== 姓名动画样式 ===== */
         .name-cell {
             max-width: 180px;
             min-height: 45px;
@@ -1587,7 +1597,6 @@ html += '''
             word-break: break-word;
         }
 
-        /* 语言切换动画 */
         .name-cell.lang-switching .name-cn {
             transform: translateY(100%);
             opacity: 0;
@@ -1598,7 +1607,6 @@ html += '''
             opacity: 0;
         }
 
-        /* 中文模式 - 中文在上，英文在下 */
         body.lang-zh .name-cell {
             display: flex;
             flex-direction: column;
@@ -1616,7 +1624,6 @@ html += '''
             opacity: 0.8;
         }
 
-        /* 英文模式 - 英文在上，中文在下 */
         body.lang-en .name-cell {
             display: flex;
             flex-direction: column;
@@ -1643,7 +1650,6 @@ html += '''
             text-overflow: ellipsis;
         }
 
-        /* 马来文模式 - 和英文一样，用英文名 */
         body.lang-ms .name-cell {
             display: flex;
             flex-direction: column;
@@ -1675,7 +1681,6 @@ html += '''
             color: var(--text-secondary);
         }
 
-        /* 热力图分数标签 */
         .score-tags {
             display: flex;
             gap: 2px;
@@ -1706,7 +1711,6 @@ html += '''
         .score-date { opacity: 0.7; margin-right: 1px; }
         .score-value { font-weight: 600; }
 
-        /* 总分热力图 */
         .total-heat {
             font-weight: 700;
             font-size: 0.9rem;
@@ -1744,7 +1748,6 @@ html += '''
             color: var(--reward-fail-text);
         }
 
-        /* 奖励机制卡片 */
         .reward-section {
             background: linear-gradient(135deg, var(--card-bg) 0%, var(--bg-primary) 100%);
             border-radius: 20px;
@@ -1863,7 +1866,6 @@ html += '''
             border-top: 1px solid var(--border-subtle);
         }
 
-        /* 下载提示 */
         .download-toast {
             position: fixed;
             bottom: 20px;
@@ -1879,7 +1881,7 @@ html += '''
             align-items: center;
             gap: 8px;
             transition: transform 0.3s ease;
-            z-index: 1000;
+            z-index: 2000;
             font-size: 0.8rem;
         }
 
@@ -1903,7 +1905,6 @@ html += '''
             color: #ffffff;
         }
 
-        /* 通知提示浮层 */
         .notification-toast {
             position: fixed;
             top: 20px;
@@ -1913,7 +1914,7 @@ html += '''
             padding: 16px;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
-            z-index: 1002;
+            z-index: 3000;
             max-width: 280px;
             display: none;
             animation: slideIn 0.3s ease;
@@ -1962,7 +1963,6 @@ html += '''
             font-weight: 600;
         }
 
-        /* ===== 开启提醒按钮 ===== */
         .reminder-btn {
             position: fixed;
             bottom: 20px;
@@ -2016,7 +2016,6 @@ html += '''
             20%, 40%, 60%, 80% { transform: rotate(-10deg); }
         }
 
-        /* 提醒时间提示框 */
         .reminder-popup {
             position: fixed;
             bottom: 100px;
@@ -2026,7 +2025,7 @@ html += '''
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border-light);
             width: 300px;
-            z-index: 1001;
+            z-index: 2000;
             display: none;
             animation: slideUp 0.4s ease;
         }
@@ -2363,8 +2362,8 @@ html += '''
         }
         
         // 初始化语言
-        let currentLang = localStorage.getItem('prefect_lang') || 'zh';
-        document.body.classList.add(`lang-${{currentLang}}`);
+        var currentLang = localStorage.getItem('prefect_lang') || 'zh';
+        document.body.classList.add('lang-' + currentLang);
         
         // 更新语言按钮
         updateLangButton();
@@ -2373,13 +2372,13 @@ html += '''
         updatePageLanguage();
         
         // ===== 双击/双空格切换深色模式 =====
-        let lastTap = 0;
-        let lastSpaceTime = 0;
-        let spaceCount = 0;
-        let hintTimeout;
+        var lastTap = 0;
+        var lastSpaceTime = 0;
+        var spaceCount = 0;
+        var hintTimeout;
 
-        const doubleTapHint = document.getElementById('doubleTapHint');
-        const hintText = document.getElementById('hintText');
+        var doubleTapHint = document.getElementById('doubleTapHint');
+        var hintText = document.getElementById('hintText');
 
         // 显示提示
         function showHint(message) {
@@ -2388,7 +2387,7 @@ html += '''
             doubleTapHint.classList.add('show');
             
             clearTimeout(hintTimeout);
-            hintTimeout = setTimeout(() => {
+            hintTimeout = setTimeout(function() {
                 doubleTapHint.classList.remove('show');
             }, 1500);
         }
@@ -2397,20 +2396,20 @@ html += '''
         function toggleNightMode() {
             document.body.classList.toggle('night-mode');
             // 更新图表颜色
-            if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
+            if (window.chart && document.getElementById('chartCard') && document.getElementById('chartCard').classList.contains('show')) {
                 generateChart();
             }
         }
 
         // 监听双击（手机）
-        document.addEventListener('touchstart', (e) => {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - lastTap;
+        document.addEventListener('touchstart', function(e) {
+            var currentTime = new Date().getTime();
+            var tapLength = currentTime - lastTap;
             
             if (tapLength < 200 && tapLength > 0) {
                 // 双击
                 toggleNightMode();
-                const isNight = document.body.classList.contains('night-mode');
+                var isNight = document.body.classList.contains('night-mode');
                 showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
                 e.preventDefault();
             }
@@ -2418,11 +2417,11 @@ html += '''
         });
 
         // 监听双空格（电脑）
-        document.addEventListener('keydown', (e) => {
+        document.addEventListener('keydown', function(e) {
             if (e.code === 'Space') {
                 e.preventDefault(); // 防止页面滚动
                 
-                const currentTime = new Date().getTime();
+                var currentTime = new Date().getTime();
                 
                 if (currentTime - lastSpaceTime < 500) {
                     // 两次空格间隔小于500ms
@@ -2430,7 +2429,7 @@ html += '''
                     if (spaceCount === 2) {
                         // 双空格
                         toggleNightMode();
-                        const isNight = document.body.classList.contains('night-mode');
+                        var isNight = document.body.classList.contains('night-mode');
                         showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
                         spaceCount = 0;
                     }
@@ -2442,18 +2441,18 @@ html += '''
             }
         });
 
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const saveChartBtn = document.getElementById('saveChartBtn');
-        const chartCard = document.getElementById('chartCard');
-        const closeChart = document.getElementById('closeChart');
-        const downloadToast = document.getElementById('downloadToast');
-        const toastMessage = document.getElementById('toastMessage');
-        const statsGrid = document.getElementById('statsGrid');
+        var searchInput = document.getElementById('search');
+        var allRows = document.querySelectorAll('tbody tr');
+        var downloadBtn = document.getElementById('downloadBtn');
+        var saveChartBtn = document.getElementById('saveChartBtn');
+        var chartCard = document.getElementById('chartCard');
+        var closeChart = document.getElementById('closeChart');
+        var downloadToast = document.getElementById('downloadToast');
+        var toastMessage = document.getElementById('toastMessage');
+        var statsGrid = document.getElementById('statsGrid');
         
         // 统计数据
-        const statsData = [
+        var statsData = [
 '''
 
 # 按固定顺序输出统计图数据
@@ -2462,207 +2461,193 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         if stat["group"] == g:
             html += f'''            {{ group: "{stat['group']}", total: {stat['total']}, rank: {stat['rank']}, members: {stat['members']}, avg: {stat['avg']}, color: "{stat['color']}" }},\n'''
 
-html += '''        ];
+html += f'''        ];
 
         // 组数据
-        const groups = ["星穹组", "夜曜组", "沧澜组"];
-        const scores = [
-            statsData.find(s => s.group === "星穹组").total,
-            statsData.find(s => s.group === "夜曜组").total,
-            statsData.find(s => s.group === "沧澜组").total
-        ];
-        const colors = ["#eab308", "#a855f7", "#3b82f6"];
+        var groups = {json.dumps(group_list)};
+        var scores = {json.dumps(total_list)};
+        var colors = ["#eab308", "#a855f7", "#3b82f6"];
         
-        let chart = null;
+        var chart = null;
 
         // 显示提示
-        function showToast(message, isSuccess = true) {
+        function showToast(message) {{
             if (!toastMessage || !downloadToast) return;
             toastMessage.textContent = message;
             downloadToast.classList.add('show');
-            setTimeout(() => {
+            setTimeout(function() {{
                 downloadToast.classList.remove('show');
-            }, 2000);
-        }
+            }}, 2000);
+        }}
 
         // 生成统计图
-        function generateChart() {
-            const canvas = document.getElementById('groupChart');
+        function generateChart() {{
+            var canvas = document.getElementById('groupChart');
             if (!canvas) return;
             
-            const ctx = canvas.getContext('2d');
-            const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
-            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
+            var ctx = canvas.getContext('2d');
+            var isNightMode = document.body.classList.contains('night-mode');
+            var textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
+            var gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
             
-            if (chart) {
+            if (chart) {{
                 chart.destroy();
-            }
+            }}
             
-            chart = new Chart(ctx, {
+            chart = new Chart(ctx, {{
                 type: 'bar',
-                data: {
-                    labels: groups.map(g => {
+                data: {{
+                    labels: groups.map(function(g) {{
                         if (g === "星穹组") return t('app.groups.xingqiong');
                         if (g === "夜曜组") return t('app.groups.yeyao');
                         return t('app.groups.canglan');
-                    }),
-                    datasets: [{
+                    }}),
+                    datasets: [{{
                         label: t('app.chart.total'),
                         data: scores,
                         backgroundColor: colors,
                         borderRadius: 6,
                         barPercentage: 0.6
-                    }]
-                },
-                options: {
+                    }}]
+                }},
+                options: {{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw;
-                                    const group = groups[context.dataIndex];
-                                    const stat = statsData.find(s => s.group === group);
+                    plugins: {{
+                        legend: {{ display: false }},
+                        tooltip: {{
+                            callbacks: {{
+                                label: function(context) {{
+                                    var value = context.raw;
+                                    var group = groups[context.dataIndex];
+                                    var stat = statsData.find(function(s) {{ return s.group === group; }});
                                     return [
-                                        `${t('app.chart.total')}: ${value}`,
-                                        `${t('app.chart.rank', {rank: stat.rank})}`,
-                                        `${t('app.chart.members', {count: stat.members})}`,
-                                        `${t('app.chart.average', {avg: stat.avg})}`
+                                        t('app.chart.total') + ': ' + value,
+                                        t('app.chart.rank', {{rank: stat.rank}}),
+                                        t('app.chart.members', {{count: stat.members}}),
+                                        t('app.chart.average', {{avg: stat.avg}})
                                     ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
+                                }}
+                            }}
+                        }}
+                    }},
+                    scales: {{
+                        y: {{
                             beginAtZero: true,
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: textColor }
-                        }
-                    }
-                }
-            });
-        }
+                            grid: {{ color: gridColor }},
+                            ticks: {{ color: textColor }}
+                        }},
+                        x: {{
+                            grid: {{ display: false }},
+                            ticks: {{ color: textColor }}
+                        }}
+                    }}
+                }}
+            }});
+        }}
 
         // 生成统计卡片
-        function generateStatsGrid() {
+        function generateStatsGrid() {{
             if (!statsGrid) return;
-            let html = '';
-            statsData.forEach(stat => {
-                html += `
-                    <div class="stat-item">
-                        <div class="stat-label">${t(`app.groups.${stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}`)}</div>
-                        <div class="stat-value">${stat.total}</div>
-                        <div class="stat-rank">${t('app.chart.rank', {rank: stat.rank})} · ${t('app.chart.members', {count: stat.members})}</div>
-                    </div>
-                `;
-            });
+            var html = '';
+            statsData.forEach(function(stat) {{
+                var groupKey = stat.group === '星穹组' ? 'xingqiong' : (stat.group === '夜曜组' ? 'yeyao' : 'canglan');
+                html += '<div class="stat-item">' +
+                    '<div class="stat-label">' + t('app.groups.' + groupKey) + '</div>' +
+                    '<div class="stat-value">' + stat.total + '</div>' +
+                    '<div class="stat-rank">' + t('app.chart.rank', {{rank: stat.rank}}) + ' · ' + t('app.chart.members', {{count: stat.members}}) + '</div>' +
+                    '</div>';
+            }});
             statsGrid.innerHTML = html;
-        }
+        }}
 
         // 保存统计图到相册
-        async function saveChartToGallery() {
-            const chartCard = document.getElementById('chartCard');
+        async function saveChartToGallery() {{
+            var chartCard = document.getElementById('chartCard');
             if (!chartCard) return;
             
-            try {
+            try {{
                 showToast(t('app.toast.generating'));
                 
-                if (!chart) {
+                if (!chart) {{
                     generateChart();
-                }
+                }}
                 
-                setTimeout(async () => {
-                    const canvas = await html2canvas(chartCard, {
+                setTimeout(async function() {{
+                    var canvas = await html2canvas(chartCard, {{
                         scale: 2,
                         backgroundColor: getComputedStyle(document.body).backgroundColor,
                         allowTaint: false,
                         useCORS: true,
                         logging: false
-                    });
+                    }});
                     
-                    const link = document.createElement('a');
-                    link.download = `prefects_score_${new Date().toISOString().slice(0,10)}.png`;
+                    var link = document.createElement('a');
+                    link.download = 'prefects_score_' + new Date().toISOString().slice(0,10) + '.png';
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     
                     showToast(t('app.toast.saved'));
-                }, 500);
+                }}, 500);
                 
-            } catch (error) {
+            }} catch (error) {{
                 console.error('保存失败:', error);
                 showToast(t('app.toast.saveFailed'));
-            }
-        }
+            }}
+        }}
 
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', () => {
-                if (chartCard) {
+        if (downloadBtn) {{
+            downloadBtn.addEventListener('click', function() {{
+                if (chartCard) {{
                     chartCard.classList.add('show');
                     generateChart();
                     generateStatsGrid();
                     showToast(t('app.toast.chartGenerated'));
-                }
-            });
-        }
+                }}
+            }});
+        }}
 
-        if (saveChartBtn) {
+        if (saveChartBtn) {{
             saveChartBtn.addEventListener('click', saveChartToGallery);
-        }
+        }}
 
-        if (closeChart) {
-            closeChart.addEventListener('click', () => {
-                if (chartCard) {
+        if (closeChart) {{
+            closeChart.addEventListener('click', function() {{
+                if (chartCard) {{
                     chartCard.classList.remove('show');
-                }
-            });
-        }
+                }}
+            }});
+        }}
 
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                allRows.forEach(row => {
-                    const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
+        if (searchInput) {{
+            searchInput.addEventListener('input', function(e) {{
+                var searchTerm = e.target.value.toLowerCase().trim();
+                allRows.forEach(function(row) {{
+                    var searchText = row.getAttribute('data-search') ? row.getAttribute('data-search').toLowerCase() : '';
                     row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
+                }});
+            }});
+        }}
 
         // 监听深色模式变化，更新图表
-        const observer = new MutationObserver(() => {
-            if (chart && chartCard?.classList.contains('show')) {
+        var observer = new MutationObserver(function() {{
+            if (chart && chartCard && chartCard.classList.contains('show')) {{
                 generateChart();
-            }
-        });
+            }}
+        }});
         
-        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        observer.observe(document.body, {{ attributes: true, attributeFilter: ['class'] }});
     </script>
 </body>
 </html>'''
 
-# 添加联课活动数据和语言数据
-html = html.replace("{languages_json}", languages_json)
-html = html.replace("{cca_json}", cca_json)
-
 # 添加组排名卡片
 rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
 group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
-group_list = []
-total_list = []
 
 rank_cards_html = ""
 for i, (g, total) in enumerate(sorted_groups, 1):
     group_id = group_ids[g]
-    group_list.append(g)
-    total_list.append(int(total))
-    
     rank_cards_html += f'''
             <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
                 <span class="rank-icon">{rank_icons[i]}</span>
@@ -2672,19 +2657,6 @@ for i, (g, total) in enumerate(sorted_groups, 1):
                 </div>
             </div>
 '''
-
-# 准备统计数据
-stats_data = []
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    if g in group_data:
-        stats_data.append({
-            "group": g,
-            "total": int(group_totals[g]),
-            "rank": group_rank[g],
-            "members": len(group_data[g]),
-            "avg": int(group_averages[g]),
-            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
-        })
 
 # 添加组别详情
 group_emojis = {"星穹组": "✨", "夜曜组": "🌙", "沧澜组": "🌊"}
@@ -2773,16 +2745,13 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 '''
     groups_html += group_html
 
-# 添加统计数据JSON
-stats_json = json.dumps(stats_data, ensure_ascii=False)
-
 # 替换HTML中的占位符
 html = html.replace('<!-- 组排名卡片区域 -->', rank_cards_html)
 html = html.replace('<!-- 组别详情区域 -->', groups_html)
 
 # 替换JavaScript中的数据
-html = html.replace('const groups = ["星穹组", "夜曜组", "沧澜组"];', f'const groups = {json.dumps(group_list)};')
-html = html.replace('const scores = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'const scores = {json.dumps(total_list)};')
+html = html.replace('const groups = ["星穹组", "夜曜组", "沧澜组"];', f'var groups = {json.dumps(group_list)};')
+html = html.replace('const scores = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'var scores = {json.dumps(total_list)};')
 
 # 替换日期
 html = html.replace('{datetime.now().strftime(\'%m/%d %H:%M\')}', datetime.now().strftime('%m/%d %H:%M'))
