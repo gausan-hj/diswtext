@@ -2187,12 +2187,12 @@ html += '''
                         <span>下载统计</span>
                     </button>
                     <!-- 语言切换按钮 - 三语轮换 -->
-                    <div class="lang-toggle" id="langToggle" onclick="toggleLanguage()">
+                    <div class="lang-toggle" id="langToggle">
                         <span class="lang-left">中</span>
                         <span class="lang-separator">/</span>
                         <span class="lang-right">EN</span>
                     </div>
-                    <div class="theme-toggle" onclick="document.body.classList.toggle('night-mode')">
+                    <div class="theme-toggle" id="themeToggle">
                         <span class="moon-icon">🌓</span>
                         <span>深色</span>
                     </div>
@@ -2305,7 +2305,7 @@ html += '''
         </div>
 
         <!-- 开启提醒按钮 -->
-        <div class="reminder-btn" id="reminderBtn" onclick="showReminderPopup()">
+        <div class="reminder-btn" id="reminderBtn">
             <span class="bell-icon">🔔</span>
             <span class="reminder-text">开启提醒</span>
         </div>
@@ -2315,7 +2315,7 @@ html += '''
             <div class="popup-header">
                 <span class="popup-icon">⏰</span>
                 <span class="popup-title">每日提醒时间</span>
-                <span class="popup-close" onclick="closePopup()">✕</span>
+                <span class="popup-close" id="popupClose">✕</span>
             </div>
             <div class="popup-content">
                 <div class="time-item">
@@ -2340,13 +2340,13 @@ html += '''
                 </div>
             </div>
             <div class="popup-footer">
-                <button class="popup-btn" onclick="enableReminders()">知道了，开启提醒</button>
+                <button class="popup-btn" id="enableRemindersBtn">知道了，开启提醒</button>
             </div>
         </div>
 
         <!-- 提示浮层 -->
         <div class="notification-toast" id="notificationToast">
-            <div class="toast-close" onclick="this.parentElement.classList.remove('show')">✕</div>
+            <div class="toast-close" id="toastClose">✕</div>
             <div class="toast-title">
                 <span>🔔</span>
                 <span id="toastMessage">通知</span>
@@ -2362,7 +2362,7 @@ html += '''
     <!-- 下载提示 -->
     <div class="download-toast" id="downloadToast">
         <span class="toast-icon">✓</span>
-        <span id="toastMessage">统计图已生成</span>
+        <span id="downloadToastMessage">统计图已生成</span>
     </div>
 
     <script>
@@ -2458,8 +2458,18 @@ html += '''
         const chartCard = document.getElementById('chartCard');
         const closeChart = document.getElementById('closeChart');
         const downloadToast = document.getElementById('downloadToast');
-        const toastMessage = document.getElementById('toastMessage');
+        const downloadToastMessage = document.getElementById('downloadToastMessage');
         const statsGrid = document.getElementById('statsGrid');
+        const reminderBtn = document.getElementById('reminderBtn');
+        const reminderPopup = document.getElementById('reminderPopup');
+        const popupClose = document.getElementById('popupClose');
+        const enableRemindersBtn = document.getElementById('enableRemindersBtn');
+        const toastClose = document.getElementById('toastClose');
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastDetail = document.getElementById('toastDetail');
+        const langToggle = document.getElementById('langToggle');
+        const themeToggle = document.getElementById('themeToggle');
         
         // 统计数据
         const statsData = [
@@ -2471,31 +2481,27 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         if stat["group"] == g:
             html += f'''            {{ group: "{stat['group']}", total: {stat['total']}, rank: {stat['rank']}, members: {stat['members']}, avg: {stat['avg']}, color: "{stat['color']}" }},\n'''
 
-html += '''        ];
+html += f'''        ];
 
         // 组数据
-        const groups = ["星穹组", "夜曜组", "沧澜组"];
-        const scores = [
-            statsData.find(s => s.group === "星穹组").total,
-            statsData.find(s => s.group === "夜曜组").total,
-            statsData.find(s => s.group === "沧澜组").total
-        ];
+        const groups = {json.dumps(group_list)};
+        const scores = {json.dumps(total_list)};
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
         
         let chart = null;
 
         // 显示提示
-        function showToast(message, isSuccess = true) {
-            if (!toastMessage || !downloadToast) return;
-            toastMessage.textContent = message;
+        function showToast(message) {{
+            if (!downloadToastMessage || !downloadToast) return;
+            downloadToastMessage.textContent = message;
             downloadToast.classList.add('show');
-            setTimeout(() => {
+            setTimeout(() => {{
                 downloadToast.classList.remove('show');
-            }, 2000);
-        }
+            }}, 2000);
+        }}
 
         // 生成统计图
-        function generateChart() {
+        function generateChart() {{
             const canvas = document.getElementById('groupChart');
             if (!canvas) return;
             
@@ -2504,154 +2510,213 @@ html += '''        ];
             const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
             const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
             
-            if (chart) {
+            if (chart) {{
                 chart.destroy();
-            }
+            }}
             
-            chart = new Chart(ctx, {
+            chart = new Chart(ctx, {{
                 type: 'bar',
-                data: {
-                    labels: groups.map(g => {
+                data: {{
+                    labels: groups.map(g => {{
                         if (g === "星穹组") return t('app.groups.xingqiong');
                         if (g === "夜曜组") return t('app.groups.yeyao');
                         return t('app.groups.canglan');
-                    }),
-                    datasets: [{
+                    }}),
+                    datasets: [{{
                         label: t('app.chart.total'),
                         data: scores,
                         backgroundColor: colors,
                         borderRadius: 6,
                         barPercentage: 0.6
-                    }]
-                },
-                options: {
+                    }}]
+                }},
+                options: {{
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
+                    plugins: {{
+                        legend: {{ display: false }},
+                        tooltip: {{
+                            callbacks: {{
+                                label: function(context) {{
                                     const value = context.raw;
                                     const group = groups[context.dataIndex];
                                     const stat = statsData.find(s => s.group === group);
                                     return [
-                                        `${t('app.chart.total')}: ${value}`,
-                                        `${t('app.chart.rank', {rank: stat.rank})}`,
-                                        `${t('app.chart.members', {count: stat.members})}`,
-                                        `${t('app.chart.average', {avg: stat.avg})}`
+                                        `${{t('app.chart.total')}}: ${{value}}`,
+                                        `${{t('app.chart.rank', {{rank: stat.rank}})}}`,
+                                        `${{t('app.chart.members', {{count: stat.members}})}}`,
+                                        `${{t('app.chart.average', {{avg: stat.avg}})}}`
                                     ];
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
+                                }}
+                            }}
+                        }}
+                    }},
+                    scales: {{
+                        y: {{
                             beginAtZero: true,
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: textColor }
-                        }
-                    }
-                }
-            });
-        }
+                            grid: {{ color: gridColor }},
+                            ticks: {{ color: textColor }}
+                        }},
+                        x: {{
+                            grid: {{ display: false }},
+                            ticks: {{ color: textColor }}
+                        }}
+                    }}
+                }}
+            }});
+        }}
 
         // 生成统计卡片
-        function generateStatsGrid() {
+        function generateStatsGrid() {{
             if (!statsGrid) return;
             let html = '';
-            statsData.forEach(stat => {
+            statsData.forEach(stat => {{
                 html += `
                     <div class="stat-item">
-                        <div class="stat-label">${t(`app.groups.${stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}`)}</div>
-                        <div class="stat-value">${stat.total}</div>
-                        <div class="stat-rank">${t('app.chart.rank', {rank: stat.rank})} · ${t('app.chart.members', {count: stat.members})}</div>
+                        <div class="stat-label">${{t(`app.groups.${{stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}}`)}}</div>
+                        <div class="stat-value">${{stat.total}}</div>
+                        <div class="stat-rank">${{t('app.chart.rank', {{rank: stat.rank}})}} · ${{t('app.chart.members', {{count: stat.members}})}}</div>
                     </div>
                 `;
-            });
+            }});
             statsGrid.innerHTML = html;
-        }
+        }}
 
         // 保存统计图到相册
-        async function saveChartToGallery() {
+        async function saveChartToGallery() {{
             const chartCard = document.getElementById('chartCard');
             if (!chartCard) return;
             
-            try {
+            try {{
                 showToast(t('app.toast.generating'));
                 
-                if (!chart) {
+                if (!chart) {{
                     generateChart();
-                }
+                }}
                 
-                setTimeout(async () => {
-                    const canvas = await html2canvas(chartCard, {
+                setTimeout(async () => {{
+                    const canvas = await html2canvas(chartCard, {{
                         scale: 2,
                         backgroundColor: getComputedStyle(document.body).backgroundColor,
                         allowTaint: false,
                         useCORS: true,
                         logging: false
-                    });
+                    }});
                     
                     const link = document.createElement('a');
-                    link.download = `prefects_score_${new Date().toISOString().slice(0,10)}.png`;
+                    link.download = `prefects_score_${{new Date().toISOString().slice(0,10)}}.png`;
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     
                     showToast(t('app.toast.saved'));
-                }, 500);
+                }}, 500);
                 
-            } catch (error) {
+            }} catch (error) {{
                 console.error('保存失败:', error);
                 showToast(t('app.toast.saveFailed'));
-            }
-        }
+            }}
+        }}
 
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', () => {
-                if (chartCard) {
-                    chartCard.classList.add('show');
-                    generateChart();
-                    generateStatsGrid();
-                    showToast(t('app.toast.chartGenerated'));
-                }
-            });
-        }
+        // ===== 绑定事件 =====
+        if (downloadBtn) {{
+            downloadBtn.addEventListener('click', function(e) {{
+                e.preventDefault();
+                chartCard.classList.add('show');
+                generateChart();
+                generateStatsGrid();
+                showToast(t('app.toast.chartGenerated'));
+            }});
+        }}
 
-        if (saveChartBtn) {
-            saveChartBtn.addEventListener('click', saveChartToGallery);
-        }
+        if (saveChartBtn) {{
+            saveChartBtn.addEventListener('click', function(e) {{
+                e.preventDefault();
+                saveChartToGallery();
+            }});
+        }}
 
-        if (closeChart) {
-            closeChart.addEventListener('click', () => {
-                if (chartCard) {
-                    chartCard.classList.remove('show');
-                }
-            });
-        }
+        if (closeChart) {{
+            closeChart.addEventListener('click', function(e) {{
+                e.preventDefault();
+                chartCard.classList.remove('show');
+            }});
+        }}
 
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
+        if (searchInput) {{
+            searchInput.addEventListener('input', function(e) {{
                 const searchTerm = e.target.value.toLowerCase().trim();
-                allRows.forEach(row => {
+                allRows.forEach(row => {{
                     const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
                     row.style.display = searchText.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
+                }});
+            }});
+        }}
+
+        // 提醒按钮
+        if (reminderBtn) {{
+            reminderBtn.addEventListener('click', function(e) {{
+                e.preventDefault();
+                reminderPopup.classList.add('show');
+            }});
+        }}
+
+        // 关闭弹窗
+        if (popupClose) {{
+            popupClose.addEventListener('click', function(e) {{
+                e.preventDefault();
+                reminderPopup.classList.remove('show');
+            }});
+        }}
+
+        // 开启提醒按钮
+        if (enableRemindersBtn) {{
+            enableRemindersBtn.addEventListener('click', function(e) {{
+                e.preventDefault();
+                enableReminders();
+            }});
+        }}
+
+        // 关闭提示浮层
+        if (toastClose) {{
+            toastClose.addEventListener('click', function(e) {{
+                e.preventDefault();
+                notificationToast.classList.remove('show');
+            }});
+        }}
+
+        // 语言切换
+        if (langToggle) {{
+            langToggle.addEventListener('click', function(e) {{
+                e.preventDefault();
+                toggleLanguage();
+            }});
+        }}
+
+        // 主题切换
+        if (themeToggle) {{
+            themeToggle.addEventListener('click', function(e) {{
+                e.preventDefault();
+                toggleNightMode();
+            }});
+        }}
+
+        // 点击外部关闭弹窗
+        document.addEventListener('click', function(e) {{
+            if (reminderPopup && reminderBtn) {{
+                if (!reminderPopup.contains(e.target) && !reminderBtn.contains(e.target)) {{
+                    reminderPopup.classList.remove('show');
+                }}
+            }}
+        }});
 
         // 监听深色模式变化，更新图表
-        const observer = new MutationObserver(() => {
-            if (chart && chartCard?.classList.contains('show')) {
+        const observer = new MutationObserver(() => {{
+            if (chart && chartCard?.classList.contains('show')) {{
                 generateChart();
-            }
-        });
+            }}
+        }});
         
-        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        observer.observe(document.body, {{ attributes: true, attributeFilter: ['class'] }});
     </script>
 </body>
 </html>'''
@@ -2663,9 +2728,6 @@ group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜
 rank_cards_html = ""
 for i, (g, total) in enumerate(sorted_groups, 1):
     group_id = group_ids[g]
-    group_list.append(g)
-    total_list.append(int(total))
-    
     rank_cards_html += f'''
             <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
                 <span class="rank-icon">{rank_icons[i]}</span>
@@ -2763,16 +2825,9 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
 '''
     groups_html += group_html
 
-# 添加统计数据JSON
-stats_json = json.dumps(stats_data, ensure_ascii=False)
-
 # 替换HTML中的占位符
 html = html.replace('<!-- 组排名卡片区域 -->', rank_cards_html)
 html = html.replace('<!-- 组别详情区域 -->', groups_html)
-
-# 替换JavaScript中的数据
-html = html.replace('const groups = ["星穹组", "夜曜组", "沧澜组"];', f'const groups = {json.dumps(group_list)};')
-html = html.replace('const scores = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'const scores = {json.dumps(total_list)};')
 
 # 替换日期
 html = html.replace('{datetime.now().strftime(\'%m/%d %H:%M\')}', datetime.now().strftime('%m/%d %H:%M'))
