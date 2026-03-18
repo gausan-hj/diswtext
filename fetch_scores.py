@@ -473,7 +473,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 生成HTML - 基于版本2，添加版本1的特色功能
+# 生成HTML - 完整版
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -482,10 +482,7 @@ html = '''<!DOCTYPE html>
     <title>训育处 - 学长团分数板</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-'''
 
-# 添加联课活动数据和语言数据
-html += f'''
 <!-- OneSignal SDK (可选) -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
@@ -499,29 +496,29 @@ const CCA_DATA = {cca_json};
 let currentLang = localStorage.getItem('prefect_lang') || 'zh';
 
 // 获取翻译文本
-function t(key, params = {{}}) {{
+function t(key, params = {}) {
     const keys = key.split('.');
     let value = LANGUAGES[currentLang];
-    for (const k of keys) {{
-        if (value && value[k] !== undefined) {{
+    for (const k of keys) {
+        if (value && value[k] !== undefined) {
             value = value[k];
-        }} else {{
-            console.warn(`Translation key not found: ${{key}}`);
+        } else {
+            console.warn(`Translation key not found: ${key}`);
             return key;
-        }}
-    }}
+        }
+    }
     
     // 替换参数
-    if (typeof value === 'string') {{
-        return value.replace(/\\{{([^}}]+)\\}}/g, (match, p1) => {{
+    if (typeof value === 'string') {
+        return value.replace(/\{([^}]+)\}/g, (match, p1) => {
             return params[p1] !== undefined ? params[p1] : match;
-        }});
-    }}
+        });
+    }
     return value;
-}}
+}
 
 // 获取明天要穿的衣服（多语言）
-function getTomorrowUniform() {{
+function getTomorrowUniform() {
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -529,44 +526,44 @@ function getTomorrowUniform() {{
     const year = tomorrow.getFullYear();
     const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
     const day = String(tomorrow.getDate()).padStart(2, '0');
-    const dateStr = `${{year}}-${{month}}-${{day}}`;
+    const dateStr = `${year}-${month}-${day}`;
     
     const tomorrowCCA = CCA_DATA.find(item => item.date === dateStr);
     
-    if (tomorrowCCA) {{
-        if (tomorrowCCA.uniform === "体育衣") {{
-            return t('app.uniform.sports', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
-        }} else {{
-            return t('app.uniform.uniform', {{ activity: tomorrowCCA[`activity_${{currentLang}}`] || tomorrowCCA.activity }});
-        }}
-    }} else {{
+    if (tomorrowCCA) {
+        if (tomorrowCCA.uniform === "体育衣") {
+            return t('app.uniform.sports', { activity: tomorrowCCA[`activity_${currentLang}`] || tomorrowCCA.activity });
+        } else {
+            return t('app.uniform.uniform', { activity: tomorrowCCA[`activity_${currentLang}`] || tomorrowCCA.activity });
+        }
+    } else {
         return t('app.uniform.default');
-    }}
-}}
+    }
+}
 
 // 更新页面所有文本
-function updatePageLanguage() {{
+function updatePageLanguage() {
     // 更新标题
     document.querySelector('h1').textContent = t('app.title');
     document.querySelector('.meta-info span:first-child').textContent = t('app.subtitle');
     document.getElementById('search').placeholder = t('app.search');
     
     // 更新按钮
-    document.getElementById('downloadBtn').innerHTML = `<span>📊</span><span>${{t('app.download')}}</span>`;
+    document.getElementById('downloadBtn').innerHTML = `<span>📊</span><span>${t('app.download')}</span>`;
     document.querySelector('.theme-toggle span:last-child').textContent = t('app.dark');
     
     // 更新热力图说明
     const heatLow = document.querySelector('.heatmap-legend .legend-label span.low');
     const heatHigh = document.querySelector('.heatmap-legend .legend-label span.high');
-    if (heatLow) heatLow.innerHTML = `${{t('app.heatmap.low')}} █`;
-    if (heatHigh) heatHigh.innerHTML = `█ ${{t('app.heatmap.high')}}`;
+    if (heatLow) heatLow.innerHTML = `${t('app.heatmap.low')} █`;
+    if (heatHigh) heatHigh.innerHTML = `█ ${t('app.heatmap.high')}`;
     
     // 更新统计图卡片
     const chartTitle = document.querySelector('.chart-title span:last-child');
     if (chartTitle) chartTitle.textContent = t('app.chart.title');
     
     const saveChartBtn = document.getElementById('saveChartBtn');
-    if (saveChartBtn) saveChartBtn.innerHTML = `<span>💾</span><span>${{t('app.chart.save')}}</span>`;
+    if (saveChartBtn) saveChartBtn.innerHTML = `<span>💾</span><span>${t('app.chart.save')}</span>`;
     
     const closeChart = document.getElementById('closeChart');
     if (closeChart) closeChart.textContent = t('app.chart.close');
@@ -601,48 +598,48 @@ function updatePageLanguage() {{
     updateTableHeaders();
     
     // 更新统计图
-    if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {{
+    if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
         generateChart();
-    }}
-}}
+    }
+}
 
 // 更新组名
-function updateGroupNames() {{
+function updateGroupNames() {
     // 组排名卡片
-    document.querySelectorAll('.rank-card').forEach(card => {{
+    document.querySelectorAll('.rank-card').forEach(card => {
         const group = card.getAttribute('data-group');
         const groupName = getTranslatedGroupName(group);
         const nameEl = card.querySelector('.rank-name');
         if (nameEl) nameEl.textContent = groupName;
-    }});
+    });
     
     // 组卡片标题
-    document.querySelectorAll('.group-card').forEach(card => {{
+    document.querySelectorAll('.group-card').forEach(card => {
         const group = card.getAttribute('data-group');
         const groupName = getTranslatedGroupName(group);
         const titleEl = card.querySelector('.group-title');
         if (titleEl) titleEl.textContent = groupName;
         
         const avgEl = card.querySelector('.group-avg');
-        if (avgEl) {{
-            const score = avgEl.textContent.match(/\\d+/)?.[0] || '';
+        if (avgEl) {
+            const score = avgEl.textContent.match(/\d+/)?.[0] || '';
             avgEl.innerHTML = t('app.groups.average') + ' ' + score;
-        }}
-    }});
-}}
+        }
+    });
+}
 
 // 获取翻译后的组名
-function getTranslatedGroupName(group) {{
-    const map = {{
+function getTranslatedGroupName(group) {
+    const map = {
         '星穹组': 'app.groups.xingqiong',
         '夜曜组': 'app.groups.yeyao',
         '沧澜组': 'app.groups.canglan'
-    }};
+    };
     return t(map[group]);
-}}
+}
 
 // 更新奖励机制卡片
-function updateRewardSection() {{
+function updateRewardSection() {
     const section = document.querySelector('.reward-section');
     if (!section) return;
     
@@ -653,7 +650,7 @@ function updateRewardSection() {{
     if (subtitle) subtitle.textContent = t('app.reward.subtitle');
     
     const items = section.querySelectorAll('.reward-item');
-    if (items.length >= 3) {{
+    if (items.length >= 3) {
         const conditions = items[0].querySelectorAll('.reward-condition');
         const benefits = items[0].querySelectorAll('.reward-benefit');
         
@@ -665,32 +662,32 @@ function updateRewardSection() {{
         
         if (conditions[2]) conditions[2].textContent = t('app.reward.third.condition');
         if (benefits[2]) benefits[2].textContent = t('app.reward.third.benefit');
-    }}
+    }
     
     const extra = section.querySelector('.reward-extra');
     if (extra) extra.textContent = t('app.reward.extra');
     
     const footer = section.querySelector('.reward-footer');
     if (footer) footer.textContent = t('app.reward.footer');
-}}
+}
 
 // 更新时间项
-function updateTimeItems() {{
+function updateTimeItems() {
     const items = document.querySelectorAll('.time-item');
     const descs = ['morning', 'evening', 'night', 'bedtime'];
-    items.forEach((item, index) => {{
-        if (index < descs.length) {{
+    items.forEach((item, index) => {
+        if (index < descs.length) {
             const desc = item.querySelector('.time-desc');
-            if (desc) desc.textContent = t(`app.reminder.${{descs[index]}}`);
-        }}
-    }});
-}}
+            if (desc) desc.textContent = t(`app.reminder.${descs[index]}`);
+        }
+    });
+}
 
 // 更新表格表头
-function updateTableHeaders() {{
-    document.querySelectorAll('.member-table thead tr').forEach(header => {{
+function updateTableHeaders() {
+    document.querySelectorAll('.member-table thead tr').forEach(header => {
         const cells = header.querySelectorAll('th');
-        if (cells.length >= 7) {{
+        if (cells.length >= 7) {
             cells[0].textContent = t('app.table.number');
             cells[1].textContent = t('app.table.name');
             cells[2].textContent = t('app.table.class');
@@ -698,12 +695,12 @@ function updateTableHeaders() {{
             cells[4].textContent = t('app.table.daily');
             cells[5].textContent = t('app.table.total');
             cells[6].textContent = t('app.table.reward');
-        }}
-    }});
-}}
+        }
+    });
+}
 
 // 更新语言按钮
-function updateLangButton() {{
+function updateLangButton() {
     const langToggle = document.getElementById('langToggle');
     if (!langToggle) return;
     
@@ -711,84 +708,84 @@ function updateLangButton() {{
     const rightSpan = langToggle.querySelector('.lang-right');
     const separator = langToggle.querySelector('.lang-separator');
     
-    if (currentLang === 'zh') {{
+    if (currentLang === 'zh') {
         if (leftSpan) leftSpan.textContent = '中';
         if (rightSpan) rightSpan.textContent = 'EN';
         if (separator) separator.textContent = '/';
-    }} else if (currentLang === 'en') {{
+    } else if (currentLang === 'en') {
         if (leftSpan) leftSpan.textContent = 'EN';
         if (rightSpan) rightSpan.textContent = 'MS';
         if (separator) separator.textContent = '/';
-    }} else {{
+    } else {
         if (leftSpan) leftSpan.textContent = 'MS';
         if (rightSpan) rightSpan.textContent = '中';
         if (separator) separator.textContent = '/';
-    }}
-}}
+    }
+}
 
 // 切换语言动画
-function animateLanguageChange(newLang) {{
+function animateLanguageChange(newLang) {
     const nameCells = document.querySelectorAll('.name-cell');
     
     // 添加动画类
-    nameCells.forEach(cell => {{
+    nameCells.forEach(cell => {
         cell.classList.add('lang-switching');
-    }});
+    });
     
-    setTimeout(() => {{
+    setTimeout(() => {
         // 更新语言
         currentLang = newLang;
         localStorage.setItem('prefect_lang', currentLang);
         
         // 更新body类
         document.body.classList.remove('lang-zh', 'lang-en', 'lang-ms');
-        document.body.classList.add(`lang-${{currentLang}}`);
+        document.body.classList.add(`lang-${currentLang}`);
         
         // 更新页面文本
         updatePageLanguage();
         
         // 移除动画类
-        setTimeout(() => {{
-            nameCells.forEach(cell => {{
+        setTimeout(() => {
+            nameCells.forEach(cell => {
                 cell.classList.remove('lang-switching');
-            }});
-        }}, 50);
-    }}, 150);
-}}
+            });
+        }, 50);
+    }, 150);
+}
 
 // 切换语言
-function toggleLanguage() {{
+function toggleLanguage() {
     const langToggle = document.getElementById('langToggle');
     if (!langToggle) return;
     
     langToggle.classList.add('swap');
     
-    setTimeout(() => {{
+    setTimeout(() => {
         // 轮换语言
         let newLang;
-        if (currentLang === 'zh') {{
+        if (currentLang === 'zh') {
             newLang = 'en';
-        }} else if (currentLang === 'en') {{
+        } else if (currentLang === 'en') {
             newLang = 'ms';
-        }} else {{
+        } else {
             newLang = 'zh';
-        }}
+        }
         
         animateLanguageChange(newLang);
         
         // 移除动画
-        setTimeout(() => {{
+        setTimeout(() => {
             langToggle.classList.remove('swap');
-        }}, 50);
+        }, 50);
         
         // 显示提示
-        const langNames = {{ zh: '中文', en: 'English', ms: 'Bahasa Melayu' }};
-        showPageToast('🌐', `已切换到 ${{langNames[newLang]}}`);
-    }}, 150);
-}}
+        const langNames = { zh: '中文', en: 'English', ms: 'Bahasa Melayu' };
+        showPageToast('🌐', `已切换到 ${langNames[newLang]}`);
+    }, 150);
+}
 
 // 显示网页内提醒
-function showPageToast(title, message) {{
+function showPageToast(title, message) {
     const toast = document.getElementById('notificationToast');
     if (!toast) return;
     
@@ -799,28 +796,28 @@ function showPageToast(title, message) {{
     if (detailEl) detailEl.textContent = message;
     toast.classList.add('show');
     
-    setTimeout(() => {{
+    setTimeout(() => {
         toast.classList.remove('show');
-    }}, 3000);
-}}
+    }, 3000);
+}
 
 // OneSignal 初始化 (可选)
 window.OneSignalDeferred = window.OneSignalDeferred || [];
-OneSignalDeferred.push(async function(OneSignal) {{
-    await OneSignal.init({{
+OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
         appId: "137d66ce-9746-4206-9861-a1c368a0b548",
         allowLocalhostAsSecureOrigin: true,
-        notifyButton: {{
+        notifyButton: {
             enable: true,
             size: 'medium',
             showCredit: false,
             position: 'bottom-right',
-            text: {{
+            text: {
                 'message': t('app.reminder.button'),
                 'subscribe': t('app.reminder.confirm'),
                 'unsubscribe': t('app.reminder.button')
-            }},
-            colors: {{
+            },
+            colors: {
                 'circle.background': '#eab308',
                 'circle.foreground': '#1a2b3c',
                 'badge.background': '#eab308',
@@ -829,49 +826,47 @@ OneSignalDeferred.push(async function(OneSignal) {{
                 'button.background': '#eab308',
                 'button.foreground': '#1a2b3c',
                 'button.hover.background': '#ca8a04'
-            }}
-        }},
-        serviceWorkerParam: {{ scope: '/' }},
+            }
+        },
+        serviceWorkerParam: { scope: '/' },
         serviceWorkerPath: 'OneSignalSDKWorker.js',
         serviceWorkerUpdaterPath: 'OneSignalSDKUpdaterWorker.js'
-    }});
+    });
     console.log('OneSignal 初始化成功');
-}});
+});
 
 // 开启提醒
-function enableReminders() {{
-    OneSignalDeferred.push(function(OneSignal) {{
+function enableReminders() {
+    OneSignalDeferred.push(function(OneSignal) {
         OneSignal.Notifications.requestPermission();
-    }});
+    });
     closePopup();
-}}
+}
 
 // 显示提示框
-function showReminderPopup() {{
+function showReminderPopup() {
     const popup = document.getElementById('reminderPopup');
     if (popup) popup.classList.add('show');
-}}
+}
 
 // 关闭提示框
-function closePopup() {{
+function closePopup() {
     const popup = document.getElementById('reminderPopup');
     if (popup) popup.classList.remove('show');
-}}
+}
 
 // 点击外部关闭提示框
-document.addEventListener('click', function(e) {{
+document.addEventListener('click', function(e) {
     const popup = document.getElementById('reminderPopup');
     const btn = document.getElementById('reminderBtn');
-    if (popup && btn) {{
-        if (!popup.contains(e.target) && !btn.contains(e.target)) {{
+    if (popup && btn) {
+        if (!popup.contains(e.target) && !btn.contains(e.target)) {
             popup.classList.remove('show');
-        }}
-    }}
-}});
+        }
+    }
+});
 </script>
-'''
 
-html += '''
     <style>
         * {
             margin: 0;
@@ -2183,7 +2178,7 @@ html += '''
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">''' + datetime.now().strftime('%m/%d %H:%M') + '''</span>
+                <span class="date-badge">{datetime.now().strftime('%m/%d %H:%M')}</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -2230,137 +2225,12 @@ html += '''
 
         <!-- 组排名卡片 -->
         <div class="rank-grid">
-'''
-
-# 添加组排名卡片
-rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
-group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
-group_list = []
-total_list = []
-
-for i, (g, total) in enumerate(sorted_groups, 1):
-    group_id = group_ids[g]
-    group_list.append(g)
-    total_list.append(int(total))
-    
-    html += f'''
-            <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
-                <span class="rank-icon">{rank_icons[i]}</span>
-                <div class="rank-info">
-                    <div class="rank-name">{g}</div>
-                    <div class="rank-score">{int(total)}<small>分</small></div>
-                </div>
-            </div>
-'''
-
-# 准备统计数据
-stats_data = []
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    if g in group_data:
-        stats_data.append({
-            "group": g,
-            "total": int(group_totals[g]),
-            "rank": group_rank[g],
-            "members": len(group_data[g]),
-            "avg": int(group_averages[g]),
-            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
-        })
-
-html += '''
+            <!-- 组排名卡片区域 -->
         </div>
 
         <!-- 组别详情 -->
         <div class="groups">
-'''
-
-# 添加三个组
-group_emojis = {"星穹组": "✨", "夜曜组": "🌙", "沧澜组": "🌊"}
-for group_name in ["星穹组", "夜曜组", "沧澜组"]:
-    members = group_data[group_name]
-    rank = group_rank[group_name]
-    group_id = group_ids[group_name]
-    avg_score = group_averages[group_name]
-    
-    # 获取该组的最高分和最低分
-    group_max = group_max_scores[group_name]
-    group_min = group_min_scores[group_name]
-    
-    html += f'''
-            <div class="group-card" data-group="{group_name}" id="{group_id}">
-                <div class="group-header">
-                    <div class="group-title-wrapper">
-                        <span class="group-emoji">{group_emojis[group_name]}</span>
-                        <span class="group-title">{group_name}</span>
-                    </div>
-                    <div class="group-stats">
-                        <span class="group-avg">平均 {int(avg_score)}</span>
-                        <span class="group-badge">第{rank}名</span>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="member-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>姓名</th>
-                                <th>班</th>
-                                <th>学号</th>
-                                <th>每日得分</th>
-                                <th>总分</th>
-                                <th>奖</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-'''
-
-    for member in members:
-        # 生成每日得分标签
-        score_tags = ""
-        sorted_dates = sorted(member["score_dict"].keys())
-        for date in sorted_dates[-5:]:
-            if date:
-                score = member["score_dict"][date]
-                score_tags += f'<span class="score-item has-score"><span class="score-date">{date}</span><span class="score-value">{int(score)}</span></span>'
-        
-        if not score_tags:
-            score_tags = '<span class="score-item">—</span>'
-        
-        # 完整显示英文名
-        name_en_full = member['name_en']
-        
-        # 计算热力图颜色 - 越浅越高分
-        total_score = member['total']
-        if group_max > group_min:
-            relative_score = (total_score - group_min) / (group_max - group_min)
-            heat_level = min(9, max(1, int(relative_score * 9) + 1))
-        else:
-            heat_level = 5
-        
-        total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level});">{int(total_score)}</span>'
-        
-        html += f'''
-                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
-                            <td>{member['order']}</td>
-                            <td class="name-cell">
-                                <div class="name-cn">{member['name_cn']}</div>
-                                <div class="name-en">{name_en_full}</div>
-                            </td>
-                            <td class="info-cell">{member['class']}</td>
-                            <td class="info-cell">{member['student_id']}</td>
-                            <td><div class="score-tags">{score_tags}</div></td>
-                            <td>{total_cell}</td>
-                            <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
-                        </tr>
-'''
-
-    html += '''
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-'''
-
-html += '''
+            <!-- 组别详情区域 -->
         </div>
 
         <!-- 奖励机制卡片 -->
@@ -2481,7 +2351,7 @@ html += '''
         
         // 初始化语言
         let currentLang = localStorage.getItem('prefect_lang') || 'zh';
-        document.body.classList.add(`lang-${{currentLang}}`);
+        document.body.classList.add(`lang-${currentLang}`);
         
         // 更新语言按钮
         updateLangButton();
@@ -2570,24 +2440,11 @@ html += '''
         const statsGrid = document.getElementById('statsGrid');
         
         // 统计数据
-        const statsData = [
-'''
-
-# 按固定顺序输出统计图数据
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    for stat in stats_data:
-        if stat["group"] == g:
-            html += f'''            {{ group: "{stat['group']}", total: {stat['total']}, rank: {stat['rank']}, members: {stat['members']}, avg: {stat['avg']}, color: "{stat['color']}" }},\n'''
-
-html += '''        ];
+        const statsData = [];
 
         // 组数据
         const groups = ["星穹组", "夜曜组", "沧澜组"];
-        const scores = [
-            statsData.find(s => s.group === "星穹组").total,
-            statsData.find(s => s.group === "夜曜组").total,
-            statsData.find(s => s.group === "沧澜组").total
-        ];
+        const scores = [];
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
         
         let chart = null;
@@ -2764,6 +2621,142 @@ html += '''        ];
 </body>
 </html>'''
 
+# 添加联课活动数据和语言数据
+html = html.replace("{languages_json}", languages_json)
+html = html.replace("{cca_json}", cca_json)
+
+# 添加组排名卡片
+rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
+group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
+group_list = []
+total_list = []
+
+rank_cards_html = ""
+for i, (g, total) in enumerate(sorted_groups, 1):
+    group_id = group_ids[g]
+    group_list.append(g)
+    total_list.append(int(total))
+    
+    rank_cards_html += f'''
+            <div class="rank-card" data-group="{g}" onclick="document.getElementById('{group_id}').scrollIntoView({{behavior: 'smooth'}})">
+                <span class="rank-icon">{rank_icons[i]}</span>
+                <div class="rank-info">
+                    <div class="rank-name">{g}</div>
+                    <div class="rank-score">{int(total)}<small>分</small></div>
+                </div>
+            </div>
+'''
+
+# 准备统计数据
+stats_data = []
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        stats_data.append({
+            "group": g,
+            "total": int(group_totals[g]),
+            "rank": group_rank[g],
+            "members": len(group_data[g]),
+            "avg": int(group_averages[g]),
+            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
+        })
+
+# 添加组别详情
+group_emojis = {"星穹组": "✨", "夜曜组": "🌙", "沧澜组": "🌊"}
+groups_html = ""
+for group_name in ["星穹组", "夜曜组", "沧澜组"]:
+    members = group_data[group_name]
+    rank = group_rank[group_name]
+    group_id = group_ids[group_name]
+    avg_score = group_averages[group_name]
+    
+    # 获取该组的最高分和最低分
+    group_max = group_max_scores[group_name]
+    group_min = group_min_scores[group_name]
+    
+    group_html = f'''
+            <div class="group-card" data-group="{group_name}" id="{group_id}">
+                <div class="group-header">
+                    <div class="group-title-wrapper">
+                        <span class="group-emoji">{group_emojis[group_name]}</span>
+                        <span class="group-title">{group_name}</span>
+                    </div>
+                    <div class="group-stats">
+                        <span class="group-avg">平均 {int(avg_score)}</span>
+                        <span class="group-badge">第{rank}名</span>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="member-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>姓名</th>
+                                <th>班</th>
+                                <th>学号</th>
+                                <th>每日得分</th>
+                                <th>总分</th>
+                                <th>奖</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+'''
+    for member in members:
+        # 生成每日得分标签
+        score_tags = ""
+        sorted_dates = sorted(member["score_dict"].keys())
+        for date in sorted_dates[-5:]:
+            if date:
+                score = member["score_dict"][date]
+                score_tags += f'<span class="score-item has-score"><span class="score-date">{date}</span><span class="score-value">{int(score)}</span></span>'
+        
+        if not score_tags:
+            score_tags = '<span class="score-item">—</span>'
+        
+        # 完整显示英文名
+        name_en_full = member['name_en']
+        
+        # 计算热力图颜色 - 越浅越高分
+        total_score = member['total']
+        if group_max > group_min:
+            relative_score = (total_score - group_min) / (group_max - group_min)
+            heat_level = min(9, max(1, int(relative_score * 9) + 1))
+        else:
+            heat_level = 5
+        
+        total_cell = f'<span class="total-heat" style="background-color: var(--heat-{heat_level});">{int(total_score)}</span>'
+        
+        group_html += f'''
+                        <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
+                            <td>{member['order']}</td>
+                            <td class="name-cell">
+                                <div class="name-cn">{member['name_cn']}</div>
+                                <div class="name-en">{name_en_full}</div>
+                            </td>
+                            <td class="info-cell">{member['class']}</td>
+                            <td class="info-cell">{member['student_id']}</td>
+                            <td><div class="score-tags">{score_tags}</div></td>
+                            <td>{total_cell}</td>
+                            <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
+                        </tr>
+'''
+    group_html += '''
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+'''
+    groups_html += group_html
+
+# 添加统计数据JSON
+stats_json = json.dumps(stats_data, ensure_ascii=False)
+
+# 替换HTML中的占位符
+html = html.replace('<!-- 组排名卡片区域 -->', rank_cards_html)
+html = html.replace('<!-- 组别详情区域 -->', groups_html)
+html = html.replace('const statsData = [];', f'const statsData = {stats_json};')
+html = html.replace('const scores = [];', f'const scores = [{", ".join([str(int(group_totals[g])) for g in ["星穹组", "夜曜组", "沧澜组"]])}];')
+html = html.replace('{datetime.now().strftime(\'%m/%d %H:%M\')}', datetime.now().strftime('%m/%d %H:%M'))
+
 # 保存HTML文件
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
@@ -2775,6 +2768,3 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         members = group_data[g]
         pass_count = sum(1 for m in members if m["reward_status"] == "✅")
         print(f"  {g}: {pass_count}/{len(members)} 人达标 ({int(pass_count/len(members)*100)}%)")
-print("✨ 基于版本2的稳定核心，添加了版本1的特色功能")
-print("✨ 功能：三语切换 + 姓名动画 + 热力图 + 提醒功能 + (版本2的正常工作的统计图和双击/双空格)")
-
