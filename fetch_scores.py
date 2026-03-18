@@ -491,7 +491,7 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
-# 准备统计数据（在生成HTML之前定义）
+# 准备统计数据
 stats_data = []
 group_list = []
 total_list = []
@@ -509,7 +509,7 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         group_list.append(g)
         total_list.append(int(group_totals[g]))
 
-# 生成HTML - 添加OneSignal通知权限（保持原有三语功能）
+# 生成HTML - 整合通知功能
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -593,36 +593,6 @@ OneSignalDeferred.push(async function(OneSignal) {{
     }});
     console.log('OneSignal 初始化成功');
 }});
-
-// 强化激活函数
-async function enableReminders() {{
-    OneSignalDeferred.push(async function(OneSignal) {{
-        // 1. 检查浏览器是否支持
-        if (!OneSignal.Notifications.isPushSupported()) {{
-            showPageToast(t('app.toast.not_supported'), t('app.toast.not_supported_detail'));
-            return;
-        }}
-
-        // 2. 弹出系统原生权限请求
-        try {{
-            await OneSignal.Notifications.requestPermission();
-            
-            // 3. 检查是否成功获取权限
-            if (OneSignal.Notifications.permission) {{
-                showPageToast(t('app.toast.permission_granted'), t('app.toast.permission_granted_detail'));
-                
-                // 可以在这里给用户打标签，方便后台定向推送
-                OneSignal.User.addTag("role", "prefect"); 
-                
-                closePopup();
-            }} else {{
-                showPageToast(t('app.toast.permission_denied'), t('app.toast.permission_denied_detail'));
-            }}
-        }} catch (err) {{
-            console.error("Permission error:", err);
-        }}
-    }});
-}}
 
 // 更新页面所有文本
 function updatePageLanguage() {{
@@ -863,12 +833,12 @@ function toggleLanguage() {{
         
         // 显示提示
         const langNames = {{ zh: '中文', en: 'English', ms: 'Bahasa Melayu' }};
-        showPageToast('🌐', `已切换到 ${{langNames[newLang]}}`);
+        showNotification('🌐', `已切换到 ${{langNames[newLang]}}`);
     }}, 150);
 }}
 
 // 显示网页内提醒
-function showPageToast(title, message) {{
+function showNotification(title, message) {{
     const toast = document.getElementById('notificationToast');
     if (!toast) return;
     
@@ -884,27 +854,51 @@ function showPageToast(title, message) {{
     }}, 3000);
 }}
 
-// 开启提醒
-function enableReminders() {{
-    OneSignalDeferred.push(function(OneSignal) {{
-        OneSignal.Notifications.requestPermission();
+// ===== 通知功能 =====
+
+// 强化激活函数
+async function enableReminders() {{
+    OneSignalDeferred.push(async function(OneSignal) {{
+        // 1. 检查浏览器是否支持
+        if (!OneSignal.Notifications.isPushSupported()) {{
+            showNotification(t('app.toast.not_supported'), t('app.toast.not_supported_detail'));
+            return;
+        }}
+
+        // 2. 弹出系统原生权限请求
+        try {{
+            await OneSignal.Notifications.requestPermission();
+            
+            // 3. 检查是否成功获取权限
+            if (OneSignal.Notifications.permission) {{
+                showNotification(t('app.toast.permission_granted'), t('app.toast.permission_granted_detail'));
+                
+                // 可以在这里给用户打标签，方便后台定向推送
+                OneSignal.User.addTag("role", "prefect"); 
+                
+                closePopup();
+            }} else {{
+                showNotification(t('app.toast.permission_denied'), t('app.toast.permission_denied_detail'));
+            }}
+        }} catch (err) {{
+            console.error("Permission error:", err);
+        }}
     }});
-    closePopup();
 }}
 
-// 显示提示框
+// 显示提醒弹窗
 function showReminderPopup() {{
     const popup = document.getElementById('reminderPopup');
     if (popup) popup.classList.add('show');
 }}
 
-// 关闭提示框
+// 关闭弹窗
 function closePopup() {{
     const popup = document.getElementById('reminderPopup');
     if (popup) popup.classList.remove('show');
 }}
 
-// 点击外部关闭提示框
+// 点击外部关闭弹窗
 document.addEventListener('click', function(e) {{
     const popup = document.getElementById('reminderPopup');
     const btn = document.getElementById('reminderBtn');
@@ -2362,7 +2356,7 @@ html += '''
     <!-- 下载提示 -->
     <div class="download-toast" id="downloadToast">
         <span class="toast-icon">✓</span>
-        <span id="downloadToastMessage">统计图已生成</span>
+        <span id="toastMessage">统计图已生成</span>
     </div>
 
     <script>
@@ -2380,6 +2374,16 @@ html += '''
         
         // 初始化页面文本
         updatePageLanguage();
+        
+        // ===== 获取DOM元素 =====
+        const reminderBtn = document.getElementById('reminderBtn');
+        const reminderPopup = document.getElementById('reminderPopup');
+        const popupClose = document.getElementById('popupClose');
+        const enableRemindersBtn = document.getElementById('enableRemindersBtn');
+        const toastClose = document.getElementById('toastClose');
+        const notificationToast = document.getElementById('notificationToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastDetail = document.getElementById('toastDetail');
         
         // ===== 双击/双空格切换深色模式 =====
         let lastTap = 0;
@@ -2458,18 +2462,7 @@ html += '''
         const chartCard = document.getElementById('chartCard');
         const closeChart = document.getElementById('closeChart');
         const downloadToast = document.getElementById('downloadToast');
-        const downloadToastMessage = document.getElementById('downloadToastMessage');
         const statsGrid = document.getElementById('statsGrid');
-        const reminderBtn = document.getElementById('reminderBtn');
-        const reminderPopup = document.getElementById('reminderPopup');
-        const popupClose = document.getElementById('popupClose');
-        const enableRemindersBtn = document.getElementById('enableRemindersBtn');
-        const toastClose = document.getElementById('toastClose');
-        const notificationToast = document.getElementById('notificationToast');
-        const toastMessage = document.getElementById('toastMessage');
-        const toastDetail = document.getElementById('toastDetail');
-        const langToggle = document.getElementById('langToggle');
-        const themeToggle = document.getElementById('themeToggle');
         
         // 统计数据
         const statsData = [
@@ -2490,13 +2483,15 @@ html += f'''        ];
         
         let chart = null;
 
-        // 显示提示
+        // 显示下载提示
         function showToast(message) {{
-            if (!downloadToastMessage || !downloadToast) return;
-            downloadToastMessage.textContent = message;
-            downloadToast.classList.add('show');
+            const toast = document.getElementById('downloadToast');
+            const msgEl = document.getElementById('toastMessage');
+            if (!toast || !msgEl) return;
+            msgEl.textContent = message;
+            toast.classList.add('show');
             setTimeout(() => {{
-                downloadToast.classList.remove('show');
+                toast.classList.remove('show');
             }}, 2000);
         }}
 
@@ -2618,9 +2613,26 @@ html += f'''        ];
         }}
 
         // ===== 绑定事件 =====
+        
+        // 深色模式切换
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {{
+            themeToggle.addEventListener('click', function(e) {{
+                toggleNightMode();
+            }});
+        }}
+
+        // 语言切换
+        const langToggle = document.getElementById('langToggle');
+        if (langToggle) {{
+            langToggle.addEventListener('click', function(e) {{
+                toggleLanguage();
+            }});
+        }}
+
+        // 下载统计按钮
         if (downloadBtn) {{
             downloadBtn.addEventListener('click', function(e) {{
-                e.preventDefault();
                 chartCard.classList.add('show');
                 generateChart();
                 generateStatsGrid();
@@ -2628,20 +2640,21 @@ html += f'''        ];
             }});
         }}
 
+        // 保存图表按钮
         if (saveChartBtn) {{
             saveChartBtn.addEventListener('click', function(e) {{
-                e.preventDefault();
                 saveChartToGallery();
             }});
         }}
 
+        // 关闭图表
         if (closeChart) {{
             closeChart.addEventListener('click', function(e) {{
-                e.preventDefault();
                 chartCard.classList.remove('show');
             }});
         }}
 
+        // 搜索功能
         if (searchInput) {{
             searchInput.addEventListener('input', function(e) {{
                 const searchTerm = e.target.value.toLowerCase().trim();
@@ -2652,19 +2665,19 @@ html += f'''        ];
             }});
         }}
 
-        // 提醒按钮
+        // 提醒按钮点击事件
         if (reminderBtn) {{
             reminderBtn.addEventListener('click', function(e) {{
                 e.preventDefault();
-                reminderPopup.classList.add('show');
+                showReminderPopup();
             }});
         }}
 
-        // 关闭弹窗
+        // 关闭弹窗按钮
         if (popupClose) {{
             popupClose.addEventListener('click', function(e) {{
                 e.preventDefault();
-                reminderPopup.classList.remove('show');
+                closePopup();
             }});
         }}
 
@@ -2683,31 +2696,6 @@ html += f'''        ];
                 notificationToast.classList.remove('show');
             }});
         }}
-
-        // 语言切换
-        if (langToggle) {{
-            langToggle.addEventListener('click', function(e) {{
-                e.preventDefault();
-                toggleLanguage();
-            }});
-        }}
-
-        // 主题切换
-        if (themeToggle) {{
-            themeToggle.addEventListener('click', function(e) {{
-                e.preventDefault();
-                toggleNightMode();
-            }});
-        }}
-
-        // 点击外部关闭弹窗
-        document.addEventListener('click', function(e) {{
-            if (reminderPopup && reminderBtn) {{
-                if (!reminderPopup.contains(e.target) && !reminderBtn.contains(e.target)) {{
-                    reminderPopup.classList.remove('show');
-                }}
-            }}
-        }});
 
         // 监听深色模式变化，更新图表
         const observer = new MutationObserver(() => {{
