@@ -1702,7 +1702,7 @@ document.addEventListener('click', function(e) {
             </div>
             <div class="meta-info">
                 <span>Prefects' Scoreboard · 颜色越浅分数越高</span>
-                <span class="date-badge">03/18 06:51</span>
+                <span class="date-badge">03/18 07:10</span>
             </div>
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
@@ -1749,7 +1749,7 @@ document.addEventListener('click', function(e) {
 
         <!-- 组排名卡片 -->
         <div class="rank-grid">
-
+            
             <div class="rank-card" data-group="夜曜组" onclick="document.getElementById('group-yeyao').scrollIntoView({behavior: 'smooth'})">
                 <span class="rank-icon">🥇</span>
                 <div class="rank-info">
@@ -1778,7 +1778,7 @@ document.addEventListener('click', function(e) {
 
         <!-- 组别详情 -->
         <div class="groups">
-
+            
             <div class="group-card" data-group="星穹组" id="group-xingqiong">
                 <div class="group-header">
                     <div class="group-title-wrapper">
@@ -2395,7 +2395,7 @@ document.addEventListener('click', function(e) {
         
         // 初始化语言
         let currentLang = localStorage.getItem('prefect_lang') || 'zh';
-        document.body.classList.add(`lang-${{currentLang}}`);
+        document.body.classList.add(`lang-${currentLang}`);
         
         // 更新语言按钮
         updateLangButton();
@@ -2484,19 +2484,11 @@ document.addEventListener('click', function(e) {
         const statsGrid = document.getElementById('statsGrid');
         
         // 统计数据
-        const statsData = [
-            { group: "星穹组", total: 57, rank: 2, members: 10, avg: 5, color: "#eab308" },
-            { group: "夜曜组", total: 110, rank: 1, members: 11, avg: 10, color: "#a855f7" },
-            { group: "沧澜组", total: 56, rank: 3, members: 10, avg: 5, color: "#3b82f6" },
-        ];
+        const statsData = [{"group": "星穹组", "total": 57, "rank": 2, "members": 10, "avg": 5, "color": "#eab308"}, {"group": "夜曜组", "total": 110, "rank": 1, "members": 11, "avg": 10, "color": "#a855f7"}, {"group": "沧澜组", "total": 56, "rank": 3, "members": 10, "avg": 5, "color": "#3b82f6"}];
 
         // 组数据
         const groups = ["星穹组", "夜曜组", "沧澜组"];
-        const scores = [
-            statsData.find(s => s.group === "星穹组").total,
-            statsData.find(s => s.group === "夜曜组").total,
-            statsData.find(s => s.group === "沧澜组").total
-        ];
+        const scores = [57, 110, 56];
         const colors = ["#eab308", "#a855f7", "#3b82f6"];
         
         let chart = null;
