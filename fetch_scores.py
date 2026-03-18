@@ -491,6 +491,24 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
+# 准备统计数据（在生成HTML之前定义）
+stats_data = []
+group_list = []
+total_list = []
+
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        stats_data.append({
+            "group": g,
+            "total": int(group_totals[g]),
+            "rank": group_rank[g],
+            "members": len(group_data[g]),
+            "avg": int(group_averages[g]),
+            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
+        })
+        group_list.append(g)
+        total_list.append(int(group_totals[g]))
+
 # 生成HTML - 添加OneSignal通知权限（保持原有三语功能）
 html = '''<!DOCTYPE html>
 <html lang="zh">
@@ -2641,8 +2659,6 @@ html += '''        ];
 # 添加组排名卡片
 rank_icons = {1: "🥇", 2: "🥈", 3: "🥉"}
 group_ids = {"星穹组": "group-xingqiong", "夜曜组": "group-yeyao", "沧澜组": "group-canglan"}
-group_list = []
-total_list = []
 
 rank_cards_html = ""
 for i, (g, total) in enumerate(sorted_groups, 1):
@@ -2659,19 +2675,6 @@ for i, (g, total) in enumerate(sorted_groups, 1):
                 </div>
             </div>
 '''
-
-# 准备统计数据
-stats_data = []
-for g in ["星穹组", "夜曜组", "沧澜组"]:
-    if g in group_data:
-        stats_data.append({
-            "group": g,
-            "total": int(group_totals[g]),
-            "rank": group_rank[g],
-            "members": len(group_data[g]),
-            "avg": int(group_averages[g]),
-            "color": "#eab308" if g == "星穹组" else "#a855f7" if g == "夜曜组" else "#3b82f6"
-        })
 
 # 添加组别详情
 group_emojis = {"星穹组": "✨", "夜曜组": "🌙", "沧澜组": "🌊"}
@@ -2768,7 +2771,7 @@ html = html.replace('<!-- 组排名卡片区域 -->', rank_cards_html)
 html = html.replace('<!-- 组别详情区域 -->', groups_html)
 
 # 替换JavaScript中的数据
-html = html.replace('const groups = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'const groups = {json.dumps(group_list)};')
+html = html.replace('const groups = ["星穹组", "夜曜组", "沧澜组"];', f'const groups = {json.dumps(group_list)};')
 html = html.replace('const scores = [\'星穹组\', \'夜曜组\', \'沧澜组\'];', f'const scores = {json.dumps(total_list)};')
 
 # 替换日期
