@@ -509,7 +509,7 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
         group_list.append(g)
         total_list.append(int(group_totals[g]))
 
-# 生成HTML - 整合通知功能
+# 生成HTML - 整合通知功能（修复按钮点击问题）
 html = '''<!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -593,6 +593,65 @@ OneSignalDeferred.push(async function(OneSignal) {{
     }});
     console.log('OneSignal 初始化成功');
 }});
+
+// 显示网页内提醒
+function showNotification(title, message) {{
+    const toast = document.getElementById('notificationToast');
+    if (!toast) return;
+    
+    const titleEl = document.getElementById('toastMessage');
+    const detailEl = document.getElementById('toastDetail');
+    
+    if (titleEl) titleEl.textContent = title;
+    if (detailEl) detailEl.textContent = message;
+    toast.classList.add('show');
+    
+    setTimeout(() => {{
+        toast.classList.remove('show');
+    }}, 3000);
+}}
+
+// ===== 通知功能 =====
+async function enableReminders() {{
+    OneSignalDeferred.push(async function(OneSignal) {{
+        // 1. 检查浏览器是否支持
+        if (!OneSignal.Notifications.isPushSupported()) {{
+            showNotification(t('app.toast.not_supported'), t('app.toast.not_supported_detail'));
+            return;
+        }}
+
+        // 2. 弹出系统原生权限请求
+        try {{
+            await OneSignal.Notifications.requestPermission();
+            
+            // 3. 检查是否成功获取权限
+            if (OneSignal.Notifications.permission) {{
+                showNotification(t('app.toast.permission_granted'), t('app.toast.permission_granted_detail'));
+                
+                // 可以在这里给用户打标签，方便后台定向推送
+                OneSignal.User.addTag("role", "prefect"); 
+                
+                closePopup();
+            }} else {{
+                showNotification(t('app.toast.permission_denied'), t('app.toast.permission_denied_detail'));
+            }}
+        }} catch (err) {{
+            console.error("Permission error:", err);
+        }}
+    }});
+}}
+
+// 显示提醒弹窗
+function showReminderPopup() {{
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.add('show');
+}}
+
+// 关闭弹窗
+function closePopup() {{
+    const popup = document.getElementById('reminderPopup');
+    if (popup) popup.classList.remove('show');
+}}
 
 // 更新页面所有文本
 function updatePageLanguage() {{
@@ -835,67 +894,6 @@ function toggleLanguage() {{
         const langNames = {{ zh: '中文', en: 'English', ms: 'Bahasa Melayu' }};
         showNotification('🌐', `已切换到 ${{langNames[newLang]}}`);
     }}, 150);
-}}
-
-// 显示网页内提醒
-function showNotification(title, message) {{
-    const toast = document.getElementById('notificationToast');
-    if (!toast) return;
-    
-    const titleEl = document.getElementById('toastMessage');
-    const detailEl = document.getElementById('toastDetail');
-    
-    if (titleEl) titleEl.textContent = title;
-    if (detailEl) detailEl.textContent = message;
-    toast.classList.add('show');
-    
-    setTimeout(() => {{
-        toast.classList.remove('show');
-    }}, 3000);
-}}
-
-// ===== 通知功能 =====
-
-// 强化激活函数
-async function enableReminders() {{
-    OneSignalDeferred.push(async function(OneSignal) {{
-        // 1. 检查浏览器是否支持
-        if (!OneSignal.Notifications.isPushSupported()) {{
-            showNotification(t('app.toast.not_supported'), t('app.toast.not_supported_detail'));
-            return;
-        }}
-
-        // 2. 弹出系统原生权限请求
-        try {{
-            await OneSignal.Notifications.requestPermission();
-            
-            // 3. 检查是否成功获取权限
-            if (OneSignal.Notifications.permission) {{
-                showNotification(t('app.toast.permission_granted'), t('app.toast.permission_granted_detail'));
-                
-                // 可以在这里给用户打标签，方便后台定向推送
-                OneSignal.User.addTag("role", "prefect"); 
-                
-                closePopup();
-            }} else {{
-                showNotification(t('app.toast.permission_denied'), t('app.toast.permission_denied_detail'));
-            }}
-        }} catch (err) {{
-            console.error("Permission error:", err);
-        }}
-    }});
-}}
-
-// 显示提醒弹窗
-function showReminderPopup() {{
-    const popup = document.getElementById('reminderPopup');
-    if (popup) popup.classList.add('show');
-}}
-
-// 关闭弹窗
-function closePopup() {{
-    const popup = document.getElementById('reminderPopup');
-    if (popup) popup.classList.remove('show');
 }}
 
 // 点击外部关闭弹窗
@@ -2360,112 +2358,45 @@ html += '''
     </div>
 
     <script>
-        // 检查系统主题偏好
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.body.classList.add('night-mode');
-        }
-        
-        // 初始化语言
-        let currentLang = localStorage.getItem('prefect_lang') || 'zh';
-        document.body.classList.add(`lang-${{currentLang}}`);
-        
-        // 更新语言按钮
-        updateLangButton();
-        
-        // 初始化页面文本
-        updatePageLanguage();
-        
-        // ===== 获取DOM元素 =====
-        const reminderBtn = document.getElementById('reminderBtn');
-        const reminderPopup = document.getElementById('reminderPopup');
-        const popupClose = document.getElementById('popupClose');
-        const enableRemindersBtn = document.getElementById('enableRemindersBtn');
-        const toastClose = document.getElementById('toastClose');
-        const notificationToast = document.getElementById('notificationToast');
-        const toastMessage = document.getElementById('toastMessage');
-        const toastDetail = document.getElementById('toastDetail');
-        
-        // ===== 双击/双空格切换深色模式 =====
-        let lastTap = 0;
-        let lastSpaceTime = 0;
-        let spaceCount = 0;
-        let hintTimeout;
-
-        const doubleTapHint = document.getElementById('doubleTapHint');
-        const hintText = document.getElementById('hintText');
-
-        // 显示提示
-        function showHint(message) {
-            if (!hintText || !doubleTapHint) return;
-            hintText.textContent = message;
-            doubleTapHint.classList.add('show');
+        // 等待DOM加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查系统主题偏好
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.body.classList.add('night-mode');
+            }
             
-            clearTimeout(hintTimeout);
-            hintTimeout = setTimeout(() => {
-                doubleTapHint.classList.remove('show');
-            }, 1500);
-        }
-
-        // 切换深色模式
-        function toggleNightMode() {
-            document.body.classList.toggle('night-mode');
-            // 更新图表颜色
-            if (window.chart && document.getElementById('chartCard')?.classList.contains('show')) {
-                generateChart();
-            }
-        }
-
-        // 监听双击（手机）
-        document.addEventListener('touchstart', (e) => {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - lastTap;
+            // 初始化语言
+            let currentLang = localStorage.getItem('prefect_lang') || 'zh';
+            document.body.classList.add(`lang-${{currentLang}}`);
             
-            if (tapLength < 200 && tapLength > 0) {
-                // 双击
-                toggleNightMode();
-                const isNight = document.body.classList.contains('night-mode');
-                showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
-                e.preventDefault();
-            }
-            lastTap = currentTime;
-        });
-
-        // 监听双空格（电脑）
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                e.preventDefault(); // 防止页面滚动
-                
-                const currentTime = new Date().getTime();
-                
-                if (currentTime - lastSpaceTime < 500) {
-                    // 两次空格间隔小于500ms
-                    spaceCount++;
-                    if (spaceCount === 2) {
-                        // 双空格
-                        toggleNightMode();
-                        const isNight = document.body.classList.contains('night-mode');
-                        showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
-                        spaceCount = 0;
-                    }
-                } else {
-                    spaceCount = 1;
-                }
-                
-                lastSpaceTime = currentTime;
-            }
-        });
-
-        const searchInput = document.getElementById('search');
-        const allRows = document.querySelectorAll('tbody tr');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const saveChartBtn = document.getElementById('saveChartBtn');
-        const chartCard = document.getElementById('chartCard');
-        const closeChart = document.getElementById('closeChart');
-        const downloadToast = document.getElementById('downloadToast');
-        const statsGrid = document.getElementById('statsGrid');
-        
-        // 统计数据
-        const statsData = [
+            // 更新语言按钮
+            updateLangButton();
+            
+            // 初始化页面文本
+            updatePageLanguage();
+            
+            // ===== 获取DOM元素 =====
+            const reminderBtn = document.getElementById('reminderBtn');
+            const reminderPopup = document.getElementById('reminderPopup');
+            const popupClose = document.getElementById('popupClose');
+            const enableRemindersBtn = document.getElementById('enableRemindersBtn');
+            const toastClose = document.getElementById('toastClose');
+            const notificationToast = document.getElementById('notificationToast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastDetail = document.getElementById('toastDetail');
+            const searchInput = document.getElementById('search');
+            const allRows = document.querySelectorAll('tbody tr');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const saveChartBtn = document.getElementById('saveChartBtn');
+            const chartCard = document.getElementById('chartCard');
+            const closeChart = document.getElementById('closeChart');
+            const downloadToast = document.getElementById('downloadToast');
+            const statsGrid = document.getElementById('statsGrid');
+            const themeToggle = document.getElementById('themeToggle');
+            const langToggle = document.getElementById('langToggle');
+            
+            // 统计数据
+            const statsData = [
 '''
 
 # 按固定顺序输出统计图数据
@@ -2476,235 +2407,300 @@ for g in ["星穹组", "夜曜组", "沧澜组"]:
 
 html += f'''        ];
 
-        // 组数据
-        const groups = {json.dumps(group_list)};
-        const scores = {json.dumps(total_list)};
-        const colors = ["#eab308", "#a855f7", "#3b82f6"];
-        
-        let chart = null;
-
-        // 显示下载提示
-        function showToast(message) {{
-            const toast = document.getElementById('downloadToast');
-            const msgEl = document.getElementById('toastMessage');
-            if (!toast || !msgEl) return;
-            msgEl.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {{
-                toast.classList.remove('show');
-            }}, 2000);
-        }}
-
-        // 生成统计图
-        function generateChart() {{
-            const canvas = document.getElementById('groupChart');
-            if (!canvas) return;
+            // 组数据
+            const groups = {json.dumps(group_list)};
+            const scores = {json.dumps(total_list)};
+            const colors = ["#eab308", "#a855f7", "#3b82f6"];
             
-            const ctx = canvas.getContext('2d');
-            const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
-            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
-            
-            if (chart) {{
-                chart.destroy();
+            let chart = null;
+
+            // 显示下载提示
+            function showToast(message) {{
+                const toast = document.getElementById('downloadToast');
+                const msgEl = document.getElementById('toastMessage');
+                if (!toast || !msgEl) return;
+                msgEl.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {{
+                    toast.classList.remove('show');
+                }}, 2000);
             }}
-            
-            chart = new Chart(ctx, {{
-                type: 'bar',
-                data: {{
-                    labels: groups.map(g => {{
-                        if (g === "星穹组") return t('app.groups.xingqiong');
-                        if (g === "夜曜组") return t('app.groups.yeyao');
-                        return t('app.groups.canglan');
-                    }}),
-                    datasets: [{{
-                        label: t('app.chart.total'),
-                        data: scores,
-                        backgroundColor: colors,
-                        borderRadius: 6,
-                        barPercentage: 0.6
-                    }}]
-                }},
-                options: {{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {{
-                        legend: {{ display: false }},
-                        tooltip: {{
-                            callbacks: {{
-                                label: function(context) {{
-                                    const value = context.raw;
-                                    const group = groups[context.dataIndex];
-                                    const stat = statsData.find(s => s.group === group);
-                                    return [
-                                        `${{t('app.chart.total')}}: ${{value}}`,
-                                        `${{t('app.chart.rank', {{rank: stat.rank}})}}`,
-                                        `${{t('app.chart.members', {{count: stat.members}})}}`,
-                                        `${{t('app.chart.average', {{avg: stat.avg}})}}`
-                                    ];
+
+            // 生成统计图
+            function generateChart() {{
+                const canvas = document.getElementById('groupChart');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                const isNightMode = document.body.classList.contains('night-mode');
+                const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
+                const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
+                
+                if (chart) {{
+                    chart.destroy();
+                }}
+                
+                chart = new Chart(ctx, {{
+                    type: 'bar',
+                    data: {{
+                        labels: groups.map(g => {{
+                            if (g === "星穹组") return t('app.groups.xingqiong');
+                            if (g === "夜曜组") return t('app.groups.yeyao');
+                            return t('app.groups.canglan');
+                        }}),
+                        datasets: [{{
+                            label: t('app.chart.total'),
+                            data: scores,
+                            backgroundColor: colors,
+                            borderRadius: 6,
+                            barPercentage: 0.6
+                        }}]
+                    }},
+                    options: {{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {{
+                            legend: {{ display: false }},
+                            tooltip: {{
+                                callbacks: {{
+                                    label: function(context) {{
+                                        const value = context.raw;
+                                        const group = groups[context.dataIndex];
+                                        const stat = statsData.find(s => s.group === group);
+                                        return [
+                                            `${{t('app.chart.total')}}: ${{value}}`,
+                                            `${{t('app.chart.rank', {{rank: stat.rank}})}}`,
+                                            `${{t('app.chart.members', {{count: stat.members}})}}`,
+                                            `${{t('app.chart.average', {{avg: stat.avg}})}}`
+                                        ];
+                                    }}
                                 }}
                             }}
-                        }}
-                    }},
-                    scales: {{
-                        y: {{
-                            beginAtZero: true,
-                            grid: {{ color: gridColor }},
-                            ticks: {{ color: textColor }}
                         }},
-                        x: {{
-                            grid: {{ display: false }},
-                            ticks: {{ color: textColor }}
+                        scales: {{
+                            y: {{
+                                beginAtZero: true,
+                                grid: {{ color: gridColor }},
+                                ticks: {{ color: textColor }}
+                            }},
+                            x: {{
+                                grid: {{ display: false }},
+                                ticks: {{ color: textColor }}
+                            }}
                         }}
                     }}
-                }}
-            }});
-        }}
+                }});
+            }}
 
-        // 生成统计卡片
-        function generateStatsGrid() {{
-            if (!statsGrid) return;
-            let html = '';
-            statsData.forEach(stat => {{
-                html += `
-                    <div class="stat-item">
-                        <div class="stat-label">${{t(`app.groups.${{stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}}`)}}</div>
-                        <div class="stat-value">${{stat.total}}</div>
-                        <div class="stat-rank">${{t('app.chart.rank', {{rank: stat.rank}})}} · ${{t('app.chart.members', {{count: stat.members}})}}</div>
-                    </div>
-                `;
-            }});
-            statsGrid.innerHTML = html;
-        }}
+            // 生成统计卡片
+            function generateStatsGrid() {{
+                if (!statsGrid) return;
+                let html = '';
+                statsData.forEach(stat => {{
+                    html += `
+                        <div class="stat-item">
+                            <div class="stat-label">${{t(`app.groups.${{stat.group === '星穹组' ? 'xingqiong' : stat.group === '夜曜组' ? 'yeyao' : 'canglan'}}`)}}</div>
+                            <div class="stat-value">${{stat.total}}</div>
+                            <div class="stat-rank">${{t('app.chart.rank', {{rank: stat.rank}})}} · ${{t('app.chart.members', {{count: stat.members}})}}</div>
+                        </div>
+                    `;
+                }});
+                statsGrid.innerHTML = html;
+            }}
 
-        // 保存统计图到相册
-        async function saveChartToGallery() {{
-            const chartCard = document.getElementById('chartCard');
-            if (!chartCard) return;
-            
-            try {{
-                showToast(t('app.toast.generating'));
+            // 保存统计图到相册
+            async function saveChartToGallery() {{
+                const chartCard = document.getElementById('chartCard');
+                if (!chartCard) return;
                 
-                if (!chart) {{
+                try {{
+                    showToast(t('app.toast.generating'));
+                    
+                    if (!chart) {{
+                        generateChart();
+                    }}
+                    
+                    setTimeout(async () => {{
+                        const canvas = await html2canvas(chartCard, {{
+                            scale: 2,
+                            backgroundColor: getComputedStyle(document.body).backgroundColor,
+                            allowTaint: false,
+                            useCORS: true,
+                            logging: false
+                        }});
+                        
+                        const link = document.createElement('a');
+                        link.download = `prefects_score_${{new Date().toISOString().slice(0,10)}}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        
+                        showToast(t('app.toast.saved'));
+                    }}, 500);
+                    
+                }} catch (error) {{
+                    console.error('保存失败:', error);
+                    showToast(t('app.toast.saveFailed'));
+                }}
+            }}
+
+            // ===== 双击/双空格切换深色模式 =====
+            let lastTap = 0;
+            let lastSpaceTime = 0;
+            let spaceCount = 0;
+            let hintTimeout;
+
+            const doubleTapHint = document.getElementById('doubleTapHint');
+            const hintText = document.getElementById('hintText');
+
+            // 显示提示
+            function showHint(message) {{
+                if (!hintText || !doubleTapHint) return;
+                hintText.textContent = message;
+                doubleTapHint.classList.add('show');
+                
+                clearTimeout(hintTimeout);
+                hintTimeout = setTimeout(() => {{
+                    doubleTapHint.classList.remove('show');
+                }}, 1500);
+            }}
+
+            // 切换深色模式
+            function toggleNightMode() {{
+                document.body.classList.toggle('night-mode');
+                if (chart && chartCard?.classList.contains('show')) {{
                     generateChart();
                 }}
-                
-                setTimeout(async () => {{
-                    const canvas = await html2canvas(chartCard, {{
-                        scale: 2,
-                        backgroundColor: getComputedStyle(document.body).backgroundColor,
-                        allowTaint: false,
-                        useCORS: true,
-                        logging: false
-                    }});
-                    
-                    const link = document.createElement('a');
-                    link.download = `prefects_score_${{new Date().toISOString().slice(0,10)}}.png`;
-                    link.href = canvas.toDataURL('image/png');
-                    link.click();
-                    
-                    showToast(t('app.toast.saved'));
-                }}, 500);
-                
-            }} catch (error) {{
-                console.error('保存失败:', error);
-                showToast(t('app.toast.saveFailed'));
             }}
-        }}
 
-        // ===== 绑定事件 =====
-        
-        // 深色模式切换
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {{
-            themeToggle.addEventListener('click', function(e) {{
-                toggleNightMode();
+            // 监听双击（手机）
+            document.addEventListener('touchstart', (e) => {{
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                
+                if (tapLength < 200 && tapLength > 0) {{
+                    toggleNightMode();
+                    const isNight = document.body.classList.contains('night-mode');
+                    showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
+                    e.preventDefault();
+                }}
+                lastTap = currentTime;
             }});
-        }}
 
-        // 语言切换
-        const langToggle = document.getElementById('langToggle');
-        if (langToggle) {{
-            langToggle.addEventListener('click', function(e) {{
-                toggleLanguage();
+            // 监听双空格（电脑）
+            document.addEventListener('keydown', (e) => {{
+                if (e.code === 'Space') {{
+                    e.preventDefault();
+                    
+                    const currentTime = new Date().getTime();
+                    
+                    if (currentTime - lastSpaceTime < 500) {{
+                        spaceCount++;
+                        if (spaceCount === 2) {{
+                            toggleNightMode();
+                            const isNight = document.body.classList.contains('night-mode');
+                            showHint(isNight ? '🌙 深色模式' : '☀️ 日间模式');
+                            spaceCount = 0;
+                        }}
+                    }} else {{
+                        spaceCount = 1;
+                    }}
+                    
+                    lastSpaceTime = currentTime;
+                }}
             }});
-        }}
 
-        // 下载统计按钮
-        if (downloadBtn) {{
-            downloadBtn.addEventListener('click', function(e) {{
-                chartCard.classList.add('show');
-                generateChart();
-                generateStatsGrid();
-                showToast(t('app.toast.chartGenerated'));
-            }});
-        }}
-
-        // 保存图表按钮
-        if (saveChartBtn) {{
-            saveChartBtn.addEventListener('click', function(e) {{
-                saveChartToGallery();
-            }});
-        }}
-
-        // 关闭图表
-        if (closeChart) {{
-            closeChart.addEventListener('click', function(e) {{
-                chartCard.classList.remove('show');
-            }});
-        }}
-
-        // 搜索功能
-        if (searchInput) {{
-            searchInput.addEventListener('input', function(e) {{
-                const searchTerm = e.target.value.toLowerCase().trim();
-                allRows.forEach(row => {{
-                    const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
-                    row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+            // ===== 绑定事件 =====
+            
+            // 深色模式切换
+            if (themeToggle) {{
+                themeToggle.addEventListener('click', function(e) {{
+                    toggleNightMode();
                 }});
-            }});
-        }}
-
-        // 提醒按钮点击事件
-        if (reminderBtn) {{
-            reminderBtn.addEventListener('click', function(e) {{
-                e.preventDefault();
-                showReminderPopup();
-            }});
-        }}
-
-        // 关闭弹窗按钮
-        if (popupClose) {{
-            popupClose.addEventListener('click', function(e) {{
-                e.preventDefault();
-                closePopup();
-            }});
-        }}
-
-        // 开启提醒按钮
-        if (enableRemindersBtn) {{
-            enableRemindersBtn.addEventListener('click', function(e) {{
-                e.preventDefault();
-                enableReminders();
-            }});
-        }}
-
-        // 关闭提示浮层
-        if (toastClose) {{
-            toastClose.addEventListener('click', function(e) {{
-                e.preventDefault();
-                notificationToast.classList.remove('show');
-            }});
-        }}
-
-        // 监听深色模式变化，更新图表
-        const observer = new MutationObserver(() => {{
-            if (chart && chartCard?.classList.contains('show')) {{
-                generateChart();
             }}
-        }});
-        
-        observer.observe(document.body, {{ attributes: true, attributeFilter: ['class'] }});
+
+            // 语言切换
+            if (langToggle) {{
+                langToggle.addEventListener('click', function(e) {{
+                    toggleLanguage();
+                }});
+            }}
+
+            // 下载统计按钮
+            if (downloadBtn) {{
+                downloadBtn.addEventListener('click', function(e) {{
+                    chartCard.classList.add('show');
+                    generateChart();
+                    generateStatsGrid();
+                    showToast(t('app.toast.chartGenerated'));
+                }});
+            }}
+
+            // 保存图表按钮
+            if (saveChartBtn) {{
+                saveChartBtn.addEventListener('click', function(e) {{
+                    saveChartToGallery();
+                }});
+            }}
+
+            // 关闭图表
+            if (closeChart) {{
+                closeChart.addEventListener('click', function(e) {{
+                    chartCard.classList.remove('show');
+                }});
+            }}
+
+            // 搜索功能
+            if (searchInput) {{
+                searchInput.addEventListener('input', function(e) {{
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    allRows.forEach(row => {{
+                        const searchText = row.getAttribute('data-search')?.toLowerCase() || '';
+                        row.style.display = searchText.includes(searchTerm) ? '' : 'none';
+                    }});
+                }});
+            }}
+
+            // 提醒按钮点击事件
+            if (reminderBtn) {{
+                reminderBtn.addEventListener('click', function(e) {{
+                    e.preventDefault();
+                    showReminderPopup();
+                }});
+            }}
+
+            // 关闭弹窗按钮
+            if (popupClose) {{
+                popupClose.addEventListener('click', function(e) {{
+                    e.preventDefault();
+                    closePopup();
+                }});
+            }}
+
+            // 开启提醒按钮
+            if (enableRemindersBtn) {{
+                enableRemindersBtn.addEventListener('click', function(e) {{
+                    e.preventDefault();
+                    enableReminders();
+                }});
+            }}
+
+            // 关闭提示浮层
+            if (toastClose) {{
+                toastClose.addEventListener('click', function(e) {{
+                    e.preventDefault();
+                    notificationToast.classList.remove('show');
+                }});
+            }}
+
+            // 监听深色模式变化，更新图表
+            const observer = new MutationObserver(() => {{
+                if (chart && chartCard?.classList.contains('show')) {{
+                    generateChart();
+                }}
+            }});
+            
+            observer.observe(document.body, {{ attributes: true, attributeFilter: ['class'] }});
+        });
     </script>
 </body>
 </html>'''
