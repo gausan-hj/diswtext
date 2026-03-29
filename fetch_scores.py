@@ -35,6 +35,45 @@ cca_data = [
 
 cca_json = json.dumps(cca_data, ensure_ascii=False)
 
+# 生成 manifest.json
+manifest = {
+    "name": "学长团分数板",
+    "short_name": "分数板",
+    "description": "Prefects' Scoreboard",
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#eab308",
+    "background_color": "#f5f7fc",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23eab308'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='white'%3E📚%3C/text%3E%3C/svg%3E",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}
+
+with open("manifest.json", "w", encoding="utf-8") as f:
+    json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+# 生成 sw.js
+sw_content = '''// Service Worker
+const CACHE_NAME = 'prefects-v1';
+
+self.addEventListener('install', event => {
+    console.log('Service Worker 安装成功');
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(fetch(event.request));
+});
+'''
+
+with open("sw.js", "w", encoding="utf-8") as f:
+    f.write(sw_content)
+
+print("✅ PWA 文件已生成：manifest.json 和 sw.js")
+
 # ===== 加载语言文件 =====
 print(f"正在加载语言文件: {LANGUAGES_JSON_PATH}")
 try:
