@@ -480,6 +480,8 @@ html = '''<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 - 学长团分数板</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#eab308">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
@@ -1511,6 +1513,7 @@ html = '''<!DOCTYPE html>
             font-weight: 600;
         }
 
+
         .reminder-btn {
             position: fixed;
             bottom: 20px;
@@ -1719,19 +1722,20 @@ html = '''<!DOCTYPE html>
                     <h1>学长团分数板 · 热力图</h1>
                 </div>
                 <div class="action-buttons">
-                    <button class="download-btn" id="downloadBtn">
-                        <span>📊</span>
-                        <span>下载统计</span>
-                    </button>
-                    <div class="lang-toggle" id="langToggle">
-                        <span class="lang-left">中</span>
-                        <span class="lang-separator">/</span>
-                        <span class="lang-right">EN</span>
-                    </div>
-                    <div class="theme-toggle" id="themeToggle">
-                        <span class="moon-icon">🌓</span>
-                        <span>深色</span>
-                    </div>
+    <button class="download-btn" id="downloadBtn">
+        <span>📊</span>
+        <span>生成统计图</span>
+    </button>
+    <div class="lang-toggle" id="langToggle">
+        <span class="lang-left">中</span>
+        <span class="lang-separator">/</span>
+        <span class="lang-right">EN</span>
+    </div>
+    <div class="theme-toggle" id="themeToggle">
+        <span class="moon-icon">🌓</span>
+        <span>深色</span>
+    </div>
+</div>
                 </div>
             </div>
             <div class="meta-info">
@@ -1897,7 +1901,7 @@ html = '''<!DOCTYPE html>
 window.OneSignalDeferred = window.OneSignalDeferred || [];
 OneSignalDeferred.push(async function(OneSignal) {
     await OneSignal.init({
-        appId: "137d66ce-9746-4206-9861-a1c368a0b548", // 确保这是你在 OneSignal 面板申请的 ID
+        appId: "9d36f74b-0815-4845-aeee-bf68f48e64d4", // 确保这是你在 OneSignal 面板申请的 ID
         allowLocalhostAsSecureOrigin: true,
         notifyButton: {
             enable: false, // 用我们自己的 bell-icon 按钮触发，关掉自带的
@@ -2007,77 +2011,7 @@ async function enableReminders() {
         }
 
         // 生成统计图
-        function generateChart() {
-            const canvas = document.getElementById('groupChart');
-            if (!canvas) return;
-            
-            const ctx = canvas.getContext('2d');
-            const isNightMode = document.body.classList.contains('night-mode');
-            const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
-            const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
-            
-            // 数据 - 会被Python替换
-            const groups = ['星穹组', '夜曜组', '沧澜组'];
-            const scores = [1234, 1156, 1089];
-            const colors = ['#eab308', '#a855f7', '#3b82f6'];
-            
-            if (window.chart) {
-                window.chart.destroy();
-            }
-            
-            window.chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: groups,
-                    datasets: [{
-                        label: '总分',
-                        data: scores,
-                        backgroundColor: colors,
-                        borderRadius: 6,
-                        barPercentage: 0.6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.raw;
-                                    return `总分: ${value}`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: gridColor },
-                            ticks: { color: textColor }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: textColor }
-                        }
-                    }
-                }
-            });
-            
-            // 更新统计卡片
-            const statsGrid = document.getElementById('statsGrid');
-            if (statsGrid) {
-                statsGrid.innerHTML = groups.map((g, i) => `
-                    <div class="stat-item">
-                        <div class="stat-label">${g}</div>
-                        <div class="stat-value">${scores[i]}</div>
-                        <div class="stat-rank">第${i+1}名 · 10人</div>
-                    </div>
-                `).join('');
-            }
-        }
-
+        
         // 保存图表
         async function saveChartToGallery() {
             const chartCard = document.getElementById('chartCard');
@@ -2148,7 +2082,104 @@ async function enableReminders() {
                     showNotification('🌐', `已切换到 ${body.classList.contains('lang-zh') ? '中文' : body.classList.contains('lang-en') ? 'English' : 'Bahasa Melayu'}`);
                 });
             }
+// ========== 统计图表相关函数 ==========
+function generateChart() {
+    const canvas = document.getElementById('groupChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    const isNightMode = document.body.classList.contains('night-mode');
+    const textColor = isNightMode ? '#94a3b8' : '#5a6b7a';
+    const gridColor = isNightMode ? '#2d3a4d' : '#e1e8f0';
+    
+    // 从全局获取数据
+    const groups = window.chartGroups || ['星穹组', '夜曜组', '沧澜组'];
+    const scores = window.chartScores || [0, 0, 0];
+    
+    // 颜色固定映射
+    const groupColorMap = {
+        '星穹组': '#eab308',
+        '夜曜组': '#a855f7',
+        '沧澜组': '#3b82f6'
+    };
+    
+    // 根据组别生成颜色数组
+    const colors = groups.map(g => groupColorMap[g] || '#888888');
+    
+    if (window.chart) {
+        window.chart.destroy();
+    }
+    
+    window.chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: groups,
+            datasets: [{
+                label: '总分',
+                data: scores,
+                backgroundColor: colors,
+                borderRadius: 6,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `总分: ${context.raw}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: gridColor },
+                    ticks: { color: textColor }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textColor }
+                }
+            }
+        }
+    });
+    
+    // 更新统计卡片
+    updateStatsGrid(groups, scores);
+}
 
+function updateStatsGrid(groups, scores) {
+    const statsGrid = document.getElementById('statsGrid');
+    if (!statsGrid) return;
+    
+    // 从全局获取组别数据
+    const groupData = window.groupStatsData || {};
+    
+    statsGrid.innerHTML = groups.map((g, i) => {
+        const data = groupData[g];
+        const membersCount = data ? data.members : '?';
+        const rank = data ? data.rank : (i + 1);
+        return `
+            <div class="stat-item">
+                <div class="stat-label">${g}</div>
+                <div class="stat-value">${scores[i]}</div>
+                <div class="stat-rank">第${rank}名 · ${membersCount}人</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// 初始化图表数据
+function initChartData(groupsList, scoresList, statsData) {
+    window.chartGroups = groupsList;
+    window.chartScores = scoresList;
+    window.groupStatsData = statsData;
+}
             // 下载统计按钮
             const downloadBtn = document.getElementById('downloadBtn');
             const chartCard = document.getElementById('chartCard');
@@ -2191,13 +2222,13 @@ async function enableReminders() {
                 });
             }
 
-            // 提醒按钮
-            const reminderBtn = document.getElementById('reminderBtn');
-            if (reminderBtn) {
-                reminderBtn.addEventListener('click', function(e) {
-                    showReminderPopup();
-                });
-            }
+            // 底部悬浮按钮
+const reminderBtn = document.getElementById('reminderBtn');
+if (reminderBtn) {
+    reminderBtn.addEventListener('click', function(e) {
+        showReminderPopup();
+    });
+}
 
             // 点击外部关闭弹窗
             document.addEventListener('click', function(e) {
@@ -2251,6 +2282,14 @@ async function enableReminders() {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
+    </script>
+        </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(() => {
+            console.log('Service Worker 注册成功');
+        });
+    }
     </script>
 </body>
 </html>'''
@@ -2395,11 +2434,112 @@ html = html.replace('const scores = [1234, 1156, 1089];', f'const scores = {json
 # 替换日期
 html = html.replace('{datetime.now().strftime(\'%m/%d %H:%M\')}', datetime.now().strftime('%m/%d %H:%M'))
 
+# ===== 准备图表数据 =====
+# 按排名顺序的组别和分数
+sorted_groups_data = []
+for g, total in sorted_groups:
+    sorted_groups_data.append({
+        "name": g,
+        "score": int(total),
+        "members": len(group_data[g]),
+        "rank": group_rank[g],
+        "avg": int(group_averages[g])
+    })
+
+# 准备注入的数据
+chart_groups = [item["name"] for item in sorted_groups_data]
+chart_scores = [item["score"] for item in sorted_groups_data]
+
+# 准备组别统计数据
+group_stats_data = {}
+for g in ["星穹组", "夜曜组", "沧澜组"]:
+    if g in group_data:
+        group_stats_data[g] = {
+            "members": len(group_data[g]),
+            "total": int(group_totals[g]),
+            "avg": int(group_averages[g]),
+            "rank": group_rank[g]
+        }
+
+# 生成注入脚本
+init_script = f'''
+<script>
+// 图表数据初始化
+window.chartGroups = {json.dumps(chart_groups, ensure_ascii=False)};
+window.chartScores = {json.dumps(chart_scores, ensure_ascii=False)};
+window.groupStatsData = {json.dumps(group_stats_data, ensure_ascii=False)};
+
+// 颜色映射
+window.groupColorMap = {{
+    '星穹组': '#eab308',
+    '夜曜组': '#a855f7',
+    '沧澜组': '#3b82f6'
+}};
+
+// 页面加载后自动生成图表（如果图表卡片已显示）
+document.addEventListener('DOMContentLoaded', function() {{
+    const chartCard = document.getElementById('chartCard');
+    if (chartCard && chartCard.classList.contains('show')) {{
+        generateChart();
+    }}
+}});
+</script>
+'''
+
+# 在 </body> 之前注入
+html = html.replace('</body>', init_script + '\n</body>')
+
 # 保存HTML文件
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
 
+# ===== 生成 PWA 文件 =====
+
+# 1. 生成 manifest.json（带纯色图标，不需要额外图片）
+manifest = {
+    "name": "学长团分数板",
+    "short_name": "分数板",
+    "description": "Prefects' Scoreboard",
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#eab308",
+    "background_color": "#f5f7fc",
+    "icons": [
+    {
+        "src": "icon-192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+    },
+    {
+        "src": "icon-512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+    }
+]
+}
+
+with open("manifest.json", "w", encoding="utf-8") as f:
+    json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+# 2. 生成 sw.js (Service Worker)
+sw_content = '''// Service Worker - 让网页可以像 App 一样使用
+const CACHE_NAME = 'prefects-v1';
+
+self.addEventListener('install', event => {
+    console.log('Service Worker 安装成功');
+});
+
+self.addEventListener('fetch', event => {
+    event.respondWith(fetch(event.request));
+});
+'''
+
+with open("sw.js", "w", encoding="utf-8") as f:
+    f.write(sw_content)
+
 print(f"\n✅ 生成成功！共 {len(people)} 人")
+print("📱 PWA 文件已生成：manifest.json 和 sw.js")
+print("💡 提示：用手机 Chrome 打开 index.html，底部会提示'添加到主屏幕'")
 print("\n📊 奖励统计:")
 for g in ["星穹组", "夜曜组", "沧澜组"]:
     if g in group_data:
