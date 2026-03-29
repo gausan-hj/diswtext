@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 获取完整历史
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -36,8 +36,10 @@ jobs:
           # 先拉取最新更改
           git pull --rebase origin main || true
           
-          # 添加并提交
-          git add index.html
+          # 添加所有生成的文件
+          git add index.html manifest.json sw.js
+          
+          # 检查是否有变化
           if git diff --quiet && git diff --staged --quiet; then
             echo "没有变化，无需提交"
           else
