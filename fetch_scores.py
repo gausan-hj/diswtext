@@ -2491,30 +2491,24 @@ html = html.replace('</body>', init_script + '\n</body>')
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
 
-# ===== 生成 PWA 文件 =====
-import json
-
 # 1. 生成 manifest.json
 manifest = {
     "name": "学长团分数板",
     "short_name": "分数板",
-    "description": "Prefects' Scoreboard - 学长团分数管理系统",
+    "description": "Prefects' Scoreboard",
     "start_url": ".",
     "display": "standalone",
     "theme_color": "#eab308",
     "background_color": "#f5f7fc",
     "icons": [
         {
-            "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23eab308'/%3E%3Ctext x='50' y='70' font-size='50' text-anchor='middle' fill='white'%3E🏫%3C/text%3E%3C/svg%3E",
-            "sizes": "any",
-            "type": "image/svg+xml",
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
             "purpose": "any maskable"
         }
     ]
 }
-
-with open("manifest.json", "w", encoding="utf-8") as f:
-    json.dump(manifest, f, ensure_ascii=False, indent=2)
 
 # 2. 生成 sw.js (Service Worker)
 sw_content = '''// Service Worker - 让网页可以像 App 一样使用
