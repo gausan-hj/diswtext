@@ -560,6 +560,120 @@ html = '''<!DOCTYPE html>
             --safe-bottom: env(safe-area-inset-bottom);
         }
 
+
+.clickable-name {
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+.clickable-name:active {
+    opacity: 0.6;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+}
+.modal.show {
+    display: flex;
+}
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 28px;
+    max-width: 480px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    animation: modalSlideIn 0.3s ease;
+}
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+}
+.modal-close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+.modal-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+.modal-info {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    margin-top: 4px;
+}
+.modal-body {
+    padding: 20px;
+}
+.modal-stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    flex: 1;
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: 12px;
+    text-align: center;
+}
+.stat-label {
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+}
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 16px 0 10px 0;
+}
+.score-detail-list {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    overflow: hidden;
+}
+.score-detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+.score-detail-date {
+    font-size: 0.8rem;
+    min-width: 70px;
+}
+.score-detail-points {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--star-primary);
+}
+.chart-wrapper {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    padding: 12px;
+    margin-top: 4px;
+}
+
         /* 组内排名样式 */
 .rank-cell {
     font-size: 0.85rem;
@@ -1938,6 +2052,39 @@ html = '''<!DOCTYPE html>
         <span id="toastMessage">统计图已生成</span>
     </div>
 
+<!-- 个人详情弹窗 -->
+<div id="memberModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-close">&times;</span>
+            <div class="modal-name" id="modalName"></div>
+            <div class="modal-info" id="modalInfo"></div>
+        </div>
+        <div class="modal-body">
+            <div class="modal-stats">
+                <div class="stat-card">
+                    <div class="stat-label">总分</div>
+                    <div class="stat-value" id="modalTotal"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">组内排名</div>
+                    <div class="stat-value" id="modalRank"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">vs 组平均</div>
+                    <div class="stat-value" id="modalVsAvg"></div>
+                </div>
+            </div>
+            <h3 class="section-title">📅 得分明细</h3>
+            <div class="score-detail-list" id="modalScores"></div>
+            <h3 class="section-title">📈 得分趋势图</h3>
+            <div class="chart-wrapper">
+                <canvas id="modalChart" width="400" height="180"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script>
         // ===== 替换原有的 OneSignal 初始化部分 =====
 window.OneSignalDeferred = window.OneSignalDeferred || [];
@@ -2216,6 +2363,71 @@ function updateStatsGrid(groups, scores) {
     }).join('');
 }
 
+// 个人详情弹窗
+function showMemberModal(member) {
+    const modal = document.getElementById('memberModal');
+    document.getElementById('modalName').textContent = member.name_cn;
+    document.getElementById('modalInfo').textContent = `${member.class}班 · 学号:${member.student_id} · ${member.group}`;
+    document.getElementById('modalTotal').textContent = Math.floor(member.total);
+    document.getElementById('modalRank').innerHTML = member.medal;
+    
+    const groupAvg = window.groupAverages?.[member.group] || 0;
+    const vsAvg = member.total - groupAvg;
+    document.getElementById('modalVsAvg').innerHTML = vsAvg >= 0 ? `+${Math.floor(vsAvg)}` : `${Math.floor(vsAvg)}`;
+    
+    const sortedDates = Object.entries(member.score_dict).sort((a,b) => a[0].localeCompare(b[0]));
+    let scoresHtml = '';
+    for (const [date, score] of sortedDates) {
+        let activity = '';
+        for (const cca of window.ccaData || []) {
+            if (cca.date === date) { activity = cca.activity; break; }
+        }
+        scoresHtml += `<div class="score-detail-item">
+            <span class="score-detail-date">📅 ${date.slice(5)}</span>
+            <span class="score-detail-points">+${Math.floor(score)}</span>
+        </div>`;
+    }
+    document.getElementById('modalScores').innerHTML = scoresHtml || '<div style="padding:16px;text-align:center;">暂无记录</div>';
+    
+    drawTrendChart(sortedDates);
+    modal.classList.add('show');
+}
+
+function drawTrendChart(sortedDates) {
+    const canvas = document.getElementById('modalChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const labels = sortedDates.map(d => d[0].slice(5));
+    const data = sortedDates.map(d => d[1]);
+    if (window.trendChart) window.trendChart.destroy();
+    window.trendChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels, datasets: [{ label: '得分', data, borderColor: '#eab308', fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
+    });
+}
+
+document.querySelector('.modal-close')?.addEventListener('click', () => {
+    document.getElementById('memberModal')?.classList.remove('show');
+});
+document.getElementById('memberModal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('memberModal')) e.target.classList.remove('show');
+});
+
+function bindNameClick() {
+    document.querySelectorAll('.clickable-name').forEach(el => {
+        el.removeEventListener('click', window.nameClickHandler);
+        window.nameClickHandler = (e) => {
+            e.stopPropagation();
+            const idx = el.getAttribute('data-idx');
+            if (idx && window.membersData && window.membersData[idx]) {
+                showMemberModal(window.membersData[idx]);
+            }
+        };
+        el.addEventListener('click', window.nameClickHandler);
+    });
+}
+
 // 初始化图表数据
 function initChartData(groupsList, scoresList, statsData) {
     window.chartGroups = groupsList;
@@ -2324,6 +2536,11 @@ if (reminderBtn) {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
+
+window.membersData = {json.dumps(people, ensure_ascii=False)};
+window.groupAverages = {json.dumps(group_averages, ensure_ascii=False)};
+window.ccaData = {json.dumps(cca_data, ensure_ascii=False)};
+        
     </script>
 </body>
 </html>'''
@@ -2437,7 +2654,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
                             <td>{member['order']}</td>
                             <td class="name-cell">
-                                <div class="name-cn">{member['name_cn']}</div>
+                                <div class="name-cn clickable-name" data-idx="{idx}">{member['name_cn']}</div>
                                 <div class="name-en">{name_en_full}</div>
                             </td>
                             <td class="info-cell">{member['class']}</td>
