@@ -2543,9 +2543,9 @@ group_averages_js = json.dumps(group_averages, ensure_ascii=False)
 cca_data_js = json.dumps(cca_data, ensure_ascii=False)
 
 data_injection = f'''
-        window.membersData = '''+ members_data_js +''' ;
-        window.groupAverages = ''' + group_averages_js + ''' ;
-        window.ccaData = ''' + cca_data_js + ''' ;
+        window.membersData = ''' + members_data_js + ''';
+        window.groupAverages = ''' + group_averages_js + ''';
+        window.ccaData = ''' + cca_data_js + ''';
 '''
 
         ''' + data_injection + '''
