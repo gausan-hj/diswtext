@@ -32,5 +32,5 @@ jobs:
           git config --global user.email 'github-actions@github.com'
           git add index.html
           git diff --quiet && git diff --staged --quiet || git commit -m "自动更新分数板"
-          git push
+          git push --force
           git pull --rebase
