@@ -462,6 +462,26 @@ for g in group_data:
                 p["reward_status"] = "❌"
                 p["reward_class"] = "reward-fail"
 
+# ===== 计算组内排名（新增）=====
+for g in group_data:
+    # 按总分从高到低排序
+    sorted_members = sorted(group_data[g], key=lambda x: x["total"], reverse=True)
+    # 分配排名
+    rank = 1
+    for i, member in enumerate(sorted_members):
+        if i > 0 and member["total"] < sorted_members[i-1]["total"]:
+            rank = i + 1
+        member["group_rank"] = rank
+        # 添加奖牌标记
+        if rank == 1:
+            member["medal"] = "🥇"
+        elif rank == 2:
+            member["medal"] = "🥈"
+        elif rank == 3:
+            member["medal"] = "🥉"
+        else:
+            member["medal"] = f"#{rank}"
+
 # 计算每组最高分和最低分，用于热力图
 group_max_scores = {}
 group_min_scores = {}
@@ -539,6 +559,30 @@ html = '''<!DOCTYPE html>
             --safe-top: env(safe-area-inset-top);
             --safe-bottom: env(safe-area-inset-bottom);
         }
+
+        /* 组内排名样式 */
+.rank-cell {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 前三名特殊背景 */
+.rank-cell:contains("🥇") {
+    background: linear-gradient(135deg, #ffd70020, #ffb34720);
+    border-radius: 20px;
+}
+
+.rank-cell:contains("🥈") {
+    background: linear-gradient(135deg, #c0c0c020, #a0a0a020);
+    border-radius: 20px;
+}
+
+.rank-cell:contains("🥉") {
+    background: linear-gradient(135deg, #cd7f3220, #b8733320);
+    border-radius: 20px;
+}
 
         body.night-mode {
             --bg-primary: #0f1825;
@@ -2358,6 +2402,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                                 <th>学号</th>
                                 <th>每日得分</th>
                                 <th>总分</th>
+                                <th>🏆 排名</th>
                                 <th>奖</th>
                             </tr>
                         </thead>
@@ -2399,8 +2444,8 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                             <td class="info-cell">{member['student_id']}</td>
                             <td><div class="score-tags">{score_tags}</div></td>
                             <td>{total_cell}</td>
+                            <td class="rank-cell">{member['medal']}</td>
                             <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
-                        </tr>
 '''
     group_html += '''
                         </tbody>
