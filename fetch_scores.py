@@ -480,8 +480,6 @@ html = '''<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <title>训育处 - 学长团分数板</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#eab308">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
@@ -2283,12 +2281,6 @@ if (reminderBtn) {
             document.body.classList.add('night-mode');
         }
     </script>
-        </script>
-    <script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-    }
-    </script>
 </body>
 </html>'''
 
@@ -2491,59 +2483,7 @@ html = html.replace('</body>', init_script + '\n</body>')
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html)
 
-# 1. 生成 manifest.json
-manifest = {
-    "name": "学长团分数板",
-    "short_name": "分数板",
-    "description": "Prefects' Scoreboard",
-    "start_url": ".",
-    "display": "standalone",
-    "theme_color": "#eab308",
-    "background_color": "#f5f7fc",
-    "icons": [
-        {
-            "src": "icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ]
-}
-
-# 2. 生成 sw.js (Service Worker)
-sw_content = '''// Service Worker - 让网页可以像 App 一样使用
-const CACHE_NAME = 'prefects-v1';
-
-// 安装时缓存文件
-self.addEventListener('install', event => {
-    console.log('Service Worker 安装成功');
-    event.waitUntil(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.addAll([
-                '/',
-                '/index.html',
-                '/manifest.json'
-            ]);
-        })
-    );
-});
-
-// 请求时优先从缓存读取
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            return response || fetch(event.request);
-        })
-    );
-});
-'''
-
-with open("sw.js", "w", encoding="utf-8") as f:
-    f.write(sw_content)
-
 print(f"\n✅ 生成成功！共 {len(people)} 人")
-print("📱 PWA 文件已生成：manifest.json 和 sw.js")
-print("💡 提示：用手机 Chrome 打开，底部会提示'添加到主屏幕'")
 print("\n📊 奖励统计:")
 for g in ["星穹组", "夜曜组", "沧澜组"]:
     if g in group_data:
