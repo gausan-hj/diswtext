@@ -2537,11 +2537,18 @@ if (reminderBtn) {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
-        
-        window.membersData = {json.dumps(people, ensure_ascii=False)};
-        window.groupAverages = {json.dumps(group_averages, ensure_ascii=False)};
-        window.ccaData = {json.dumps(cca_data, ensure_ascii=False)};
-        
+              
+members_data_js = json.dumps(people, ensure_ascii=False)
+group_averages_js = json.dumps(group_averages, ensure_ascii=False)
+cca_data_js = json.dumps(cca_data, ensure_ascii=False)
+
+data_injection = f'''
+        window.membersData = {members_data_js};
+        window.groupAverages = {group_averages_js};
+        window.ccaData = {cca_data_js};
+'''
+
+        ''' + data_injection + '''
     </script>
 </body>
 </html>'''
