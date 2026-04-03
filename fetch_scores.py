@@ -2541,10 +2541,10 @@ if (reminderBtn) {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
-              
-window.membersData = ''' + members_data_js + ''';
-window.groupAverages = ''' + group_averages_js + ''';
-window.ccaData = ''' + cca_data_js + ''';
+
+        window.membersData = ''' + members_data_js + ''';
+        window.groupAverages = ''' + group_averages_js + ''';
+        window.ccaData = ''' + cca_data_js + ''';
     </script>
 </body>
 </html>'''
