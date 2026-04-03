@@ -2538,7 +2538,6 @@ if (reminderBtn) {
             document.body.classList.add('night-mode');
         }
         
-\\bb
         window.membersData = {json.dumps(people, ensure_ascii=False)};
         window.groupAverages = {json.dumps(group_averages, ensure_ascii=False)};
         window.ccaData = {json.dumps(cca_data, ensure_ascii=False)};
