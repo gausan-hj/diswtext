@@ -396,7 +396,7 @@ for idx, member in enumerate(members_list):
                     "class": member["class"],
                     "student_id": member["student_id"],
                     "score_dict": score_dict,
-                    "total": total
+                    "total": total,
                     "people_idx":idx
                 })
                 print(f"✓ 找到 {member['name_cn']} (总分: {total})")
