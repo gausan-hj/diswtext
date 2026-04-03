@@ -359,7 +359,7 @@ group_members_count = {g: 0 for g in ["星穹组", "夜曜组", "沧澜组"]}
 
 print("\n开始匹配成员...")
 
-for member in members_list:
+for idx, member in enumerate(members):
     found = False
     
     for i in range(len(df)):
