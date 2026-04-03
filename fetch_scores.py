@@ -2537,10 +2537,11 @@ if (reminderBtn) {
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.body.classList.add('night-mode');
         }
-
-window.membersData = {json.dumps(people, ensure_ascii=False)};
-window.groupAverages = {json.dumps(group_averages, ensure_ascii=False)};
-window.ccaData = {json.dumps(cca_data, ensure_ascii=False)};
+        
+\\bb
+        window.membersData = {json.dumps(people, ensure_ascii=False)};
+        window.groupAverages = {json.dumps(group_averages, ensure_ascii=False)};
+        window.ccaData = {json.dumps(cca_data, ensure_ascii=False)};
         
     </script>
 </body>
