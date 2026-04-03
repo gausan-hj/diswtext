@@ -2655,7 +2655,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                         <tr data-search="{member['name_cn']} {member['name_en']} {member['class']} {member['student_id']}">
                             <td>{member['order']}</td>
                             <td class="name-cell">
-                                <div class="name-cn clickable-name" data-idx="{idx}">{member['name_cn']}</div>
+                                <div class="name-cn clickable-name" data-idx="{member['people_idx']}">{member['name_cn']}</div>
                                 <div class="name-en">{name_en_full}</div>
                             </td>
                             <td class="info-cell">{member['class']}</td>
