@@ -2,8 +2,8 @@ name: Update Scoreboard
 
 on:
   schedule:
-    - cron: '10 14 * * *'  # 每天10:05运行一次（给你安心）
-    - cron: '0 */3 * * *'  # 每3小时一次
+    - cron: '10 14 * * *'
+    - cron: '0 */3 * * *'
   workflow_dispatch:
 
 jobs:
@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -23,14 +25,16 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pandas gspread requests beautifulsoup4 lxml
+
       - name: Run fetch script
         run: python fetch_scores.py
 
       - name: Commit and push changes
         run: |
-         git config --global user.name 'github-actions'
-         git config --global user.email 'actions@github.com'
-         git add .
-         git commit -m "自动更新分数板" || true
-         git pull --rebase
-         git push
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+          git fetch origin main
+          git reset --soft origin/main
+          git add .
+          git commit -m "自动更新分数板" || true
+          git push --force origin main
