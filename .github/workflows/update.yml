@@ -2,8 +2,9 @@ name: Update Scoreboard
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # 每30分钟运行一次
-  workflow_dispatch:  # 允许手动触发
+    - cron: '10 14 * * *'  # 每天10:05运行一次（给你安心）
+    - cron: '0 */3 * * *'  # 每3小时一次
+  workflow_dispatch:
 
 jobs:
   build:
@@ -13,8 +14,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -23,8 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas
-
+          pip install pandas gspread requests beautifulsoup4 lxml
       - name: Run fetch script
         run: python fetch_scores.py
 
@@ -32,17 +30,6 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-          
-          # 获取当前时间
-          current_time=$(date +'%Y-%m-%d %H:%M:%S')
-          
-          # 添加所有生成的文件
-          git add index.html manifest.json sw.js 2>/dev/null || true
-          
-          # 检查是否有变化
-          if git diff --cached --quiet; then
-            echo "没有变化，无需提交"
-          else
-            git commit -m "自动更新分数板 [${current_time}]"
-            git push origin main
-          fi
+          git add index.html
+          git diff --quiet && git diff --staged --quiet || git commit -m "自动更新分数板"
+          git push
