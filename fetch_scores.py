@@ -494,6 +494,10 @@ for g in group_data:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
 
+        members_data_js = json.dumps(people, ensure_ascii=False)
+        group_averages_js = json.dumps(group_averages, ensure_ascii=False)
+        cca_data_js = json.dumps(cca_data, ensure_ascii=False)
+
 # 生成HTML - 添加OneSignal通知权限
 html = '''<!DOCTYPE html>
 <html lang="zh">
@@ -2538,11 +2542,6 @@ if (reminderBtn) {
             document.body.classList.add('night-mode');
         }
               
-members_data_js = json.dumps(people, ensure_ascii=False)
-group_averages_js = json.dumps(group_averages, ensure_ascii=False)
-cca_data_js = json.dumps(cca_data, ensure_ascii=False)
-
-data_injection = f'''
         window.membersData = ''' + members_data_js + ''';
         window.groupAverages = ''' + group_averages_js + ''';
         window.ccaData = ''' + cca_data_js + ''';
