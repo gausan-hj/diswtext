@@ -2443,7 +2443,7 @@ function drawTrendChart(sortedDates, groupName) {
                             return `得分: ${context.raw} 分`;
                         },
                         title: function(tooltipItems) {
-                            return `日期: ${date};
+                            return `日期: ${tooltipltems[0].label}`;
                         }
                     }
                 }
