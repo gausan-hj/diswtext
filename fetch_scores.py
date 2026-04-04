@@ -493,10 +493,10 @@ for g in group_data:
     else:
         group_max_scores[g] = 0
         group_min_scores[g] = 0
-
-        members_data_js = json.dumps(people, ensure_ascii=False)
-        group_averages_js = json.dumps(group_averages, ensure_ascii=False)
-        cca_data_js = json.dumps(cca_data, ensure_ascii=False)
+        
+members_data_js = json.dumps(people, ensure_ascii=False)
+group_averages_js = json.dumps(group_averages, ensure_ascii=False)
+cca_data_js = json.dumps(cca_data, ensure_ascii=False)
 
 # 生成HTML - 添加OneSignal通知权限
 html = '''<!DOCTYPE html>
