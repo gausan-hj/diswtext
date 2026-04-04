@@ -2243,6 +2243,8 @@ async function enableReminders() {
 
         // ========== DOM 加载完成后绑定事件 ==========
         document.addEventListener('DOMContentLoaded', function() {
+          bindNameClick();
+        });
             
             // 深色模式切换
             const themeToggle = document.getElementById('themeToggle');
@@ -2432,6 +2434,9 @@ function bindNameClick() {
         el.addEventListener('click', window.nameClickHandler);
     });
 }
+
+//直接调用
+bindNameClick();
 
 // 初始化图表数据
 function initChartData(groupsList, scoresList, statsData) {
