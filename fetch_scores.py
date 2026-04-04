@@ -2407,7 +2407,16 @@ function drawTrendChart(sortedDates) {
     if (window.trendChart) window.trendChart.destroy();
     window.trendChart = new Chart(ctx, {
         type: 'line',
-        data: { labels, datasets: [{ label: '得分', data, borderColor: '#eab308', fill: true, tension: 0.3 }] },
+        data: { 
+            labels: labels, 
+            datasets: [{ 
+                label: '得分', 
+                data: data, 
+                borderColor: '#eab308', 
+                fill: true, 
+                tension: 0.3 
+            }] 
+        },
         options: { 
             responsive: true, 
             maintainAspectRatio: true, 
@@ -2418,8 +2427,8 @@ function drawTrendChart(sortedDates) {
                         label: function(context) {
                             return `得分: ${context.raw} 分`;
                         },
-                        title: function(context) {
-                            return `日期: ${context[0].label}`;
+                        title: function(tooltipItems) {
+                            return `日期: ${tooltipItems[0].label}`;
                         }
                     }
                 }
