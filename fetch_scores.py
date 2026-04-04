@@ -2243,8 +2243,6 @@ async function enableReminders() {
 
         // ========== DOM 加载完成后绑定事件 ==========
         document.addEventListener('DOMContentLoaded', function() {
-          bindNameClick();
-        });
             
             // 深色模式切换
             const themeToggle = document.getElementById('themeToggle');
@@ -2550,6 +2548,11 @@ if (reminderBtn) {
         window.membersData = ''' + members_data_js + ''';
         window.groupAverages = ''' + group_averages_js + ''';
         window.ccaData = ''' + cca_data_js + ''';
+//绑定点击事件
+        document.addEventListener('DOMContentLoaded', function() {
+          bindNameClick();
+        });
+        
     </script>
 </body>
 </html>'''
