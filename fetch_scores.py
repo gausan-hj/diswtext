@@ -2388,7 +2388,7 @@ function showMemberModal(member) {
             if (cca.date === date) { activity = cca.activity; break; }
         }
         scoresHtml += `<div class="score-detail-item">
-            <span class="score-detail-date">📅 ${date.slice(5)}</span>
+            <span class="score-detail-date">📅 ${date}</span>
             <span class="score-detail-points">+${Math.floor(score)}</span>
         </div>`;
     }
@@ -2408,7 +2408,23 @@ function drawTrendChart(sortedDates) {
     window.trendChart = new Chart(ctx, {
         type: 'line',
         data: { labels, datasets: [{ label: '得分', data, borderColor: '#eab308', fill: true, tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: true, 
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `得分: ${context.raw} 分`;
+                        },
+                        title: function(context) {
+                            return `日期: ${context[0].label}`;
+                        }
+                    }
+                }
+            }
+        }
     });
 }
 
