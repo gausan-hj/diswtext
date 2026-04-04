@@ -2398,13 +2398,22 @@ function showMemberModal(member) {
     modal.classList.add('show');
 }
 
-function drawTrendChart(sortedDates) {
+function drawTrendChart(sortedDates, groupName) {
     const canvas = document.getElementById('modalChart');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const labels = sortedDates.map(d => d[0].slice(5));
     const data = sortedDates.map(d => d[1]);
     if (window.trendChart) window.trendChart.destroy();
+    
+    // 根据组别设置颜色
+    const groupColors = {
+        '星穹组': '#eab308',
+        '夜曜组': '#a855f7',
+        '沧澜组': '#3b82f6'
+    };
+    const lineColor = groupColors[groupName] || '#eab308';
+    
     window.trendChart = new Chart(ctx, {
         type: 'line',
         data: { 
@@ -2412,9 +2421,15 @@ function drawTrendChart(sortedDates) {
             datasets: [{ 
                 label: '得分', 
                 data: data, 
-                borderColor: '#eab308', 
+                borderColor: lineColor,
+                backgroundColor: lineColor + '20',
                 fill: true, 
-                tension: 0.3 
+                tension: 0.3,
+                pointBackgroundColor: lineColor,
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }] 
         },
         options: { 
@@ -2428,7 +2443,7 @@ function drawTrendChart(sortedDates) {
                             return `得分: ${context.raw} 分`;
                         },
                         title: function(tooltipItems) {
-                            return `日期: ${tooltipItems[0].label}`;
+                            return `日期: ${date};
                         }
                     }
                 }
