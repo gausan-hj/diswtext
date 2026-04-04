@@ -2394,7 +2394,7 @@ function showMemberModal(member) {
     }
     document.getElementById('modalScores').innerHTML = scoresHtml || '<div style="padding:16px;text-align:center;">暂无记录</div>';
     
-    drawTrendChart(sortedDates， member.group);
+    drawTrendChart(sortedDates, member.group);
     modal.classList.add('show');
 }
 
