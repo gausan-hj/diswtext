@@ -468,20 +468,27 @@ for g in group_data:
     # 按总分从高到低排序
     sorted_members = sorted(group_data[g], key=lambda x: x["total"], reverse=True)
     # 分配排名
+    # 分配排名和徽章样式
+# ===== 计算组内排名（新增）=====
+for g in group_data:
+    # 按总分从高到低排序
+    sorted_members = sorted(group_data[g], key=lambda x: x["total"], reverse=True)
+    # 分配排名和徽章样式
     rank = 1
     for i, member in enumerate(sorted_members):
         if i > 0 and member["total"] < sorted_members[i-1]["total"]:
             rank = i + 1
         member["group_rank"] = rank
-        # 添加奖牌标记
+        
+        # 自定义徽章 HTML
         if rank == 1:
-            member["medal"] = "🥇"
+            member["rank_badge"] = '<span class="rank-badge rank-1">🥇</span>'
         elif rank == 2:
-            member["medal"] = "🥈"
+            member["rank_badge"] = '<span class="rank-badge rank-2">🥈</span>'
         elif rank == 3:
-            member["medal"] = "🥉"
+            member["rank_badge"] = '<span class="rank-badge rank-3">🥉</span>'
         else:
-            member["medal"] = f"#{rank}"
+            member["rank_badge"] = f'<span class="rank-badge rank-other">{rank}</span>'
 
 # 计算每组最高分和最低分，用于热力图
 group_max_scores = {}
@@ -599,6 +606,40 @@ html = '''<!DOCTYPE html>
     overflow-y: auto;
     animation: modalSlideIn 0.3s ease;
 }
+
+/* 自定义排名徽章 */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #c0c0c0, #a0a0a0);
+    box-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #cd7f32, #b87333);
+    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
+}
+
+.rank-other {
+    background: #6c757d;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
 @keyframes modalSlideIn {
     from { opacity: 0; transform: translateY(-30px); }
     to { opacity: 1; transform: translateY(0); }
@@ -2713,7 +2754,7 @@ for group_name in ["星穹组", "夜曜组", "沧澜组"]:
                             <td class="info-cell">{member['student_id']}</td>
                             <td><div class="score-tags">{score_tags}</div></td>
                             <td>{total_cell}</td>
-                            <td class="rank-cell">{member['medal']}</td>
+                            <td class="rank-cell">{member['rank_badge']}</td>
                             <td><span class="{member['reward_class']}">{member['reward_status']}</span></td>
 '''
     group_html += '''
